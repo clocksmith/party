@@ -1,0 +1,16 @@
+{
+  "name": "laser-dmx-control",
+  "version": "0.0.7",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "node demo.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "serialport": "^13.0.0"
+  }
+}

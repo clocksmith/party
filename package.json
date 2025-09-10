@@ -1,16 +1,40 @@
 {
-  "name": "laser-dmx-control",
-  "version": "0.0.7",
-  "description": "",
+  "name": "dmx-laser-control",
+  "version": "2.0.0",
+  "description": "Professional DMX512 Laser Control System with Pattern Discovery",
   "type": "module",
-  "scripts": {
-    "start": "node demo.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "main": "dmx.js",
+  "bin": {
+    "dmx": "./dmx-cli.js"
   },
-  "keywords": [],
+  "scripts": {
+    "start": "node dmx-cli.js control",
+    "demo": "node demo.js",
+    "test": "mocha test/**/*.test.js",
+    "test:mock": "node dmx-cli.js test --mock",
+    "discover": "node dmx-cli.js discover",
+    "setup": "node dmx-cli.js setup",
+    "pattern-editor": "node pattern-editor-cli.js",
+    "animator": "node pattern-editor-cli.js"
+  },
+  "keywords": ["dmx", "dmx512", "laser", "lighting", "control", "serial"],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "serialport": "^13.0.0"
+    "serialport": "^13.0.0",
+    "commander": "^11.0.0",
+    "chalk": "^5.3.0",
+    "ora": "^7.0.1",
+    "cli-table3": "^0.6.3",
+    "blessed": "^0.1.81",
+    "blessed-contrib": "^4.11.0"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "chai": "^4.3.10",
+    "sinon": "^17.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

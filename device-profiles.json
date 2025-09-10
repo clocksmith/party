@@ -1,0 +1,92 @@
+{
+  "devices": {
+    "generic_laser": {
+      "name": "Generic DMX Laser",
+      "manufacturer": "Unknown",
+      "channelCount": 32,
+      "channels": {
+        "mode": { "channel": 1, "type": "enum", "values": { "auto": 0, "sound": 50, "manual": 100, "dmx": 200 }},
+        "pattern1": { "channel": 2, "type": "range", "min": 0, "max": 255, "description": "Pattern selection 1" },
+        "patternSize1": { "channel": 3, "type": "range", "min": 0, "max": 255 },
+        "patternRotation1": { "channel": 4, "type": "range", "min": 0, "max": 255 },
+        "horizontalMove1": { "channel": 5, "type": "range", "min": 0, "max": 255, "center": 128 },
+        "verticalMove1": { "channel": 6, "type": "range", "min": 0, "max": 255, "center": 128 },
+        "zoom1": { "channel": 7, "type": "range", "min": 0, "max": 255 },
+        "colorRed1": { "channel": 8, "type": "range", "min": 0, "max": 255 },
+        "colorGreen1": { "channel": 9, "type": "range", "min": 0, "max": 255 },
+        "colorBlue1": { "channel": 10, "type": "range", "min": 0, "max": 255 },
+        "pattern2": { "channel": 19, "type": "range", "min": 0, "max": 255 },
+        "patternSize2": { "channel": 20, "type": "range", "min": 0, "max": 255 },
+        "colorRed2": { "channel": 24, "type": "range", "min": 0, "max": 255 },
+        "colorGreen2": { "channel": 25, "type": "range", "min": 0, "max": 255 },
+        "colorBlue2": { "channel": 26, "type": "range", "min": 0, "max": 255 },
+        "movementSpeed": { "channel": 26, "type": "range", "min": 0, "max": 255 },
+        "colorChange": { "channel": 30, "type": "range", "min": 0, "max": 255 },
+        "strobe": { "channel": 31, "type": "range", "min": 0, "max": 255, "off": 0 }
+      },
+      "patterns": {
+        "circle": { "value": 10, "category": "geometric" },
+        "square": { "value": 20, "category": "geometric" },
+        "triangle": { "value": 30, "category": "geometric" },
+        "star": { "value": 40, "category": "geometric" },
+        "pentagon": { "value": 50, "category": "geometric" },
+        "tunnel": { "value": 60, "category": "effect" },
+        "spiral": { "value": 70, "category": "effect" },
+        "wave": { "value": 80, "category": "effect" },
+        "random": { "value": 90, "category": "effect" },
+        "text": { "value": 100, "category": "special" }
+      },
+      "presets": {
+        "blackout": {
+          "description": "All lights off",
+          "channels": { "mode": 0, "colorRed1": 0, "colorGreen1": 0, "colorBlue1": 0 }
+        },
+        "test_pattern": {
+          "description": "Basic test pattern",
+          "channels": { "mode": 200, "pattern1": 10, "colorRed1": 255, "colorGreen1": 255, "colorBlue1": 255 }
+        },
+        "party_mode": {
+          "description": "Energetic party settings",
+          "channels": { "mode": 200, "pattern1": 90, "strobe": 150, "movementSpeed": 200, "colorChange": 180 }
+        },
+        "chill_mode": {
+          "description": "Relaxed ambient lighting",
+          "channels": { "mode": 200, "pattern1": 80, "movementSpeed": 30, "colorBlue1": 100, "colorGreen1": 50 }
+        }
+      }
+    },
+    "laserworld_cs1000": {
+      "name": "Laserworld CS-1000RGB",
+      "manufacturer": "Laserworld",
+      "channelCount": 12,
+      "channels": {
+        "mode": { "channel": 1, "type": "enum", "values": { "laser_off": 0, "auto": 50, "sound": 100, "dmx": 200 }},
+        "pattern": { "channel": 2, "type": "range", "min": 0, "max": 255 },
+        "zoom": { "channel": 3, "type": "range", "min": 0, "max": 255 },
+        "rotationY": { "channel": 4, "type": "range", "min": 0, "max": 255 },
+        "rotationX": { "channel": 5, "type": "range", "min": 0, "max": 255 },
+        "rotationZ": { "channel": 6, "type": "range", "min": 0, "max": 255 },
+        "horizontalMove": { "channel": 7, "type": "range", "min": 0, "max": 255 },
+        "verticalMove": { "channel": 8, "type": "range", "min": 0, "max": 255 },
+        "color": { "channel": 9, "type": "enum", "values": { 
+          "original": 0, "red": 40, "green": 80, "blue": 120, 
+          "yellow": 160, "cyan": 200, "magenta": 240 
+        }},
+        "strobe": { "channel": 10, "type": "range", "min": 0, "max": 255 },
+        "dotting": { "channel": 11, "type": "range", "min": 0, "max": 255 },
+        "speed": { "channel": 12, "type": "range", "min": 0, "max": 255 }
+      },
+      "patterns": {
+        "line": { "value": 0, "category": "basic" },
+        "circle": { "value": 32, "category": "geometric" },
+        "square": { "value": 64, "category": "geometric" },
+        "triangle": { "value": 96, "category": "geometric" },
+        "star": { "value": 128, "category": "geometric" },
+        "animation1": { "value": 160, "category": "animated" },
+        "animation2": { "value": 192, "category": "animated" },
+        "animation3": { "value": 224, "category": "animated" }
+      }
+    }
+  },
+  "defaultDevice": "generic_laser"
+}

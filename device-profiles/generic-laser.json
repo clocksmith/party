@@ -1,0 +1,346 @@
+{
+  "id": "generic-laser",
+  "name": "Generic DMX Laser",
+  "manufacturer": "Generic",
+  "model": "DMX512-Compatible",
+  "channelCount": 32,
+  "dmxStartAddress": 1,
+  "channels": {
+    "mode": {
+      "channel": 1,
+      "type": "enum",
+      "description": "Lamp operation mode",
+      "values": {
+        "off": 0,
+        "dmx_manual": { "min": 1, "max": 99 },
+        "dmx_dynamic_sound": { "min": 100, "max": 199 },
+        "tune_program": { "min": 200, "max": 219 },
+        "sound_program": { "min": 220, "max": 249 }
+      }
+    },
+    "patternSize1": {
+      "channel": 2,
+      "type": "enum",
+      "description": "Pattern 1 size/effect mode",
+      "values": {
+        "parts_blank": { "min": 0, "max": 49 },
+        "pattern_returns": { "min": 50, "max": 99 },
+        "pattern_folds": { "min": 100, "max": 149 },
+        "crossing": { "min": 150, "max": 199 },
+        "blanking": { "min": 200, "max": 255 }
+      }
+    },
+    "gallery": {
+      "channel": 3,
+      "type": "enum",
+      "description": "Gallery selection",
+      "values": {
+        "beam": 0,
+        "animation": 240
+      }
+    },
+    "pattern1": {
+      "channel": 4,
+      "type": "range",
+      "description": "Pattern 1 selection",
+      "min": 0,
+      "max": 255,
+      "patterns": {
+        "circle": 10,
+        "square": 20,
+        "triangle": 30,
+        "star": 40,
+        "wave": 50,
+        "spiral": 60,
+        "grid": 70,
+        "random": 80
+      }
+    },
+    "zoom1": {
+      "channel": 5,
+      "type": "enum",
+      "description": "Pattern 1 zoom effect",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "dynamic_zoom_in": { "min": 128, "max": 159 },
+        "dynamic_zoom_out": { "min": 160, "max": 191 },
+        "dynamic_flip_zooming": { "min": 192, "max": 255 }
+      }
+    },
+    "rotation1": {
+      "channel": 6,
+      "type": "enum",
+      "description": "Pattern 1 rotation",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "dynamic_inversion_a": { "min": 128, "max": 192 },
+        "dynamic_inversion_b": { "min": 193, "max": 255 }
+      }
+    },
+    "horizontalMovement1": {
+      "channel": 7,
+      "type": "enum",
+      "description": "Pattern 1 horizontal movement",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "push_up_wave": { "min": 128, "max": 159 },
+        "push_down_wave": { "min": 160, "max": 191 },
+        "left_shift": { "min": 192, "max": 223 },
+        "right_shift": { "min": 224, "max": 255 }
+      }
+    },
+    "verticalMovement1": {
+      "channel": 8,
+      "type": "enum",
+      "description": "Pattern 1 vertical movement",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "right_push_wave": { "min": 128, "max": 159 },
+        "left_push_wave": { "min": 160, "max": 191 },
+        "move_up": { "min": 192, "max": 223 },
+        "move_down": { "min": 224, "max": 255 }
+      }
+    },
+    "horizontalZooming1": {
+      "channel": 9,
+      "type": "enum",
+      "description": "Pattern 1 horizontal zooming",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "push_up_distortion": { "min": 128, "max": 159 },
+        "push_down_distortion": { "min": 160, "max": 191 },
+        "zooming": { "min": 192, "max": 223 },
+        "flip_zooming": { "min": 224, "max": 255 }
+      }
+    },
+    "verticalZooming1": {
+      "channel": 10,
+      "type": "enum",
+      "description": "Pattern 1 vertical zooming",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "right_push_distortion": { "min": 128, "max": 159 },
+        "left_push_distortion": { "min": 160, "max": 191 },
+        "zoom": { "min": 192, "max": 223 },
+        "flip_zooming": { "min": 224, "max": 255 }
+      }
+    },
+    "colorRed1": {
+      "channel": 11,
+      "type": "range",
+      "description": "Pattern 1 red color",
+      "min": 0,
+      "max": 255
+    },
+    "colorGreen1": {
+      "channel": 12,
+      "type": "range",
+      "description": "Pattern 1 green color",
+      "min": 0,
+      "max": 255
+    },
+    "colorBlue1": {
+      "channel": 13,
+      "type": "range",
+      "description": "Pattern 1 blue color",
+      "min": 0,
+      "max": 255
+    },
+    "colorWhite1": {
+      "channel": 14,
+      "type": "range",
+      "description": "Pattern 1 white color",
+      "min": 0,
+      "max": 255
+    },
+    "drawingMode1": {
+      "channel": 15,
+      "type": "range",
+      "description": "Pattern 1 drawing mode",
+      "min": 0,
+      "max": 255
+    },
+    "animationSpeed1": {
+      "channel": 16,
+      "type": "range",
+      "description": "Pattern 1 animation speed",
+      "min": 0,
+      "max": 255
+    },
+    "strobe1": {
+      "channel": 17,
+      "type": "range",
+      "description": "Pattern 1 strobe effect",
+      "min": 0,
+      "max": 255,
+      "special": {
+        "off": 0,
+        "slow": 64,
+        "medium": 128,
+        "fast": 192,
+        "max": 255
+      }
+    },
+    "pattern2": {
+      "channel": 18,
+      "type": "range",
+      "description": "Pattern 2 selection",
+      "min": 0,
+      "max": 255
+    },
+    "patternSize2": {
+      "channel": 19,
+      "type": "enum",
+      "description": "Pattern 2 size/effect mode",
+      "values": {
+        "parts_blank": { "min": 0, "max": 49 },
+        "pattern_returns": { "min": 50, "max": 99 },
+        "pattern_folds": { "min": 100, "max": 149 },
+        "crossing": { "min": 150, "max": 199 },
+        "blanking": { "min": 200, "max": 255 }
+      }
+    },
+    "selectDynamicPicture": {
+      "channel": 21,
+      "type": "boolean",
+      "description": "Select dynamic picture separately",
+      "values": {
+        "disabled": 0,
+        "enabled": 1
+      }
+    },
+    "horizontalPosition1": {
+      "channel": 22,
+      "type": "range",
+      "description": "Pattern 1 horizontal position",
+      "min": 0,
+      "max": 255,
+      "center": 128
+    },
+    "verticalPosition1": {
+      "channel": 23,
+      "type": "range",
+      "description": "Pattern 1 vertical position",
+      "min": 0,
+      "max": 255,
+      "center": 128
+    },
+    "horizontalPosition2": {
+      "channel": 24,
+      "type": "range",
+      "description": "Pattern 2 horizontal position",
+      "min": 0,
+      "max": 255,
+      "center": 128
+    },
+    "verticalPosition2": {
+      "channel": 25,
+      "type": "range",
+      "description": "Pattern 2 vertical position",
+      "min": 0,
+      "max": 255,
+      "center": 128
+    },
+    "movementSpeed": {
+      "channel": 26,
+      "type": "range",
+      "description": "Overall movement speed",
+      "min": 0,
+      "max": 255
+    },
+    "globalStrobe": {
+      "channel": 31,
+      "type": "range",
+      "description": "Global strobe effect",
+      "min": 0,
+      "max": 255,
+      "special": {
+        "off": 0,
+        "slow": 64,
+        "medium": 128,
+        "fast": 192,
+        "max": 255
+      }
+    },
+    "reset": {
+      "channel": 32,
+      "type": "enum",
+      "description": "System reset/special functions",
+      "values": {
+        "normal": 0,
+        "reset": 200
+      }
+    }
+  },
+  "buttonEmulation": {
+    "menu": { "channel": 512, "value": 10, "duration": 150 },
+    "enter": { "channel": 512, "value": 20, "duration": 150 },
+    "up": { "channel": 512, "value": 30, "duration": 150 },
+    "down": { "channel": 512, "value": 40, "duration": 150 }
+  },
+  "presets": {
+    "blackout": {
+      "description": "All lasers off",
+      "channels": {
+        "mode": 0
+      }
+    },
+    "test": {
+      "description": "Safe test pattern - red circle",
+      "channels": {
+        "mode": { "value": 50, "mode": "dmx_manual" },
+        "pattern1": 10,
+        "colorRed1": 255,
+        "colorGreen1": 0,
+        "colorBlue1": 0
+      }
+    },
+    "party": {
+      "description": "Dynamic party mode",
+      "channels": {
+        "mode": { "value": 150, "mode": "dmx_dynamic_sound" },
+        "pattern1": 0,
+        "animationSpeed1": 200,
+        "strobe1": 128
+      }
+    },
+    "ambient": {
+      "description": "Slow ambient patterns",
+      "channels": {
+        "mode": { "value": 50, "mode": "dmx_manual" },
+        "pattern1": 60,
+        "zoom1": { "value": 140, "mode": "dynamic_zoom_in" },
+        "rotation1": { "value": 150, "mode": "dynamic_inversion_a" },
+        "colorRed1": 64,
+        "colorGreen1": 128,
+        "colorBlue1": 255,
+        "animationSpeed1": 32
+      }
+    }
+  },
+  "macros": {
+    "colorCycle": {
+      "description": "Cycle through RGB colors",
+      "steps": [
+        { "channels": { "colorRed1": 255, "colorGreen1": 0, "colorBlue1": 0 }, "duration": 1000 },
+        { "channels": { "colorRed1": 0, "colorGreen1": 255, "colorBlue1": 0 }, "duration": 1000 },
+        { "channels": { "colorRed1": 0, "colorGreen1": 0, "colorBlue1": 255 }, "duration": 1000 }
+      ]
+    },
+    "patternSequence": {
+      "description": "Show different patterns",
+      "steps": [
+        { "channels": { "pattern1": 10 }, "duration": 2000 },
+        { "channels": { "pattern1": 30 }, "duration": 2000 },
+        { "channels": { "pattern1": 50 }, "duration": 2000 },
+        { "channels": { "pattern1": 70 }, "duration": 2000 }
+      ]
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "created": "2024-01-01",
+    "author": "DMX Laser Control System",
+    "notes": "Generic profile for most DMX512-compatible lasers. Adjust channel mappings as needed for specific devices."
+  }
+}

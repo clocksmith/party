@@ -547,7 +547,9 @@ class DMXController extends EventEmitter {
 
 //\\//\\// High-Level API - Device-Specific Control \\//\\//\\
 
-// Device specific constants
+// Device specific constants - DEPRECATED
+// These hardcoded values are kept for backward compatibility with LaserDeviceControl
+// New code should use device profiles instead (see device-profiles/ directory)
 const BUTTON_CHANNEL_MENU = 512;
 const BUTTON_VALUE_MENU = 10;
 const BUTTON_CHANNEL_ENTER = 512;
@@ -589,6 +591,9 @@ function mapToRange(value, inMin, inMax, outMin, outMax) {
 /**
  * @class LaserDeviceControl
  * @extends EventEmitter
+ * @deprecated Since v2.0.0 - Use ProfileBasedDeviceControl from dmx-profile-based-control.js instead.
+ * This class uses hardcoded channel mappings and will be removed in v3.0.0.
+ * 
  * @classdesc Provides a high-level API for controlling a specific laser device
  * by translating commands into DMX channel updates via a DMXController.
  * Assumes a specific DMX channel mapping (start address, number of channels, function definitions).
@@ -613,6 +618,14 @@ class LaserDeviceControl extends EventEmitter {
      */
     constructor(options) {
         super();
+        
+        // Deprecation warning
+        console.warn('\x1b[33m%s\x1b[0m', 
+            '⚠️  DEPRECATION WARNING: LaserDeviceControl is deprecated since v2.0.0.\n' +
+            '   Please use ProfileBasedDeviceControl from dmx-profile-based-control.js instead.\n' +
+            '   This class will be removed in v3.0.0.'
+        );
+        
         if (!options || !options.dmxController) {
             throw new Error("LaserDeviceControl Error: dmxController option is required.");
         }

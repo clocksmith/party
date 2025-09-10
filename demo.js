@@ -1,26 +1,31 @@
+/**
+ * DMX Demo Script
+ * Uses the new profile-based device control system
+ */
+
 import readline from 'readline';
 import {
     DMXSerialInterface as DmxSerialInterface,
-    DMXController as DmxController,
-    LaserDeviceControl as LaserDeviceController
+    DMXController as DmxController
 } from './dmx.js';
+import { ProfileBasedDeviceControl } from './dmx-profile-based-control.js';
+import { DeviceProfileManager } from './dmx-device-control.js';
+import { DMXLogger, LogLevel } from './dmx-logger.js';
 
 const LASER_START_ADDRESS = 1;
-// Number of channels the device uses in this mode...
-const LASER_NUM_CHANNELS = 32; 
 const REFRESH_RATE_MS = 33;
 const LOG_FILE_PATH = './dmx_received_log.txt';
 
-// TODO: Update these with discovered Hex patterns for pattern matching
-// The key is the exact space-separated HEX string received.
-const DMX_PATTERNS = {
-    // Example: Replace 'XX XX' with the actual hex string for the Menu button
-    // '0A': '[Button: MENU]',
-    // '14': '[Button: ENTER]',
-    // '1E': '[Button: UP]',
-    // '28': '[Button: DOWN]',
-    // Add other known device responses here
-};
+// Logger instance
+const logger = new DMXLogger({
+    moduleName: 'Demo',
+    minLevel: LogLevel.INFO
+});
+
+// Profile manager for loading device profiles
+const profileManager = new DeviceProfileManager({
+    profilesDir: './device-profiles'
+});
 
 
 const BUTTON_DISCOVERY_DURATION_S = 15;
@@ -159,11 +164,11 @@ async function runBasicLampTest(laserDevice) {
         console.log("Skipping test: Controller not connected."); return;
     }
     console.log("Turning lamp ON (DMX Manual, Full)...");
-    laserDevice.setLampMode('DMX_MANUAL', 100);
+    laserDevice.setChannel('mode', 'dmx_manual', 100);
     await sleep(2500);
 
     console.log("Turning lamp OFF...");
-    laserDevice.setLampMode('OFF');
+    laserDevice.setChannel('mode', 'off');
     await sleep(1500);
 
     console.log("--- End Test 4 ---");
@@ -176,19 +181,19 @@ async function runElaborateControlTest(laserDevice) {
     }
     console.log("Starting sequence: Lamp On -> Beam -> Dynamics -> Animation -> Off");
 
-    console.log("  Lamp ON (Manual)"); laserDevice.setLampMode('DMX_MANUAL', 100); await sleep(1500);
-    console.log("  Select Beam Gallery"); laserDevice.selectGallery('BEAM'); await sleep(500);
-    console.log("  Select Pattern 10"); laserDevice.selectPattern1(10); await sleep(1500);
-    console.log("  Apply Dynamic Zoom In"); laserDevice.setZoom1('DYNAMIC_ZOOM_IN', 50); await sleep(2500);
-    console.log("  Apply Dynamic Rotation"); laserDevice.setRotation1('DYNAMIC_INVERSION_A', 75); await sleep(2500);
-    console.log("  Change Color to Green"); laserDevice.setColorChange('GREEN', 100); await sleep(1500);
-    console.log("  Change Color to RGB Cycle"); laserDevice.setColorChange('RGB_CYCLE', 50); await sleep(3000);
-    console.log("  Stop Zoom & Rotation"); laserDevice.setZoom1('STATIC'); laserDevice.setRotation1('STATIC'); await sleep(1000);
-    console.log("  Select Animation Gallery"); laserDevice.selectGallery('ANIMATION'); await sleep(500);
-    console.log("  Select Animation Pattern 5"); laserDevice.selectPattern1(5); await sleep(2500);
-    console.log("  Apply Strobe (Slow)"); laserDevice.setStrobe('STROBE', 20); await sleep(2500);
-    console.log("  Stop Strobe (Solid On)"); laserDevice.setStrobe('ON'); await sleep(1000); // Use ON mode to make it solid
-    console.log("  Turn Lamp OFF"); laserDevice.setLampMode('OFF'); await sleep(2000);
+    console.log("  Lamp ON (Manual)"); laserDevice.setChannel('mode', 'dmx_manual', 100); await sleep(1500);
+    console.log("  Select Beam Gallery"); laserDevice.setChannel('gallery', 'beam'); await sleep(500);
+    console.log("  Select Pattern 10"); laserDevice.setChannel('pattern1', 10); await sleep(1500);
+    console.log("  Apply Dynamic Zoom In"); laserDevice.setChannel('zoom1', 'dynamic_zoom_in', 50); await sleep(2500);
+    console.log("  Apply Dynamic Rotation"); laserDevice.setChannel('rotation1', 'dynamic_inversion_a', 75); await sleep(2500);
+    console.log("  Set Color to Red"); laserDevice.setChannel('colorRed1', 255); await sleep(1500);
+    console.log("  Set Color to Green"); laserDevice.setChannels({ colorRed1: 0, colorGreen1: 255, colorBlue1: 0 }); await sleep(1500);
+    console.log("  Stop Zoom & Rotation"); laserDevice.setChannels({ zoom1: 'static', rotation1: 'static' }); await sleep(1000);
+    console.log("  Select Animation Gallery"); laserDevice.setChannel('gallery', 'animation'); await sleep(500);
+    console.log("  Select Animation Pattern 5"); laserDevice.setChannel('pattern1', 5); await sleep(2500);
+    console.log("  Apply Strobe (Slow)"); laserDevice.setChannel('strobe1', 20); await sleep(2500);
+    console.log("  Stop Strobe"); laserDevice.setChannel('strobe1', 0); await sleep(1000);
+    console.log("  Turn Lamp OFF"); laserDevice.setChannel('mode', 'off'); await sleep(2000);
 
     console.log("--- End Test 5 ---");
 }
@@ -198,12 +203,12 @@ async function runButtonEmulationTest(laserDevice) {
      if (!laserDevice || !laserDevice.isConnected()) {
         console.log("Skipping test: Controller not connected."); return;
     }
-     console.log("!! Ensure button channels/values in dmx.js (or overrides) are correct !!");
+     console.log("!! Button emulation using profile configuration !!");
 
-     console.log("Pressing MENU..."); await laserDevice.pressMenu(); await sleep(1000);
-     console.log("Pressing DOWN..."); await laserDevice.pressDown(); await sleep(1000);
-     console.log("Pressing UP..."); await laserDevice.pressUp(); await sleep(1000);
-     console.log("Pressing ENTER..."); await laserDevice.pressEnter(); await sleep(1000);
+     console.log("Pressing MENU..."); await laserDevice.pressButton('menu'); await sleep(1000);
+     console.log("Pressing DOWN..."); await laserDevice.pressButton('down'); await sleep(1000);
+     console.log("Pressing UP..."); await laserDevice.pressButton('up'); await sleep(1000);
+     console.log("Pressing ENTER..."); await laserDevice.pressButton('enter'); await sleep(1000);
 
      console.log("--- End Test 6 ---");
 }
@@ -241,13 +246,33 @@ async function runDemo() {
             patternIdentification: DMX_PATTERNS
         });
 
-        // 3. Create High-Level Device Controller
-        laserDevice = new LaserDeviceController({
+        // 3. Load device profile
+        let profile;
+        try {
+            // Try to load generic profile, or create a basic one
+            profile = await profileManager.loadProfile('generic-laser.json');
+            console.log(`Loaded profile: ${profile.name}`);
+        } catch (error) {
+            console.log('Using fallback profile');
+            // Fallback to basic profile if file not found
+            profile = {
+                name: 'Basic DMX Device',
+                channelCount: 32,
+                channels: {
+                    mode: { channel: 1, type: 'range', min: 0, max: 255 },
+                    pattern: { channel: 2, type: 'range', min: 0, max: 255 }
+                },
+                presets: {
+                    blackout: { channels: { mode: 0 } }
+                }
+            };
+        }
+
+        // 4. Create Profile-Based Device Controller
+        laserDevice = new ProfileBasedDeviceControl({
             dmxController: dmxController,
-            startAddress: LASER_START_ADDRESS,
-            numberOfChannels: LASER_NUM_CHANNELS,
-            // Optionally pass buttonConfig overrides here if needed
-            // buttonConfig: { menuChannel: 511, menuValue: 11, pressDurationMs: 200 }
+            profile: profile,
+            startAddress: LASER_START_ADDRESS
         });
 
         console.log("\nConnecting...");

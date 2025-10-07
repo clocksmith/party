@@ -133,6 +133,7 @@ export class ProfileBasedDeviceControl extends EventEmitter {
                 value = this.clamp(valueOrMode, 0, 255);
         }
         
+        // Use setChannel which now always exists
         this.dmxController.setChannel(channelDef.absoluteChannel, value);
         this.logger.debug(`Set ${channelName} (ch${channelDef.channel}) to ${value}`);
         
@@ -260,13 +261,13 @@ export class ProfileBasedDeviceControl extends EventEmitter {
         this.logger.info(`Pressing button: ${buttonName}`);
         
         // Press
-        this.dmxController.setChannel(absoluteChannel, button.value);
+        await this.dmxController.setChannel(absoluteChannel, button.value);
         
         // Hold
         await this.delay(button.duration || 150);
         
         // Release
-        this.dmxController.setChannel(absoluteChannel, 0);
+        await this.dmxController.setChannel(absoluteChannel, 0);
         
         return true;
     }
@@ -279,6 +280,7 @@ export class ProfileBasedDeviceControl extends EventEmitter {
         for (let i = 0; i < this.channelCount; i++) {
             updates[this.startAddress + i] = 0;
         }
+        // Use setChannels which now always exists
         this.dmxController.setChannels(updates);
         this.logger.info('Blackout applied');
     }

@@ -116,6 +116,31 @@ export class DeviceProfileManager {
     }
     
     /**
+     * Load all profiles from the profiles directory
+     */
+    async loadAllProfiles() {
+        try {
+            const files = await fs.readdir(this.profilesDir);
+            
+            for (const file of files) {
+                if (file.endsWith('.json')) {
+                    try {
+                        await this.loadProfile(file);
+                    } catch (e) {
+                        this.logger.warn(`Skipping invalid profile: ${file}`);
+                    }
+                }
+            }
+            
+            this.logger.info(`Loaded ${this.profiles.size} profiles`);
+            return this.profiles;
+        } catch (error) {
+            this.logger.error('Failed to load profiles', { error: error.message });
+            return this.profiles;
+        }
+    }
+    
+    /**
      * List available profiles
      */
     async listAvailableProfiles() {
@@ -324,6 +349,8 @@ export class DynamicDeviceControl extends EventEmitter {
         
         // Set in controller
         this.dmxController.setChannel(dmxChannel, validatedValue);
+
+        this.logger.info(`Sending to ${channelName}: value=${validatedValue}, dmx_channel=${dmxChannel}`);
         
         // Store in local map
         this.channelValues.set(channelName, validatedValue);
@@ -343,19 +370,28 @@ export class DynamicDeviceControl extends EventEmitter {
         if (channelDef.type === 'enum') {
             // For enums, accept both key names and direct values
             if (typeof value === 'string' && channelDef.values[value] !== undefined) {
-                return channelDef.values[value];
+                const enumEntry = channelDef.values[value];
+                return typeof enumEntry === 'object' ? enumEntry.min : enumEntry;
             }
             
-            // Check if value is valid enum value
-            const validValues = Object.values(channelDef.values);
-            if (!validValues.includes(value)) {
-                this.logger.warn(`Invalid enum value: ${value}`, {
-                    valid: Object.keys(channelDef.values)
-                });
-                return channelDef.default || validValues[0] || 0;
+            // Check if the numeric value is valid
+            for (const key in channelDef.values) {
+                const enumEntry = channelDef.values[key];
+                if (typeof enumEntry === 'object') {
+                    if (value >= enumEntry.min && value <= enumEntry.max) {
+                        return value; // Value is within a valid range
+                    }
+                } else if (value === enumEntry) {
+                    return value; // Value is a direct match
+                }
             }
-            
-            return value;
+
+            this.logger.warn(`Invalid enum value: ${value}`, {
+                valid: Object.keys(channelDef.values)
+            });
+            const firstKey = Object.keys(channelDef.values)[0];
+            const fallback = channelDef.values[firstKey];
+            return typeof fallback === 'object' ? fallback.min : fallback;
             
         } else if (channelDef.type === 'range' || !channelDef.type) {
             // Clamp to range

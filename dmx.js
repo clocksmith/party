@@ -457,6 +457,63 @@ class DMXController extends EventEmitter {
         }
         if(changed) this._log(`Reset channels 1-${this.universeSize} to 0.`, 'info');
     }
+    
+    /**
+     * Promise-aware wrapper for setChannel (maps to updateChannel)
+     * @param {number} channel - DMX channel (1-based)
+     * @param {number} value - DMX value (0-255)
+     * @returns {Promise<void>}
+     */
+    async setChannel(channel, value) {
+        return new Promise((resolve) => {
+            this.updateChannel(channel, value);
+            resolve();
+        });
+    }
+    
+    /**
+     * Promise-aware wrapper for setChannels (maps to updateChannels)
+     * @param {object} updates - Object { channel: value, ... } (1-based channels)
+     * @returns {Promise<void>}
+     */
+    async setChannels(updates) {
+        return new Promise((resolve) => {
+            this.updateChannels(updates);
+            resolve();
+        });
+    }
+    
+    /**
+     * Batch update channels with priority support
+     * @param {Array} channelUpdates - Array of {channel, value, priority}
+     * @returns {Promise<void>}
+     */
+    async batchUpdateChannels(channelUpdates) {
+        return new Promise((resolve) => {
+            const prioritizedUpdates = channelUpdates.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+            
+            for (const update of prioritizedUpdates) {
+                this.updateChannel(update.channel, update.value);
+            }
+            
+            resolve();
+        });
+    }
+    
+    /**
+     * Update channel with callback
+     * @param {number} channel - DMX channel (1-based)
+     * @param {number} value - DMX value (0-255)
+     * @param {Function} callback - Callback function
+     */
+    updateChannelWithCallback(channel, value, callback) {
+        try {
+            this.updateChannel(channel, value);
+            if (callback) callback(null);
+        } catch (error) {
+            if (callback) callback(error);
+        }
+    }
 
      /**
      * Temporarily sets a channel to a value, then resets it to 0.

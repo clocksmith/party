@@ -615,8 +615,9 @@ program
         console.log(table.toString());
     });
 
-// Run CLI
-program.parse();
+// Run CLI - commented out to avoid conflict when imported by dmx-cli.js
+// Uncomment if using this file directly as standalone CLI
+// program.parse();
 
 // Export for testing
 export { ProfileGenerator };

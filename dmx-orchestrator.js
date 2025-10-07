@@ -82,7 +82,13 @@ export class DMXOrchestrator extends EventEmitter {
         this.isConnected = false;
         this.activeControlMode = null;
         this.dmxController = null;
-        this.profileBasedControl = null;
+        
+        // Multiple fixtures support
+        this.fixtures = new Map();  // Map of fixture ID -> fixture control
+        this.fixtureProfiles = new Map();  // Map of profile ID -> profile
+        this.fixturePatch = [];  // DMX patch list
+        
+        this.profileBasedControl = null;  // Legacy single fixture support
         this.patternAnimator = null;
         this.deviceProfile = null;
         this.profileManager = new DeviceProfileManager();
@@ -93,6 +99,7 @@ export class DMXOrchestrator extends EventEmitter {
         
         this.channels = new Map();
         this.lastChannelValues = new Map();
+        this.channelPriorities = new Map();  // Channel priority tracking
         
         this.logger = this._createLogger();
     }
@@ -119,11 +126,12 @@ export class DMXOrchestrator extends EventEmitter {
                 );
             }
             
-            // Validate profile
-            const validation = this.profileManager.validateProfile(this.deviceProfile);
-            if (!validation.valid) {
+            // Validate profile (throws on error)
+            try {
+                this.profileManager.validateProfile(this.deviceProfile);
+            } catch (validationError) {
                 throw new ConfigurationError(
-                    `Invalid device profile: ${validation.errors.join(', ')}`,
+                    `Invalid device profile: ${validationError.message}`,
                     'deviceProfile',
                     'Valid profile',
                     'Invalid profile'
@@ -141,12 +149,22 @@ export class DMXOrchestrator extends EventEmitter {
                 });
             }
             
-            // Create profile-based control
-            this.profileBasedControl = new ProfileBasedDeviceControl({
-                dmxController: this.dmxController,
-                profile: this.deviceProfile,
-                startAddress: this.options.startAddress
-            });
+            // Create profile-based control (legacy single fixture)
+            if (this.deviceProfile) {
+                this.profileBasedControl = new ProfileBasedDeviceControl({
+                    dmxController: this.dmxController,
+                    profile: this.deviceProfile,
+                    startAddress: this.options.startAddress
+                });
+                
+                // Also add as first fixture for compatibility
+                this.addFixture({
+                    id: 'primary',
+                    profile: this.deviceProfile,
+                    startAddress: this.options.startAddress,
+                    priority: 100
+                });
+            }
             
             // Create pattern animator
             this.patternAnimator = new PatternAnimator({
@@ -180,6 +198,131 @@ export class DMXOrchestrator extends EventEmitter {
             throw error;
         }
     }
+    
+    /**
+     * Add a fixture to the patch
+     * @param {Object} config - Fixture configuration
+     * @returns {Object} The created fixture control
+     */
+    async addFixture(config) {
+        const { id, profile, profilePath, startAddress, priority = 50 } = config;
+        
+        if (!id) {
+            throw new Error('Fixture ID is required');
+        }
+        
+        if (this.fixtures.has(id)) {
+            throw new Error(`Fixture with ID ${id} already exists`);
+        }
+        
+        // Load profile if needed
+        let fixtureProfile = profile;
+        if (profilePath) {
+            fixtureProfile = await this.profileManager.loadProfile(profilePath);
+        }
+        
+        if (!fixtureProfile) {
+            throw new Error('Fixture profile is required');
+        }
+        
+        // Create fixture control
+        const fixture = new ProfileBasedDeviceControl({
+            dmxController: this.dmxController,
+            profile: fixtureProfile,
+            startAddress: startAddress
+        });
+        
+        // Store fixture
+        this.fixtures.set(id, {
+            id,
+            control: fixture,
+            profile: fixtureProfile,
+            startAddress,
+            priority,
+            enabled: true
+        });
+        
+        // Update patch
+        this.fixturePatch.push({
+            id,
+            startAddress,
+            endAddress: startAddress + fixtureProfile.channelCount - 1,
+            priority
+        });
+        
+        this.logger.info(`Added fixture: ${id} at address ${startAddress}`);
+        this.emit('fixtureAdded', { id, startAddress });
+        
+        return fixture;
+    }
+    
+    /**
+     * Remove a fixture from the patch
+     * @param {string} id - Fixture ID
+     */
+    removeFixture(id) {
+        const fixture = this.fixtures.get(id);
+        if (!fixture) {
+            throw new Error(`Fixture ${id} not found`);
+        }
+        
+        // Blackout fixture before removing
+        fixture.control.blackout();
+        
+        // Remove from collections
+        this.fixtures.delete(id);
+        this.fixturePatch = this.fixturePatch.filter(f => f.id !== id);
+        
+        this.logger.info(`Removed fixture: ${id}`);
+        this.emit('fixtureRemoved', { id });
+    }
+    
+    /**
+     * Get a fixture by ID
+     * @param {string} id - Fixture ID
+     * @returns {Object} Fixture control
+     */
+    getFixture(id) {
+        const fixture = this.fixtures.get(id);
+        return fixture ? fixture.control : null;
+    }
+    
+    /**
+     * Apply preset to specific fixture or all fixtures
+     * @param {string} presetName - Preset name
+     * @param {string} fixtureId - Optional fixture ID (applies to all if not specified)
+     */
+    async applyPresetToFixtures(presetName, fixtureId = null) {
+        if (fixtureId) {
+            const fixture = this.getFixture(fixtureId);
+            if (fixture) {
+                await fixture.applyPreset(presetName);
+            }
+        } else {
+            // Apply to all fixtures
+            for (const [id, fixture] of this.fixtures) {
+                if (fixture.enabled) {
+                    await fixture.control.applyPreset(presetName);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Update channel values with priority handling
+     * @param {number} channel - DMX channel
+     * @param {number} value - Channel value
+     * @param {number} priority - Priority level
+     */
+    updateChannelWithPriority(channel, value, priority = 0) {
+        const currentPriority = this.channelPriorities.get(channel) || -1;
+        
+        if (priority >= currentPriority) {
+            this.dmxController.updateChannel(channel, value);
+            this.channelPriorities.set(channel, priority);
+            this.channels.set(channel, value);
+        }
+    }
 
     /**
      * Connect to DMX hardware
@@ -201,7 +344,16 @@ export class DMXOrchestrator extends EventEmitter {
             }
             
             this.isConnected = true;
-            this.profileBasedControl.blackout();
+            
+            // Blackout all fixtures
+            for (const [id, fixture] of this.fixtures) {
+                fixture.control.blackout();
+            }
+            
+            // Legacy single fixture support
+            if (this.profileBasedControl) {
+                this.profileBasedControl.blackout();
+            }
             
             this.logger.info('Connected to DMX hardware');
             this.emit('connected');
@@ -229,7 +381,16 @@ export class DMXOrchestrator extends EventEmitter {
         }
         
         this.stopAnimation();
-        this.profileBasedControl.blackout();
+        
+        // Blackout all fixtures
+        for (const [id, fixture] of this.fixtures) {
+            fixture.control.blackout();
+        }
+        
+        // Legacy single fixture support
+        if (this.profileBasedControl) {
+            this.profileBasedControl.blackout();
+        }
         
         if (!this.options.mock) {
             await this.dmxController.disconnect();

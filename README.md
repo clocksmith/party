@@ -1,153 +1,158 @@
-# 🎭 DMX Laser Control System v3.0
+# LASER <-> RESAL (LR)
 
-> Professional-grade DMX512 lighting control system with pattern animation, automatic device discovery, dynamic profile management, and real-time control.
+> LASER — **L**aser **A**utomation **S**equencing **E**ngine **R**ESAL  
+> RESAL — **R**ealtime **E**ffects **S**ynchronization **A**utomation **L**ASER
+
+Professional-grade DMX512 lighting framework with pattern animation, automatic device discovery, dynamic profile management, and real-time control. Throughout this document we shorten the LASER⇄RESAL pairing to **LR**.
 
 [![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](package.json)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](package.json)
 
-## 🌟 Features
+## Features
 
 ### Core Capabilities
-- **🔌 Automatic DMX Interface Detection** - Finds ENTTEC, FTDI, and compatible interfaces
-- **📁 Dynamic Device Profile System** - JSON-based device configurations
-- **🔍 Pattern Discovery Mode** - Interactive pattern mapping and profile generation
-- **🎮 Real-time Control Panel** - Professional UI with presets and live monitoring
-- **✅ Profile Validation** - Ensures device profiles are correct before use
-- **🧪 Hardware-free Testing** - Complete mock system for development
-- **📊 Comprehensive Logging** - Detailed logs for debugging
 
-### New in v3.0
-- **✨ Custom Pattern Animation** - Generate and animate custom patterns with precise control.
-- **📐 Parametric Pattern Editor** - Interactive CLI for creating and editing patterns with visual feedback.
-- **💾 Pattern Library Management** - Save, load, and organize your custom patterns.
-- Profile-based device control (no more hardcoded values!)
-- Automated profile generation from pattern discovery
-- Multi-device support through profiles
-- Enhanced CLI with setup wizard
-- Robust error handling and recovery
+- Automatic DMX interface detection for ENTTEC, FTDI, and compatible adapters
+- Dynamic device profile system with JSON descriptors
+- Guided pattern discovery for rapid profile authoring
+- Real-time control panel with presets and live monitoring
+- Built-in profile validation prior to live use
+- Complete mock environment for hardware-free development
+- Centralised logging for troubleshooting
 
-## 📦 Installation
+### Highlights in v3.0
+
+- Custom pattern animation engine with precise parameter control
+- Parametric pattern editor available from the CLI
+- Pattern library management with save/load/versioning support
+- Non-interactive setup for CI/CD environments
+- Multi-fixture orchestration and priority management
+- Promise-based DMX controller API
+- Expanded discovery tooling with multi-channel capture
+- Expanded test harnesses for both hardware and mock scenarios
+
+## Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/dmx-laser-control.git
-cd dmx-laser-control
+git clone https://github.com/yourusername/laser-resal.git
+cd laser-resal
 
 # Install dependencies
 npm install
 
-# Make CLI globally available (optional)
+# Quick smoke test
+node test/system/test-run.js
+
+# Optional: expose CLI globally
 npm link
 ```
 
 ### System Requirements
 
-- **Node.js**: v16.0.0 or higher
-- **Operating System**: Windows, macOS, or Linux
-- **DMX Interface**: ENTTEC DMX USB Pro, FTDI-based interfaces, or compatible
-- **Permissions**: Serial port access (may require sudo on Linux/macOS)
+- Node.js v16.0.0 or higher
+- Windows, macOS, or Linux
+- DMX interface (ENTTEC DMX USB Pro, FTDI-based, or compatible)
+- Serial port access (may require `sudo` or group membership on Unix-like systems)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Initial Setup
-
-Run the interactive setup wizard to configure your laser device:
 
 ```bash
 npm run setup
 # or
-dmx setup
+node dmx-cli.js setup
 ```
 
-The wizard will:
-1. Help you select a device profile (or use generic)
-2. Auto-detect your DMX interface
+The setup wizard helps you:
+
+1. Select an existing device profile or create a new one
+2. Detect an attached DMX interface
 3. Configure DMX addressing
-4. Test the connection with a safe pattern
+4. Verify connectivity with a safe pattern
+
+#### Non-Interactive Setup
+
+```bash
+# First run – capture configuration
+node dmx-cli.js setup --profile generic-laser --port /dev/ttyUSB0 --address 1 --save
+
+# Subsequent runs – reuse saved configuration
+node dmx-cli.js setup --non-interactive --config ./dmx-config.json
+```
 
 ### 2. Pattern Discovery
-
-Discover and map your laser's patterns:
 
 ```bash
 npm run discover
 # or
-dmx discover
+node dmx-cli.js discover --channels 2,3,4 --step 5 --capture-state --output my-patterns.json
 ```
 
-This mode will:
-- Cycle through DMX values on pattern channels
-- Let you name patterns as you see them
-- Generate a device profile JSON file
-- Save discovered patterns for future use
+Discovery cycles DMX values across selected channels, allows you to name patterns, and emits a profile JSON file for later use.
 
-### 3. Control Panel
-
-Launch the interactive control interface:
+### 3. Control Interface
 
 ```bash
 npm start
 # or
-dmx control
+node dmx-cli.js control --profile ehaho-l2400.json --port /dev/tty.usbserial-A50285BI --address 1
 ```
 
-Controls:
-- **Mouse**: Click on presets and patterns
-- **Arrow Keys**: Navigate sliders
-- **B**: Blackout (emergency stop)
-- **T**: Run test sequence
-- **Q**: Quit
+If no port is supplied the control command auto-selects the first detected device and defaults to DMX start address 1. Keyboard shortcuts: arrow keys for focus, `B` for blackout, `T` to run the test sequence, `Q` to quit.
 
-## 📖 Command Reference
+## Command Reference
 
-### Main Commands
+### CLI Commands
 
-| Command | Description | Options |
-|---------|-------------|---------|
-| `dmx setup` | Interactive setup wizard | None |
-| `dmx discover` | Pattern discovery mode | `--output <file>` |
-| `dmx control` | Launch control panel | `--profile <name>` |
-| `dmx pattern-editor` | Launch interactive pattern editor | `--profile <name>` |
-| `dmx test` | Run test sequence | `--mock` for simulated device |
+| Command                  | Description                    | Selected Options                                                          |
+| ------------------------ | ------------------------------ | -------------------------------------------------------------------------- |
+| `dmx setup`              | Interactive setup wizard       | `--profile <id>`, `--port <path>`, `--save`, `--non-interactive`           |
+| `dmx discover`           | Pattern discovery mode         | `--channels <list>`, `--step <size>`, `--capture-state`, `--output <file>` |
+| `dmx control`            | Launch control panel           | `--profile <name>`, `--port <path>`, `--address <start>`                   |
+| `dmx pattern`            | Launch pattern editor          | `--demo` for demo mode                                                     |
+| `dmx test`               | Run test sequence              | `--mock` for simulated device                                              |
+| `dmx generate`           | Profile generator              | interactive prompts                                                        |
+| `dmx validate <profile>` | Validate a profile             | path to profile                                                            |
+| `dmx list`               | List available profiles        | reads `device-profiles/`                                                   |
 
 ### NPM Scripts
 
 ```bash
-npm start          # Launch control panel
-npm run demo       # Run original demo
-npm test           # Run test suite
-npm run test:mock  # Test with mock device
-npm run discover   # Pattern discovery
-npm run setup      # Setup wizard
-npm run pattern-editor # Launch interactive pattern editor
-npm run animator   # Alias for pattern editor
+npm start                 # Launch control panel
+npm run demo              # Legacy demo sequence
+npm test                  # Run unit + device tests
+npm run test:ehaho        # Ehaho L2400 regression using mock serial port
+npm run test:ehaho:hardware -- --port=/dev/tty.usbserial-XXXX  # Ehaho hardware validation
+npm run discover          # Pattern discovery helper
+npm run setup             # Setup wizard
+npm run pattern-editor    # Launch interactive pattern editor
 ```
 
-## 🎮 Understanding DMX Channels
+## Understanding DMX Channels
 
-DMX512 uses 512 channels (1-512) to control lighting parameters. Here's how they typically map for laser devices:
+DMX512 uses channels (1–512) to control fixture parameters. Typical mappings for lasers:
 
-### Common Channel Mappings
+| Channel | Function          | Example Values                       |
+| ------- | ----------------- | ------------------------------------ |
+| 1       | Mode              | 0 Off, 50 Auto, 100 Sound, 200 DMX   |
+| 2       | Pattern           | 0–255 device-specific pattern codes  |
+| 3       | Size / Zoom       | 0–255                                |
+| 4–6     | Position          | 0–255 (128 is centered)              |
+| 7–9     | RGB colour        | 0–255 per channel                    |
+| 10      | Strobe            | 0 Off, 1–255 speed                   |
+| 11      | Rotation          | 0–255                                |
+| 12      | Animation speed   | 0–255                                |
 
-| Channel | Function | Values |
-|---------|----------|--------|
-| 1 | Mode | 0=Off, 50=Auto, 100=Sound, 200=DMX |
-| 2 | Pattern Selection | 0-255 (device-specific) |
-| 3 | Pattern Size/Zoom | 0-255 |
-| 4-6 | X/Y Position | 0-255 (128=center) |
-| 7-9 | RGB Color | 0-255 per channel |
-| 10 | Strobe | 0=Off, 1-255=Speed |
-| 11 | Rotation | 0-255 |
-| 12 | Animation Speed | 0-255 |
+> Exact mappings vary by device; use `dmx discover` to map your hardware accurately.
 
-> **Note**: Exact mappings vary by device. Use `dmx discover` to map your specific laser.
+## Device Profiles
 
-## 📁 Device Profiles
+Profiles live in `device-profiles/` and describe how channels map to functions.
 
-Device profiles define how your laser interprets DMX values. They're stored as JSON files in the project directory.
-
-### Profile Structure
+### Structure Example
 
 ```json
 {
@@ -155,9 +160,9 @@ Device profiles define how your laser interprets DMX values. They're stored as J
   "manufacturer": "LaserCorp",
   "channelCount": 32,
   "channels": {
-    "mode": { 
-      "channel": 1, 
-      "type": "enum", 
+    "mode": {
+      "channel": 1,
+      "type": "enum",
       "values": {
         "off": 0,
         "auto": 50,
@@ -190,251 +195,142 @@ Device profiles define how your laser interprets DMX values. They're stored as J
 }
 ```
 
-### Using Custom Profiles
+### Workflow
 
-1. Create a profile using `dmx discover`
-2. Save it as `my-laser-profile.json`
-3. Use it: `dmx control --profile my-laser-profile.json`
+1. Discover channel behaviour with `dmx discover`
+2. Save the emitted profile to `device-profiles/`
+3. Reference it via `dmx control --profile <file>`
 
-## 🧪 Testing
+## Testing
 
-### With Hardware
+### System and Integration
 
-```bash
-# Run full test sequence
-npm test
+- `node test/system/test-run.js` – high-level smoke test of the mock harness
+- `npm run test` – unit tests plus device suites
 
-# Run specific test
-dmx test --sequence strobe
-```
+### Device Suites
 
-### Without Hardware (Mock Mode)
+| Script                                                   | Purpose                                      |
+| -------------------------------------------------------- | -------------------------------------------- |
+| `npm run test:ehaho`                                     | Ehaho L2400 regression using the mock serial |
+| `npm run test:ehaho:hardware -- --port=/dev/ttyUSB0`     | Ehaho L2400 hardware validation              |
+| `node test/devices/ehaho-l2400.test.js --list-ports`     | Enumerate serial ports prior to testing      |
+| `node test/devices/generic-laser.test.js --full`         | Generic profile hardware suite               |
+| `node test/devices/generic-laser.test.js --help`         | View options such as `--port` and `--safety` |
+| `node test/devices/generic-laser-mock.test.js --mock`    | Generic profile regression without hardware  |
 
-```bash
-# Test with simulated device
-npm run test:mock
+### Mock-Only Development
 
-# Run unit tests
-npx mocha test/**/*.test.js
-```
+- Launch `node test/devices/generic-laser-mock.test.js --channels` to inspect DMX channel effects
+- Use `node test/system/test-run.js` to verify profile loading and DMX controller behaviour without hardware
 
-### Writing Tests
+## Logs
 
-```javascript
-import { DMXTestHarness } from './dmx-mock.js';
+| File                   | Description                  |
+| ---------------------- | ---------------------------- |
+| `dmx-cli.log`          | CLI session output           |
+| `dmx_received_log.txt` | Raw DMX traffic captures     |
+| `patterns-*.json`      | Generated pattern libraries  |
 
-const harness = new DMXTestHarness();
-await harness.setup();
-
-const scenario = {
-  name: 'Pattern Test',
-  steps: [
-    { type: 'connect' },
-    { type: 'send_dmx', data: [0, 255, 10] },
-    { type: 'assert_state', expected: { 
-      patterns: { pattern1: 'CIRCLE' } 
-    }},
-    { type: 'disconnect' }
-  ]
-};
-
-const results = await harness.simulateScenario(scenario);
-```
-
-## 📊 Log Files
-
-The system generates several log files for debugging:
-
-| File | Purpose | Format |
-|------|---------|--------|
-| `dmx-cli.log` | Main application log | Timestamped text |
-| `dmx_received_log.txt` | Raw DMX data received | Hex dumps |
-| `patterns-*.json` | Discovered patterns | JSON |
-
-### Reading Log Files
+Useful commands:
 
 ```bash
-# View recent errors
-grep ERROR dmx-cli.log | tail -20
-
-# Monitor DMX traffic
-tail -f dmx_received_log.txt
-
-# Parse hex patterns
-grep "RX <---" dmx_received_log.txt
+grep ERROR dmx-cli.log | tail -20      # Inspect recent failures
+tail -f dmx_received_log.txt            # Monitor DMX frames in real time
 ```
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
-### Common Issues
+### Serial Port Issues
 
-#### "Permission denied" on serial port
 ```bash
-# Linux/macOS
+# Grant temporary access on Linux/macOS
 sudo chmod 666 /dev/ttyUSB0
-# or add user to dialout group
-sudo usermod -a -G dialout $USER
+# Preferred: add your user to the dialout/uucp group
+sudo usermod -a -G dialout "$USER"
 ```
 
-#### "Port already in use"
-- Close other DMX software
-- Check for zombie processes: `lsof | grep tty`
+If the interface is reported as in use, close other DMX software and inspect with `lsof | grep tty`.
 
-#### "No serial ports detected"
-1. Check USB connection
-2. Install FTDI drivers if needed
-3. Verify with: `ls /dev/tty*` (Linux/macOS) or Device Manager (Windows)
+### Device Not Detected
 
-#### Patterns not responding
-1. Ensure laser is in DMX mode (not Auto/Sound)
-2. Check DMX address matches configuration
-3. Verify DMX terminator is installed if needed
+1. Confirm the USB connection
+2. Install the vendor’s FTDI driver if required
+3. Run `node test/devices/ehaho-l2400.test.js --list-ports`
 
-### Debug Mode
+### Pattern or Colour Misbehaviour
 
-Enable detailed logging:
+- Ensure the fixture is in DMX mode
+- Verify the configured DMX start address
+- Re-run discovery to confirm channel mapping
 
-```javascript
-// In your code
-const logger = new DMXLogger({
-  minLevel: LogLevel.TRACE,
-  enableFile: true
-});
+### Dependency Problems
+
+```bash
+npm install
 ```
 
-## 🏗️ Architecture
-
-The system employs a robust, layered architecture designed for modularity, extensibility, and ease of use, enabling precise control over DMX-compatible laser devices.
+## Architecture
 
 ```mermaid
 graph TD
-    subgraph User Interface Layer
-        A[dmx-cli.js] --> B(Control Panel)
-        C[pattern-editor-cli.js] --> D(Pattern Editor UI)
-    end
+    CLI[CLI & UI Layer] --> PB(Device Profile Control)
+    CLI --> PE(Pattern Editor)
+    PB --> DC(DMX Controller)
+    PE --> DC
+    DC --> SI(DMX Serial Interface)
 
-    subgraph High-Level Control Layer
-        B --> E(ProfileBasedDeviceControl)
-        D --> F(PatternAnimator)
-        E -- Manages Profiles --> G(DeviceProfileManager)
-        F -- Uses Patterns --> H(PatternFactory)
-    end
-
-    subgraph Middle Layer
-        E --> I(DMXController)
-        F --> I
-    end
-
-    subgraph Hardware Layer
-        I --> J(DMXSerialInterface)
+    subgraph Profiles & Patterns
+        PB --> PM(Profile Manager)
+        PE --> PL(Pattern Library)
     end
 
     subgraph Supporting Modules
-        K(DMXLogger)
-        L(DMXErrors)
-        M(DMXMock)
-        N(ProfileValidator)
-        O(ProfileGenerator)
+        DC --> LG(Logger)
+        DC --> ER(Error Handling)
+        PB --> MV(Mock & Validation)
     end
-
-    I -- Uses --> K
-    I -- Handles --> L
-    I -- Can Use --> M
-    G -- Uses --> N
-    O -- Generates --> G
 ```
 
-### Key Components
+### Testing Flow
 
-| Component | File | Purpose |
-|-----------|------|---------|
-| **CLI Interface** | `dmx-cli.js` | User interaction and commands |
-| **Pattern Editor CLI** | `pattern-editor-cli.js` | Interactive editor for custom patterns |
-| **Profile Control** | `dmx-profile-based-control.js` | Dynamic device control using profiles |
-| **Pattern Animation** | `pattern-animator.js` | Generates and animates custom patterns |
-| **Profile Manager** | `dmx-device-control.js` | Load and manage device profiles |
-| **Profile Generator** | `dmx-profile-generator.js` | Create profiles from discoveries |
-| **Profile Validator** | `dmx-profile-validator.js` | Validate profile correctness |
-| **Core DMX** | `dmx.js` | Low-level DMX protocol handling |
-| **Mock System** | `dmx-mock.js` | Testing without hardware |
-| **Error Handling** | `dmx-errors.js` | Custom error types and recovery |
-| **Logging** | `dmx-logger.js` | Centralized logging system |
-| **Geometric Patterns** | `patterns/geometric-patterns.js` | Library of basic geometric patterns |
-
-
-```
-┌─────────────────────────────────┐
-│         dmx-cli.js              │ ← User Interface Layer
-│  (Commander CLI + Blessed UI)    │
-└────────────┬────────────────────┘
-             │
-┌────────────▼────────────────────┐
-│      LaserDeviceControl         │ ← Device Abstraction Layer
-│   (High-level API + Profiles)   │
-└────────────┬────────────────────┘
-             │
-┌────────────▼────────────────────┐
-│        DMXController            │ ← Protocol Layer
-│  (Channel management + Timing)  │
-└────────────┬────────────────────┘
-             │
-┌────────────▼────────────────────┐
-│      DMXSerialInterface         │ ← Hardware Layer
-│    (Serial port + DMX frames)   │
-└─────────────────────────────────┘
+```mermaid
+flowchart LR
+    A[Edit profile or code] --> B[Run mock tests
+node test/system/test-run.js]
+    B --> C{Hardware available?}
+    C -- No --> D[Run
+node test/devices/generic-laser-mock.test.js]
+    C -- Yes --> E[Run
+npm run test:ehaho:hardware]
+    E --> F[Run
+node test/devices/generic-laser.test.js --full]
+    D --> G[Review logs]
+    F --> G
+    G --> H[Iterate or deploy]
 ```
 
-### Key Components
+## Contributing
 
-- **dmx-cli.js**: Command-line interface and UI
-- **dmx.js**: Core DMX control classes
-- **dmx-mock.js**: Testing infrastructure
-- **dmx-errors.js**: Error handling system
-- **dmx-logger.js**: Logging infrastructure
-- **device-profiles.json**: Device configurations
+1. Fork the repository and branch from `main`
+2. Add or update tests alongside code changes
+3. Run `npm test` plus relevant device suites
+4. Submit a pull request with context on hardware used
 
-## 🤝 Contributing
+### Coding Guidelines
 
-### Development Workflow
+- Prefer ES6+ syntax
+- Document exported functions with JSDoc where relevant
+- Keep modules focused and covered by tests
 
-1. Fork the repository
-2. Create a feature branch
-3. Write tests for new features
-4. Ensure all tests pass
-5. Submit a pull request
+## License
 
-### Code Style
+MIT License – see [LICENSE](LICENSE).
 
-- Use ES6+ features
-- Add JSDoc comments for public APIs
-- Follow existing naming conventions
-- Keep functions focused and testable
+## Support
 
-### Adding Device Support
+- Issues: [GitHub Issues](https://github.com/yourusername/dmx-laser-control/issues)
+- Discussions: [GitHub Discussions](https://github.com/yourusername/dmx-laser-control/discussions)
+- Email: support@example.com
 
-1. Use `dmx discover` to map the device
-2. Create a profile JSON file
-3. Add to `device-profiles/` directory
-4. Submit PR with test data
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details
-
-## 🙏 Acknowledgments
-
-- DMX512 protocol specification by USITT
-- SerialPort.js community
-- ENTTEC for DMX USB Pro documentation
-
-## 📮 Support
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/dmx-laser-control/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/dmx-laser-control/discussions)
-- **Email**: support@example.com
-
----
-
-**Happy Lighting! 🎉🎭🎨**
-
-*Remember: Always use laser safety glasses and follow local regulations for laser displays.*
+_Remember to follow all safety regulations and wear approved laser safety equipment during testing._

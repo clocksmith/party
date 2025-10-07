@@ -9,13 +9,16 @@
   },
   "scripts": {
     "start": "node dmx-cli.js control",
-    "demo": "node demo.js",
-    "test": "mocha test/**/*.test.js",
-    "test:mock": "node dmx-cli.js test --mock",
+    "test": "npm run test:unit && npm run test:devices",
+    "test:unit": "mocha test/unit/**/*.test.js",
+    "test:integration": "mocha test/integration/**/*.test.js",
+    "test:devices": "npm run test:ehaho",
+    "test:ehaho": "node test/devices/ehaho-l2400.test.js",
+    "test:ehaho:hardware": "node test/devices/ehaho-l2400.test.js --hardware",
     "discover": "node dmx-cli.js discover",
     "setup": "node dmx-cli.js setup",
-    "pattern-editor": "node pattern-editor-cli.js",
-    "animator": "node pattern-editor-cli.js"
+    "control": "node dmx-cli.js control",
+    "pattern-editor": "node pattern-editor-cli.js"
   },
   "keywords": ["dmx", "dmx512", "laser", "lighting", "control", "serial"],
   "author": "",

@@ -158,7 +158,7 @@ export class MockSerialPort extends EventEmitter {
         
         // Check for strobe (rapid channel 30 changes)
         if (channels[29] > 200) {
-            this.emit('data', Buffer.from([0xST, 0x01])); // Strobe active
+            this.emit('data', Buffer.from([0x53, 0x01])); // Strobe active (S=0x53)
         }
     }
     

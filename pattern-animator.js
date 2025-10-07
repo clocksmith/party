@@ -319,11 +319,11 @@ export class PatternAnimator extends EventEmitter {
         // Check exclusive mode
         if (this.exclusiveMode) {
             // Take full control of specified channels
-            this.dmxController.setChannels(dmxValues, this.priority);
+            this.dmxController.updateChannels(dmxValues);
         } else {
             // Merge with existing values based on priority
             for (const [channel, value] of Object.entries(dmxValues)) {
-                this.dmxController.setChannel(parseInt(channel), value);
+                this.dmxController.updateChannel(parseInt(channel), value);
             }
         }
     }

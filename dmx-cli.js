@@ -41,83 +41,166 @@ class DMXCLIApplication {
         this.isConnected = false;
         this.discoveredPatterns = new Map();
         this.screen = null;
+        this.connectionTimeoutMs = 8000;
     }
     
     /**
      * Interactive Device Setup Wizard
      */
-    async setupWizard() {
-        console.clear();
-        console.log(chalk.cyan.bold(`
+    async setupWizard(options = {}) {
+        // Support non-interactive mode with options
+        const nonInteractive = options.nonInteractive || false;
+        const configFile = options.configFile || './dmx-config.json';
+        
+        // Try to load saved config in non-interactive mode
+        if (nonInteractive && await this.loadSavedConfig(configFile)) {
+            return true;
+        }
+        
+        if (!nonInteractive) {
+            console.clear();
+            console.log(chalk.cyan.bold(`
 ╔════════════════════════════════════════════╗
 ║      DMX Laser Controller Setup Wizard      ║
 ║         Professional Lighting Control        ║
 ╚════════════════════════════════════════════╝
-        `));
+            `));
+        }
         
-        const rl = readline.createInterface({
+        const rl = nonInteractive ? null : readline.createInterface({
             input: process.stdin,
             output: process.stdout
         });
         
-        const question = (query) => new Promise(resolve => rl.question(query, resolve));
+        const question = (query) => nonInteractive ? null : new Promise(resolve => rl.question(query, resolve));
         
         try {
-            // Step 1: Select Device Profile
-            console.log(chalk.yellow('\n📋 Step 1: Select Device Profile'));
-            const profiles = Object.keys(deviceProfiles.devices);
-            profiles.forEach((profile, index) => {
-                const device = deviceProfiles.devices[profile];
-                console.log(`  ${chalk.green(`[${index + 1}]`)} ${device.name} (${device.channelCount} channels)`);
-            });
+            // Step 1: Load and select device profile
+            let selectedProfileId;
+            let selectedProfile;
             
-            const profileChoice = await question('\nSelect profile number: ');
-            const selectedProfile = profiles[parseInt(profileChoice) - 1] || deviceProfiles.defaultDevice;
-            this.currentProfile = deviceProfiles.devices[selectedProfile];
-            logger.info(`Selected device profile: ${selectedProfile}`);
+            if (options.profile) {
+                // Use profile from command line or config
+                selectedProfileId = options.profile;
+                if (selectedProfileId.endsWith('.json')) {
+                    // Load external profile file
+                    selectedProfile = await this.profileManager.loadProfile(selectedProfileId);
+                } else {
+                    // Load from profiles directory
+                    await this.profileManager.loadAllProfiles();
+                    selectedProfile = this.profileManager.getProfile(selectedProfileId);
+                }
+            } else if (!nonInteractive) {
+                // Interactive profile selection
+                console.log(chalk.yellow('\n📋 Step 1: Select Device Profile'));
+                
+                // Load all available profiles
+                await this.profileManager.loadAllProfiles();
+                const profiles = Array.from(this.profileManager.profiles.entries());
+                
+                if (profiles.length === 0) {
+                    console.log(chalk.red('No device profiles found!'));
+                    console.log(chalk.yellow('Please add profiles to device-profiles/ directory'));
+                    if (rl) rl.close();
+                    return false;
+                }
+                
+                profiles.forEach(([id, profile], index) => {
+                    console.log(`  ${chalk.green(`[${index + 1}]`)} ${profile.name} (${profile.channelCount} channels)`);
+                });
+                
+                const profileChoice = await question('\nSelect profile number: ');
+                const selectedIndex = parseInt(profileChoice) - 1;
+                
+                if (selectedIndex >= 0 && selectedIndex < profiles.length) {
+                    [selectedProfileId, selectedProfile] = profiles[selectedIndex];
+                } else {
+                    // Default to first profile
+                    [selectedProfileId, selectedProfile] = profiles[0];
+                }
+            }
             
-            // Step 2: Find Serial Port
-            console.log(chalk.yellow('\n🔌 Step 2: Detecting DMX Interface...'));
-            const spinner = ora('Scanning serial ports...').start();
-            
-            const ports = await DMXSerialInterface.listPorts();
-            spinner.stop();
-            
-            if (ports.length === 0) {
-                console.log(chalk.red('❌ No serial ports detected!'));
-                console.log(chalk.yellow('Please check:'));
-                console.log('  1. DMX interface is connected');
-                console.log('  2. Drivers are installed');
-                console.log('  3. You have permission to access serial ports');
-                rl.close();
+            if (!selectedProfile) {
+                console.log(chalk.red('No profile selected or found'));
+                if (rl) rl.close();
                 return false;
             }
             
-            console.log(chalk.green(`✅ Found ${ports.length} port(s):`));
-            ports.forEach((port, index) => {
-                const info = [];
-                if (port.manufacturer) info.push(port.manufacturer);
-                if (port.serialNumber) info.push(`S/N: ${port.serialNumber}`);
-                console.log(`  ${chalk.green(`[${index + 1}]`)} ${port.path} ${info.length ? `(${info.join(', ')})` : ''}`);
-            });
+            this.currentProfile = selectedProfile;
+            logger.info(`Selected device profile: ${selectedProfileId}`);
             
-            const portChoice = await question('\nSelect port number: ');
-            const selectedPort = ports[parseInt(portChoice) - 1];
+            // Step 2: Find Serial Port
+            let selectedPort;
             
-            if (!selectedPort) {
-                console.log(chalk.red('Invalid selection'));
-                rl.close();
-                return false;
+            if (options.port) {
+                // Use port from command line
+                selectedPort = { path: options.port };
+                console.log(chalk.yellow('\n🔌 Using specified port: ') + chalk.green(options.port));
+            } else {
+                // Scan for ports
+                if (!nonInteractive) {
+                    console.log(chalk.yellow('\n🔌 Step 2: Detecting DMX Interface...'));
+                }
+                const spinner = nonInteractive ? null : ora('Scanning serial ports...').start();
+                
+                const ports = await DMXSerialInterface.listPorts();
+                if (spinner) spinner.stop();
+                
+                if (ports.length === 0) {
+                    console.log(chalk.red('❌ No serial ports detected!'));
+                    console.log(chalk.yellow('Please check:'));
+                    console.log('  1. DMX interface is connected');
+                    console.log('  2. Drivers are installed');
+                    console.log('  3. You have permission to access serial ports');
+                    if (rl) rl.close();
+                    return false;
+                }
+
+                if (nonInteractive) {
+                    // In non-interactive mode, use first available port
+                    selectedPort = ports[0];
+                    logger.info(`Auto-selected port: ${selectedPort.path}`);
+                    console.log(chalk.yellow('\n🔌 Auto-selected port: ') + chalk.green(selectedPort.path));
+                } else {
+                    console.log(chalk.green(`✅ Found ${ports.length} port(s):`));
+                    ports.forEach((port, index) => {
+                        const info = [];
+                        if (port.manufacturer) info.push(port.manufacturer);
+                        if (port.serialNumber) info.push(`S/N: ${port.serialNumber}`);
+                        console.log(`  ${chalk.green(`[${index + 1}]`)} ${port.path} ${info.length ? `(${info.join(', ')})` : ''}`);
+                    });
+                    
+                    const portChoice = await question('\nSelect port number: ');
+                    selectedPort = ports[parseInt(portChoice) - 1];
+                    
+                    if (!selectedPort) {
+                        console.log(chalk.red('Invalid selection'));
+                        if (rl) rl.close();
+                        return false;
+                    }
+                }
             }
             
             // Step 3: DMX Address Configuration
-            console.log(chalk.yellow('\n⚙️  Step 3: DMX Configuration'));
-            const startAddress = await question('Enter DMX start address (1-512) [1]: ') || '1';
+            let startAddress;
+            
+            if (options.startAddress) {
+                // Use address from command line
+                startAddress = options.startAddress;
+                console.log(chalk.yellow('\n⚙️  Using DMX start address: ') + chalk.green(startAddress));
+            } else if (nonInteractive) {
+                // Default to 1 in non-interactive mode
+                startAddress = '1';
+                console.log(chalk.yellow('\n⚙️  Using default DMX start address: ') + chalk.green(startAddress));
+            } else {
+                console.log(chalk.yellow('\n⚙️  Step 3: DMX Configuration'));
+                startAddress = await question('Enter DMX start address (1-512) [1]: ') || '1';
+            }
             
             // Step 4: Test Connection
             console.log(chalk.yellow('\n🔗 Step 4: Testing Connection...'));
             const connectSpinner = ora('Connecting to DMX interface...').start();
-            
+
             try {
                 this.serialInterface = new DMXSerialInterface({
                     portPath: selectedPort.path
@@ -132,10 +215,14 @@ class DMXCLIApplication {
                     profile: this.currentProfile,
                     startAddress: parseInt(startAddress)
                 });
-                
-                await this.laserDevice.connect();
+
+                await this.withTimeout(
+                    this.laserDevice.connect(),
+                    this.connectionTimeoutMs,
+                    `Timed out opening ${selectedPort.path}. Check cabling, permissions, or choose a different port.`
+                );
                 this.isConnected = true;
-                
+
                 connectSpinner.succeed('Connected successfully!');
                 
                 // Send test pattern
@@ -152,30 +239,41 @@ class DMXCLIApplication {
             } catch (error) {
                 connectSpinner.fail(`Connection failed: ${error.message}`);
                 logger.error('Setup failed', { error: error.message });
-                rl.close();
+                await this.cleanup();
+                if (rl) rl.close();
                 return false;
             }
+
+            // Save config if requested
+            if (options.save) {
+                await this.saveConfig(configFile, {
+                    profile: selectedProfileId,
+                    port: selectedPort.path,
+                    startAddress: parseInt(startAddress)
+                });
+                console.log(chalk.green(`\n💾 Configuration saved to ${configFile}`));
+            }
             
-            rl.close();
+            if (rl) rl.close();
             return true;
             
         } catch (error) {
             console.error(chalk.red('Setup error:'), error.message);
-            rl.close();
+            if (rl) rl.close();
             return false;
         }
     }
     
     /**
-     * Pattern Discovery Tool
+     * Enhanced Pattern Discovery Tool
      */
-    async discoverPatterns() {
+    async discoverPatterns(options = {}) {
         if (!this.isConnected) {
             console.log(chalk.red('Not connected. Run setup first.'));
             return;
         }
         
-        console.log(chalk.cyan.bold('\n🔍 Pattern Discovery Mode'));
+        console.log(chalk.cyan.bold('\n🔍 Enhanced Pattern Discovery Mode'));
         console.log('This will cycle through channel values to discover patterns.');
         console.log('Watch your laser device and note the patterns you see.\n');
         
@@ -184,38 +282,108 @@ class DMXCLIApplication {
             output: process.stdout
         });
         
-        const patternChannel = this.currentProfile.channels.pattern1?.channel || 2;
+        // Discovery configuration
+        const config = {
+            channels: options.channels || [],
+            stepSize: options.stepSize || 10,
+            dwellTime: options.dwellTime || 0,
+            minValue: options.minValue || 0,
+            maxValue: options.maxValue || 255,
+            captureState: options.captureState || false
+        };
         
-        console.log(chalk.yellow(`Testing channel ${patternChannel} (Pattern Selection)`));
-        console.log('Press ENTER to move to next value, type pattern name to save it.\n');
-        
-        for (let value = 0; value <= 255; value += 10) {
-            // Set pattern value
-            await this.dmxController.setChannel(patternChannel, value);
-            
-            process.stdout.write(`Value ${chalk.green(value.toString().padStart(3))}: `);
-            
-            const input = await new Promise(resolve => {
-                rl.question('', answer => resolve(answer.trim()));
-            });
-            
-            if (input) {
-                this.discoveredPatterns.set(value, input);
-                console.log(chalk.green(`  ✓ Saved: ${input}`));
+        // Determine channels to test
+        if (config.channels.length === 0) {
+            // Default to pattern channels
+            for (const [name, def] of Object.entries(this.currentProfile.channels)) {
+                if (name.includes('pattern') || def.description?.toLowerCase().includes('pattern')) {
+                    config.channels.push({ name, ...def });
+                }
             }
             
-            // Check if user wants to stop
-            if (input.toLowerCase() === 'stop') {
-                break;
+            if (config.channels.length === 0) {
+                // Fallback to channel 2
+                config.channels.push({ name: 'pattern', channel: 2 });
+            }
+        }
+        
+        console.log(chalk.yellow('Discovery Configuration:'));
+        console.log(`  Channels: ${config.channels.map(c => `${c.name} (${c.channel})`).join(', ')}`);
+        console.log(`  Range: ${config.minValue}-${config.maxValue}, Step: ${config.stepSize}`);
+        console.log(`  Dwell time: ${config.dwellTime}ms`);
+        
+        const question = (prompt) => new Promise(resolve => rl.question(prompt, resolve));
+        
+        // Discovery results
+        const discoveries = new Map();
+        
+        for (const channelDef of config.channels) {
+            console.log(chalk.cyan(`\nTesting channel ${channelDef.channel} (${channelDef.name})`));
+            console.log('Press ENTER to move to next value, type pattern name to save it.');
+            console.log('Type "skip" to skip this channel, "stop" to finish.\n');
+            
+            const channelDiscoveries = new Map();
+            
+            for (let value = config.minValue; value <= config.maxValue; value += config.stepSize) {
+                // Set channel value
+                await this.dmxController.updateChannel(channelDef.channel, value);
+                
+                // Optional dwell time
+                if (config.dwellTime > 0) {
+                    await this.delay(config.dwellTime);
+                }
+                
+                process.stdout.write(`Value ${chalk.green(value.toString().padStart(3))}: `);
+                
+                const input = await question('');
+                const trimmedInput = input.trim();
+                
+                if (trimmedInput && trimmedInput !== '') {
+                    if (trimmedInput.toLowerCase() === 'stop') {
+                        break;
+                    } else if (trimmedInput.toLowerCase() === 'skip') {
+                        console.log(chalk.yellow('  Skipping channel'));
+                        break;
+                    }
+                    
+                    // Capture current state if requested
+                    const discovery = { 
+                        value,
+                        name: trimmedInput
+                    };
+                    
+                    if (config.captureState) {
+                        // Capture all channel values for this pattern
+                        discovery.state = {};
+                        const startAddr = this.laserDevice?.startAddress || 1;
+                        for (const [name, def] of Object.entries(this.currentProfile.channels)) {
+                            // Account for fixture's start address
+                            const absoluteChannel = startAddr + def.channel - 1;
+                            discovery.state[name] = this.dmxController.dmxState[absoluteChannel] || 0;
+                        }
+                    }
+                    
+                    channelDiscoveries.set(value, discovery);
+                    console.log(chalk.green(`  ✓ Saved: ${trimmedInput}`));
+                }
+            }
+            
+            if (channelDiscoveries.size > 0) {
+                discoveries.set(channelDef.name, {
+                    channel: channelDef.channel,
+                    patterns: channelDiscoveries
+                });
             }
         }
         
         rl.close();
         
         // Save discovered patterns
-        if (this.discoveredPatterns.size > 0) {
-            await this.saveDiscoveredPatterns();
+        if (discoveries.size > 0) {
+            await this.saveEnhancedDiscoveries(discoveries, options.outputFile);
         }
+        
+        return discoveries;
     }
     
     /**
@@ -309,7 +477,7 @@ class DMXCLIApplication {
             const patternName = patternList.items[index].content;
             const pattern = this.currentProfile.patterns[patternName];
             if (pattern) {
-                await this.dmxController.setChannel(
+                await this.dmxController.updateChannel(
                     this.currentProfile.channels.pattern1.channel,
                     pattern.value
                 );
@@ -363,7 +531,7 @@ class DMXCLIApplication {
         for (const [channelName, value] of Object.entries(preset.channels)) {
             const channelDef = this.currentProfile.channels[channelName];
             if (channelDef) {
-                await this.dmxController.setChannel(channelDef.channel, value);
+                await this.dmxController.updateChannel(channelDef.channel, value);
             }
         }
         
@@ -377,22 +545,22 @@ class DMXCLIApplication {
         const sequences = [
             { name: 'Blackout', action: () => this.laserDevice.blackout() },
             { name: 'Red Circle', action: () => {
-                this.dmxController.setChannel(8, 255);  // Red
-                this.dmxController.setChannel(2, 10);   // Circle pattern
+                this.dmxController.updateChannel(8, 255);  // Red
+                this.dmxController.updateChannel(2, 10);   // Circle pattern
             }},
             { name: 'Green Square', action: () => {
-                this.dmxController.setChannel(8, 0);    // Red off
-                this.dmxController.setChannel(9, 255);  // Green
-                this.dmxController.setChannel(2, 20);   // Square pattern
+                this.dmxController.updateChannel(8, 0);    // Red off
+                this.dmxController.updateChannel(9, 255);  // Green
+                this.dmxController.updateChannel(2, 20);   // Square pattern
             }},
             { name: 'Blue Wave', action: () => {
-                this.dmxController.setChannel(9, 0);    // Green off
-                this.dmxController.setChannel(10, 255); // Blue
-                this.dmxController.setChannel(2, 80);   // Wave pattern
+                this.dmxController.updateChannel(9, 0);    // Green off
+                this.dmxController.updateChannel(10, 255); // Blue
+                this.dmxController.updateChannel(2, 80);   // Wave pattern
             }},
             { name: 'Rainbow Strobe', action: () => {
-                this.dmxController.setChannel(30, 200); // Color change
-                this.dmxController.setChannel(31, 150); // Strobe
+                this.dmxController.updateChannel(30, 200); // Color change
+                this.dmxController.updateChannel(31, 150); // Strobe
             }}
         ];
         
@@ -419,7 +587,69 @@ class DMXCLIApplication {
     }
     
     /**
-     * Save discovered patterns to file
+     * Save enhanced discoveries to file
+     */
+    async saveEnhancedDiscoveries(discoveries, outputFile = null) {
+        const filename = outputFile || `discovered-patterns-${Date.now()}.json`;
+        
+        // Generate complete device profile from discoveries
+        const profile = {
+            id: `discovered-${Date.now()}`,
+            name: `${this.currentProfile.name} - Enhanced Discovery`,
+            manufacturer: this.currentProfile.manufacturer || 'Unknown',
+            model: this.currentProfile.model || 'Discovered',
+            channelCount: this.currentProfile.channelCount || 32,
+            dmxStartAddress: 1,
+            channels: { ...this.currentProfile.channels },
+            presets: {},
+            patterns: {},
+            metadata: {
+                version: '2.0.0',
+                created: new Date().toISOString(),
+                discoveryMethod: 'Enhanced pattern scan',
+                originalProfile: this.currentProfile.id || this.currentProfile.name
+            }
+        };
+        
+        // Process discoveries
+        for (const [channelName, discovery] of discoveries) {
+            // Add discovered patterns to channel definition
+            if (profile.channels[channelName]) {
+                profile.channels[channelName].discoveredPatterns = {};
+                
+                for (const [value, pattern] of discovery.patterns) {
+                    profile.channels[channelName].discoveredPatterns[pattern.name] = pattern.value;
+                    
+                    // Create preset if state was captured
+                    if (pattern.state) {
+                        const presetName = `${channelName}_${pattern.name.toLowerCase().replace(/\s+/g, '_')}`;
+                        profile.presets[presetName] = {
+                            description: `${pattern.name} (discovered)`,
+                            channels: pattern.state
+                        };
+                    }
+                    
+                    // Add to global patterns
+                    profile.patterns[pattern.name] = {
+                        channel: discovery.channel,
+                        value: pattern.value,
+                        description: `Discovered pattern: ${pattern.name}`
+                    };
+                }
+            }
+        }
+        
+        await fs.writeFile(filename, JSON.stringify(profile, null, 2));
+        console.log(chalk.green(`\n✅ Enhanced device profile saved to ${filename}`));
+        console.log(chalk.cyan(`  Discovered ${discoveries.size} channels with patterns`));
+        console.log(chalk.cyan(`  Created ${Object.keys(profile.presets).length} presets`));
+        console.log(chalk.cyan(`  To use: dmx control --profile ${filename}`));
+        
+        return profile;
+    }
+    
+    /**
+     * Save discovered patterns to file (legacy)
      */
     async saveDiscoveredPatterns(outputFile = null) {
         const filename = outputFile || `patterns-${Date.now()}.json`;
@@ -483,18 +713,99 @@ class DMXCLIApplication {
         console.log(chalk.cyan(`  To use: dmx control --profile ${filename}`));
     }
     
+    /**
+     * Load saved configuration
+     */
+    async loadSavedConfig(configFile) {
+        try {
+            const content = await fs.readFile(configFile, 'utf8');
+            const config = JSON.parse(content);
+            
+            // Load the specified profile
+            if (config.profile) {
+                if (config.profile.endsWith('.json')) {
+                    this.currentProfile = await this.profileManager.loadProfile(config.profile);
+                } else {
+                    await this.profileManager.loadAllProfiles();
+                    this.currentProfile = this.profileManager.getProfile(config.profile);
+                }
+            }
+            
+            // Connect to specified port
+            if (config.port && this.currentProfile) {
+                this.serialInterface = new DMXSerialInterface({
+                    portPath: config.port
+                });
+                
+                this.dmxController = new DMXController({
+                    serialInterface: this.serialInterface
+                });
+                
+                this.laserDevice = new ProfileBasedDeviceControl({
+                    dmxController: this.dmxController,
+                    profile: this.currentProfile,
+                    startAddress: config.startAddress || 1
+                });
+                
+                await this.withTimeout(
+                    this.laserDevice.connect(),
+                    this.connectionTimeoutMs,
+                    `Timed out opening ${config.port}. Check cabling, permissions, or choose a different port.`
+                );
+                this.isConnected = true;
+
+                logger.info('Loaded configuration from file', { config });
+                return true;
+            }
+        } catch (error) {
+            logger.warn('Could not load saved config', { error: error.message });
+        }
+        return false;
+    }
+    
+    /**
+     * Save configuration to file
+     */
+    async saveConfig(configFile, config) {
+        try {
+            await fs.writeFile(configFile, JSON.stringify(config, null, 2));
+            logger.info('Saved configuration', { file: configFile, config });
+        } catch (error) {
+            logger.error('Failed to save configuration', { error: error.message });
+            throw error;
+        }
+    }
+    
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
-    
+
+    async withTimeout(promise, ms, message) {
+        let timeoutId;
+        const timeoutPromise = new Promise((_, reject) => {
+            timeoutId = setTimeout(() => reject(new Error(message)), ms);
+        });
+
+        try {
+            return await Promise.race([promise, timeoutPromise]);
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
     async cleanup() {
         if (this.laserDevice) {
             await this.laserDevice.blackout();
             await this.laserDevice.disconnect();
+            this.laserDevice = null;
         }
         if (this.screen) {
             this.screen.destroy();
+            this.screen = null;
         }
+        this.dmxController = null;
+        this.serialInterface = null;
+        this.isConnected = false;
     }
 }
 
@@ -507,18 +818,54 @@ program
 program
     .command('setup')
     .description('Interactive setup wizard')
-    .action(async () => {
+    .option('--profile <profile>', 'Device profile ID or path to JSON file')
+    .option('--port <port>', 'Serial port path')
+    .option('--address <address>', 'DMX start address', '1')
+    .option('--save', 'Save configuration for reuse')
+    .option('--config <file>', 'Configuration file path', './dmx-config.json')
+    .option('--non-interactive', 'Run in non-interactive mode (requires saved config)')
+    .action(async (options) => {
         const app = new DMXCLIApplication();
-        await app.setupWizard();
+        await app.setupWizard({
+            profile: options.profile,
+            port: options.port,
+            startAddress: options.address,
+            save: options.save,
+            configFile: options.config,
+            nonInteractive: options.nonInteractive
+        });
     });
 
 program
     .command('discover')
     .description('Discover and map DMX patterns')
-    .action(async () => {
+    .option('-c, --channels <channels>', 'Comma-separated list of channels to test')
+    .option('-s, --step <size>', 'Step size for value changes', '10')
+    .option('-d, --dwell <ms>', 'Dwell time between changes in ms', '0')
+    .option('--min <value>', 'Minimum value to test', '0')
+    .option('--max <value>', 'Maximum value to test', '255')
+    .option('--capture-state', 'Capture full channel state for each pattern')
+    .option('-o, --output <file>', 'Output file for discovered patterns')
+    .action(async (options) => {
         const app = new DMXCLIApplication();
         if (await app.setupWizard()) {
-            await app.discoverPatterns();
+            const discoverOptions = {
+                stepSize: parseInt(options.step),
+                dwellTime: parseInt(options.dwell),
+                minValue: parseInt(options.min),
+                maxValue: parseInt(options.max),
+                captureState: options.captureState || false,
+                outputFile: options.output
+            };
+            
+            if (options.channels) {
+                discoverOptions.channels = options.channels.split(',').map(ch => {
+                    const num = parseInt(ch.trim());
+                    return { name: `channel_${num}`, channel: num };
+                });
+            }
+            
+            await app.discoverPatterns(discoverOptions);
         }
         await app.cleanup();
     });
@@ -526,9 +873,17 @@ program
 program
     .command('control')
     .description('Launch interactive control panel')
-    .action(async () => {
+    .option('--profile <profile>', 'Device profile ID or path to JSON file')
+    .option('--port <port>', 'Serial port path')
+    .option('--address <address>', 'DMX start address', '1')
+    .action(async (options) => {
         const app = new DMXCLIApplication();
-        if (await app.setupWizard()) {
+        if (await app.setupWizard({
+            profile: options.profile,
+            port: options.port,
+            startAddress: options.address,
+            nonInteractive: Boolean(options.profile || options.port)
+        })) {
             await app.launchControlPanel();
         }
     });

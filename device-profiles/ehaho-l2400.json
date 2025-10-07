@@ -1,0 +1,444 @@
+{
+  "id": "ehaho-l2400",
+  "name": "Ehaho L2400 RGB 3D Animation Laser",
+  "manufacturer": "Ehaho",
+  "model": "L2400",
+  "channelCount": 32,
+  "dmxStartAddress": 1,
+  "channels": {
+    "mode": {
+      "channel": 1,
+      "type": "enum",
+      "description": "On/Off/Mode Select - Controls laser output and main control mode",
+      "values": {
+        "off": 0,
+        "dmx_manual": { "min": 1, "max": 99 },
+        "sound_activated": { "min": 100, "max": 199 },
+        "auto_mode": { "min": 200, "max": 255 }
+      }
+    },
+    "patternSize1": {
+      "channel": 2,
+      "type": "enum",
+      "description": "Out-of-Bounds/Pattern Size 1 - Edge behavior and overall size",
+      "values": {
+        "size_small": { "min": 0, "max": 63 },
+        "size_medium": { "min": 64, "max": 127 },
+        "size_large": { "min": 128, "max": 191 },
+        "size_xlarge": { "min": 192, "max": 255 }
+      }
+    },
+    "gallerySelection": {
+      "channel": 3,
+      "type": "enum",
+      "description": "Gallery Selection - Choose between Beam and Animation gallery",
+      "values": {
+        "beam": { "min": 0, "max": 127 },
+        "animation": { "min": 128, "max": 255 }
+      }
+    },
+    "pattern1": {
+      "channel": 4,
+      "type": "range",
+      "description": "Pattern Selection 1 - Select specific pattern from gallery",
+      "min": 0,
+      "max": 255
+    },
+    "zoom1": {
+      "channel": 5,
+      "type": "enum",
+      "description": "Pattern Zooming 1 - Static or dynamic zoom effects",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "zoom_in": { "min": 128, "max": 159 },
+        "zoom_out": { "min": 160, "max": 191 },
+        "flip_zoom": { "min": 192, "max": 255 }
+      }
+    },
+    "rotation1": {
+      "channel": 6,
+      "type": "enum",
+      "description": "Pattern Rotation 1 - Static angle or dynamic rotation",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "clockwise": { "min": 128, "max": 191 },
+        "counter_clockwise": { "min": 192, "max": 255 }
+      }
+    },
+    "horizontalMovement1": {
+      "channel": 7,
+      "type": "enum",
+      "description": "Horizontal Movement 1 - X position control with wave effects",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "wave_left": { "min": 128, "max": 159 },
+        "wave_right": { "min": 160, "max": 191 },
+        "move_left": { "min": 192, "max": 223 },
+        "move_right": { "min": 224, "max": 255 }
+      }
+    },
+    "verticalMovement1": {
+      "channel": 8,
+      "type": "enum",
+      "description": "Vertical Movement 1 - Y position control with wave effects",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "wave_up": { "min": 128, "max": 159 },
+        "wave_down": { "min": 160, "max": 191 },
+        "move_up": { "min": 192, "max": 223 },
+        "move_down": { "min": 224, "max": 255 }
+      }
+    },
+    "horizontalZoom1": {
+      "channel": 9,
+      "type": "range",
+      "description": "Horizontal Zooming 1 - Stretch/squash pattern on X axis",
+      "min": 0,
+      "max": 255,
+      "center": 128
+    },
+    "verticalZoom1": {
+      "channel": 10,
+      "type": "range",
+      "description": "Vertical Zooming 1 - Stretch/squash pattern on Y axis",
+      "min": 0,
+      "max": 255,
+      "center": 128
+    },
+    "forcedColor1": {
+      "channel": 11,
+      "type": "enum",
+      "description": "Forced Color Setting 1 - Override pattern color",
+      "values": {
+        "original": 0,
+        "red": { "min": 1, "max": 31 },
+        "green": { "min": 32, "max": 63 },
+        "blue": { "min": 64, "max": 95 },
+        "yellow": { "min": 96, "max": 127 },
+        "cyan": { "min": 128, "max": 159 },
+        "magenta": { "min": 160, "max": 191 },
+        "white": { "min": 192, "max": 223 },
+        "color_cycle": { "min": 224, "max": 255 }
+      }
+    },
+    "strobe": {
+      "channel": 12,
+      "type": "enum",
+      "description": "Strobe/Flash - Control strobing effects",
+      "values": {
+        "off": 0,
+        "slow": { "min": 1, "max": 63 },
+        "medium": { "min": 64, "max": 127 },
+        "fast": { "min": 128, "max": 191 },
+        "random": { "min": 192, "max": 223 },
+        "sound": { "min": 224, "max": 255 }
+      }
+    },
+    "nodeHighlight1": {
+      "channel": 13,
+      "type": "range",
+      "description": "Node Highlighting 1 - Brighten points or render as broken lines",
+      "min": 0,
+      "max": 255
+    },
+    "nodeExpansion1": {
+      "channel": 14,
+      "type": "range",
+      "description": "Node Expansion 1 - Pattern drawn point-by-point",
+      "min": 0,
+      "max": 255
+    },
+    "gradualDrawing1": {
+      "channel": 15,
+      "type": "enum",
+      "description": "Gradual Drawing 1 - Draw pattern forward or reverse",
+      "values": {
+        "off": 0,
+        "forward": { "min": 1, "max": 127 },
+        "reverse": { "min": 128, "max": 255 }
+      }
+    },
+    "distortionDegree1": {
+      "channel": 16,
+      "type": "range",
+      "description": "Distortion Degree 1 - Warping effect intensity",
+      "min": 0,
+      "max": 255
+    },
+    "distortionDegree2": {
+      "channel": 17,
+      "type": "range",
+      "description": "Distortion Degree 2 - Additional warping control",
+      "min": 0,
+      "max": 255
+    },
+    "secondLampPattern": {
+      "channel": 18,
+      "type": "boolean",
+      "description": "Second Lamp Pattern Select - Activate second pattern layer",
+      "values": {
+        "disabled": 0,
+        "enabled": { "min": 1, "max": 255 }
+      }
+    },
+    "patternSize2": {
+      "channel": 19,
+      "type": "enum",
+      "description": "Out-of-Bounds/Pattern Size 2 - Size and edge for second pattern",
+      "values": {
+        "size_small": { "min": 0, "max": 63 },
+        "size_medium": { "min": 64, "max": 127 },
+        "size_large": { "min": 128, "max": 191 },
+        "size_xlarge": { "min": 192, "max": 255 }
+      }
+    },
+    "patternLibrary2": {
+      "channel": 20,
+      "type": "enum",
+      "description": "Pattern Library 2 - Gallery for second layer",
+      "values": {
+        "beam": { "min": 0, "max": 127 },
+        "animation": { "min": 128, "max": 255 }
+      }
+    },
+    "pattern2": {
+      "channel": 21,
+      "type": "range",
+      "description": "Pattern Selection 2 - Select pattern for second layer",
+      "min": 0,
+      "max": 255
+    },
+    "zoom2": {
+      "channel": 22,
+      "type": "enum",
+      "description": "Pattern Zooming 2 - Zoom control for second pattern",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "zoom_in": { "min": 128, "max": 159 },
+        "zoom_out": { "min": 160, "max": 191 },
+        "flip_zoom": { "min": 192, "max": 255 }
+      }
+    },
+    "rotation2": {
+      "channel": 23,
+      "type": "enum",
+      "description": "Pattern Rotation 2 - Rotation for second pattern",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "clockwise": { "min": 128, "max": 191 },
+        "counter_clockwise": { "min": 192, "max": 255 }
+      }
+    },
+    "horizontalMovement2": {
+      "channel": 24,
+      "type": "enum",
+      "description": "Horizontal Movement 2 - X position for second pattern",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "wave_left": { "min": 128, "max": 159 },
+        "wave_right": { "min": 160, "max": 191 },
+        "move_left": { "min": 192, "max": 223 },
+        "move_right": { "min": 224, "max": 255 }
+      }
+    },
+    "verticalMovement2": {
+      "channel": 25,
+      "type": "enum",
+      "description": "Vertical Movement 2 - Y position for second pattern",
+      "values": {
+        "static": { "min": 0, "max": 127 },
+        "wave_up": { "min": 128, "max": 159 },
+        "wave_down": { "min": 160, "max": 191 },
+        "move_up": { "min": 192, "max": 223 },
+        "move_down": { "min": 224, "max": 255 }
+      }
+    },
+    "horizontalFlip": {
+      "channel": 26,
+      "type": "boolean",
+      "description": "Horizontal Flip - Flip second pattern on X axis",
+      "values": {
+        "normal": 0,
+        "flipped": { "min": 128, "max": 255 }
+      }
+    },
+    "verticalFlip": {
+      "channel": 27,
+      "type": "boolean",
+      "description": "Vertical Flip - Flip second pattern on Y axis",
+      "values": {
+        "normal": 0,
+        "flipped": { "min": 128, "max": 255 }
+      }
+    },
+    "forcedColor2": {
+      "channel": 28,
+      "type": "enum",
+      "description": "Forced Color Setting 2 - Override color of second pattern",
+      "values": {
+        "original": 0,
+        "red": { "min": 1, "max": 31 },
+        "green": { "min": 32, "max": 63 },
+        "blue": { "min": 64, "max": 95 },
+        "yellow": { "min": 96, "max": 127 },
+        "cyan": { "min": 128, "max": 159 },
+        "magenta": { "min": 160, "max": 191 },
+        "white": { "min": 192, "max": 223 },
+        "color_cycle": { "min": 224, "max": 255 }
+      }
+    },
+    "colorChange": {
+      "channel": 29,
+      "type": "enum",
+      "description": "Color Change - Master color control with dynamic cycles",
+      "values": {
+        "original": 0,
+        "red": { "min": 1, "max": 31 },
+        "green": { "min": 32, "max": 63 },
+        "blue": { "min": 64, "max": 95 },
+        "yellow": { "min": 96, "max": 127 },
+        "cyan": { "min": 128, "max": 159 },
+        "magenta": { "min": 160, "max": 191 },
+        "white": { "min": 192, "max": 223 },
+        "dynamic_cycle": { "min": 224, "max": 239 },
+        "color_movement": { "min": 240, "max": 255 }
+      }
+    },
+    "nodeHighlight2": {
+      "channel": 30,
+      "type": "range",
+      "description": "Node Highlighting 2 - Can array first pattern onto second's points",
+      "min": 0,
+      "max": 255,
+      "special": {
+        "normal": 0,
+        "highlight": 128,
+        "array_mode": 200
+      }
+    },
+    "nodeExpansion2": {
+      "channel": 31,
+      "type": "range",
+      "description": "Node Expansion 2 - Point-by-point drawing for second pattern",
+      "min": 0,
+      "max": 255
+    },
+    "gradualDrawing2": {
+      "channel": 32,
+      "type": "enum",
+      "description": "Gradual Drawing 2 - Draw/erase effects for second pattern",
+      "values": {
+        "off": 0,
+        "forward": { "min": 1, "max": 127 },
+        "reverse": { "min": 128, "max": 255 }
+      }
+    }
+  },
+  "presets": {
+    "blackout": {
+      "description": "All lasers off",
+      "channels": {
+        "mode": 0
+      }
+    },
+    "test_single": {
+      "description": "Safe test - single red beam pattern",
+      "channels": {
+        "mode": 50,
+        "gallerySelection": 0,
+        "pattern1": 10,
+        "forcedColor1": 16,
+        "secondLampPattern": 0
+      }
+    },
+    "dual_pattern": {
+      "description": "Dual pattern demonstration",
+      "channels": {
+        "mode": 50,
+        "gallerySelection": 200,
+        "pattern1": 30,
+        "forcedColor1": 48,
+        "secondLampPattern": 128,
+        "patternLibrary2": 0,
+        "pattern2": 60,
+        "forcedColor2": 80
+      }
+    },
+    "party_mode": {
+      "description": "Dynamic party mode with color cycling",
+      "channels": {
+        "mode": 50,
+        "gallerySelection": 200,
+        "pattern1": 100,
+        "zoom1": 140,
+        "rotation1": 160,
+        "colorChange": 230,
+        "strobe": 96
+      }
+    },
+    "ambient": {
+      "description": "Slow ambient patterns with wave movements",
+      "channels": {
+        "mode": 50,
+        "gallerySelection": 200,
+        "pattern1": 60,
+        "zoom1": 64,
+        "horizontalMovement1": 140,
+        "verticalMovement1": 140,
+        "forcedColor1": 144,
+        "strobe": 0
+      }
+    },
+    "array_effect": {
+      "description": "Array first pattern onto second pattern's nodes",
+      "channels": {
+        "mode": 50,
+        "gallerySelection": 0,
+        "pattern1": 20,
+        "forcedColor1": 16,
+        "secondLampPattern": 128,
+        "patternLibrary2": 200,
+        "pattern2": 80,
+        "forcedColor2": 48,
+        "nodeHighlight2": 200
+      }
+    }
+  },
+  "macros": {
+    "colorCycle": {
+      "description": "Cycle through all colors",
+      "steps": [
+        { "channels": { "forcedColor1": { "value": 16, "mode": "red" } }, "duration": 1000 },
+        { "channels": { "forcedColor1": { "value": 48, "mode": "green" } }, "duration": 1000 },
+        { "channels": { "forcedColor1": { "value": 80, "mode": "blue" } }, "duration": 1000 },
+        { "channels": { "forcedColor1": { "value": 112, "mode": "yellow" } }, "duration": 1000 },
+        { "channels": { "forcedColor1": { "value": 144, "mode": "cyan" } }, "duration": 1000 },
+        { "channels": { "forcedColor1": { "value": 176, "mode": "magenta" } }, "duration": 1000 },
+        { "channels": { "forcedColor1": { "value": 208, "mode": "white" } }, "duration": 1000 }
+      ]
+    },
+    "patternSequence": {
+      "description": "Showcase different patterns",
+      "steps": [
+        { "channels": { "pattern1": 10 }, "duration": 2000 },
+        { "channels": { "pattern1": 30 }, "duration": 2000 },
+        { "channels": { "pattern1": 50 }, "duration": 2000 },
+        { "channels": { "pattern1": 70 }, "duration": 2000 },
+        { "channels": { "pattern1": 90 }, "duration": 2000 }
+      ]
+    },
+    "zoomEffect": {
+      "description": "Dynamic zoom in and out",
+      "steps": [
+        { "channels": { "zoom1": { "value": 140, "mode": "zoom_in" } }, "duration": 3000 },
+        { "channels": { "zoom1": { "value": 175, "mode": "zoom_out" } }, "duration": 3000 }
+      ]
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "created": "2025-09-19",
+    "author": "DMX Laser Control System",
+    "notes": "Complete 32-channel profile for Ehaho L2400 RGB 3D Animation Laser with dual-pattern support and advanced effects"
+  }
+}

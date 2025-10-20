@@ -6,11 +6,11 @@
 
 import blessed from 'blessed';
 import contrib from 'blessed-contrib';
-import { PatternAnimator } from './pattern-animator.js';
-import { PatternFactory } from './patterns/geometric-patterns.js';
-import { DMXController } from './dmx.js';
-import { DeviceProfileManager } from './dmx-device-control.js';
-import { DMXLogger, LogLevel } from './dmx-logger.js';
+import { PatternAnimator } from '../laser/pattern-animator.js';
+import { PatternFactory } from '../patterns/geometric-patterns.js';
+import { DMXController } from '../laser/dmx.js';
+import { DeviceProfileManager } from '../laser/dmx-device-control.js';
+import { DMXLogger, LogLevel } from '../laser/dmx-logger.js';
 import fs from 'fs/promises';
 import path from 'path';
 

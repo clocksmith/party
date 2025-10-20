@@ -3,22 +3,22 @@
   "version": "2.0.0",
   "description": "Professional DMX512 Laser Control System with Pattern Discovery",
   "type": "module",
-  "main": "dmx.js",
+  "main": "laser/dmx.js",
   "bin": {
-    "dmx": "./dmx-cli.js"
+    "dmx": "./cli/dmx-cli.js"
   },
   "scripts": {
-    "start": "node dmx-cli.js control",
+    "start": "node cli/dmx-cli.js control",
     "test": "npm run test:unit && npm run test:devices",
     "test:unit": "mocha test/unit/**/*.test.js",
     "test:integration": "mocha test/integration/**/*.test.js",
     "test:devices": "npm run test:ehaho",
     "test:ehaho": "node test/devices/ehaho-l2400.test.js",
     "test:ehaho:hardware": "node test/devices/ehaho-l2400.test.js --hardware",
-    "discover": "node dmx-cli.js discover",
-    "setup": "node dmx-cli.js setup",
-    "control": "node dmx-cli.js control",
-    "pattern-editor": "node pattern-editor-cli.js"
+    "discover": "node cli/dmx-cli.js discover",
+    "setup": "node cli/dmx-cli.js setup",
+    "control": "node cli/dmx-cli.js control",
+    "pattern-editor": "node cli/pattern-editor-cli.js"
   },
   "keywords": ["dmx", "dmx512", "laser", "lighting", "control", "serial"],
   "author": "",

@@ -330,7 +330,7 @@ export class DynamicDeviceControl extends EventEmitter {
         if (!this.profile) {
             throw new Error('No profile loaded');
         }
-        
+
         const channelDef = this.profile.channels[channelName];
         if (!channelDef) {
             throw new ConfigurationError(
@@ -340,27 +340,48 @@ export class DynamicDeviceControl extends EventEmitter {
                 channelName
             );
         }
-        
+
         // Validate value based on type
         const validatedValue = this.validateChannelValue(channelDef, value);
-        
+
         // Calculate actual DMX channel
         const dmxChannel = this.startAddress + channelDef.channel - 1;
-        
+
         // Set in controller
         this.dmxController.setChannel(dmxChannel, validatedValue);
 
         this.logger.info(`Sending to ${channelName}: value=${validatedValue}, dmx_channel=${dmxChannel}`);
-        
+
         // Store in local map
         this.channelValues.set(channelName, validatedValue);
-        
+
         this.logger.debug(`Set ${channelName} to ${validatedValue}`, {
             dmxChannel,
             definition: channelDef
         });
-        
+
         return validatedValue;
+    }
+
+    /**
+     * Set multiple channels at once
+     */
+    async setChannels(channels) {
+        if (!this.profile) {
+            throw new Error('No profile loaded');
+        }
+
+        const results = {};
+        for (const [channelName, value] of Object.entries(channels)) {
+            try {
+                results[channelName] = this.setChannelByName(channelName, value);
+            } catch (error) {
+                this.logger.warn(`Failed to set ${channelName}`, { error: error.message });
+                results[channelName] = null;
+            }
+        }
+
+        return results;
     }
     
     /**

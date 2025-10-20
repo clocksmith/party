@@ -4,9 +4,9 @@
  * Tests that all methods work without errors
  */
 
-import { DMXController, DMXSerialInterface } from '../dmx.js';
-import { EhahoL2400Helper, GenericLaserHelper } from '../dmx-helpers.js';
-import { MockSerialPort } from '../dmx-mock.js';
+import { DMXController, DMXSerialInterface } from '../laser/dmx.js';
+import { EhahoL2400Helper, GenericLaserHelper } from '../laser/dmx-helpers.js';
+import { MockSerialPort } from '../laser/dmx-mock.js';
 
 console.log('🧪 Testing DMX Helper API\n');
 

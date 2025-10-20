@@ -406,11 +406,41 @@ export class DMXTestHarness {
     }
 }
 
+/**
+ * Create a mock DMX Serial Interface for testing
+ * This wraps MockSerialPort in a real DMXSerialInterface so tests get full functionality
+ * @param {object} options - Options for mock port
+ * @returns {Promise<DMXSerialInterface>} Fully functional mock interface
+ */
+export async function createMockDMXInterface(options = {}) {
+    // Import DMXSerialInterface (avoid circular dependency by lazy loading)
+    const { DMXSerialInterface } = await import('./dmx.js');
+
+    // Create mock port
+    const mockPort = new MockSerialPort({
+        path: options.path || '/dev/tty.mock',
+        responseDelay: options.responseDelay || 1, // Faster for tests
+        failureRate: options.failureRate || 0,
+        ...options
+    });
+
+    // Create interface - we need to inject the mock port
+    const dmxInterface = new DMXSerialInterface({
+        portPath: mockPort.path
+    });
+
+    // Override the port with our mock (before connection)
+    dmxInterface.port = mockPort;
+
+    return dmxInterface;
+}
+
 // Export for testing
 export default {
     MockSerialPort,
     MockDMXDevice,
     DMXTestHarness,
     DMX_CONSTANTS,
-    DEVICE_RESPONSES
+    DEVICE_RESPONSES,
+    createMockDMXInterface
 };

@@ -1,336 +1,292 @@
-# LASER <-> RESAL (LR)
+# Project PARTY
 
-> LASER — **L**aser **A**utomation **S**equencing **E**ngine **R**ESAL  
-> RESAL — **R**ealtime **E**ffects **S**ynchronization **A**utomation **L**ASER
+**Perception-Action Reconstruction & Tooling Yard**
 
-Professional-grade DMX512 lighting framework with pattern animation, automatic device discovery, dynamic profile management, and real-time control. Throughout this document we shorten the LASER⇄RESAL pairing to **LR**.
-
-[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](package.json)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](package.json)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](package.json)
 
-## Features
+---
 
-### Core Capabilities
+## Vision
 
-- Automatic DMX interface detection for ENTTEC, FTDI, and compatible adapters
-- Dynamic device profile system with JSON descriptors
-- Guided pattern discovery for rapid profile authoring
-- Real-time control panel with presets and live monitoring
-- Built-in profile validation prior to live use
-- Complete mock environment for hardware-free development
-- Centralised logging for troubleshooting
+An autonomous AI system that can reverse-engineer unknown DMX laser hardware using only visual feedback—transforming opaque devices into fully understood, programmable creative instruments without human intervention.
 
-### Highlights in v3.0
+### What Project PARTY Does
 
-- Custom pattern animation engine with precise parameter control
-- Parametric pattern editor available from the CLI
-- Pattern library management with save/load/versioning support
-- Non-interactive setup for CI/CD environments
-- Multi-fixture orchestration and priority management
-- Promise-based DMX controller API
-- Expanded discovery tooling with multi-channel capture
-- Expanded test harnesses for both hardware and mock scenarios
+An AI agent equipped with a camera watches a laser projector as it systematically tests different control commands. By analyzing what it sees, the agent autonomously:
 
-## Installation
+• **Discovers** which DMX channels control position, color, intensity, patterns, and other features
+• **Calibrates** the hardware by building mathematical models of non-linear responses
+• **Generates** a clean, high-level Python API (e.g., `laser_canvas.draw_line()`, `draw_circle()`)
+• **Validates** its own code through visual feedback until geometric primitives meet strict quality thresholds (>95% accuracy)
+• **Enables** creative use where a developer can say "draw a spinning rainbow spiral" and the system instantly translates this into precise DMX commands
+
+### Why This Matters
+
+Most DMX laser hardware ships with incomplete documentation, proprietary software, or cryptic control schemes. Manual reverse-engineering is tedious, error-prone, and time-consuming. Project PARTY automates this process, making any laser device instantly programmable and accessible to creative developers.
+
+---
+
+## Key Objectives
+
+1. **Autonomous Hardware Discovery** → Identify channel functions without prior device knowledge
+2. **Calibration & Characterization** → Build precise mathematical models of channel behavior including non-linearities
+3. **API Generation** → Automatically write intuitive libraries that abstract low-level DMX details
+4. **Validation & Refinement** → Continuously improve through visual feedback loops
+5. **Creative Enablement** → Transform the system into a real-time creative tool for laser art
+6. **Scientific Measurement** → Instrument the process to measure and compare LLM capabilities in real-world robotics tasks
+
+---
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   HOST PC (Strategist)                      │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │ Experiment   │←→│ Coder Agent  │←→│  Knowledge Base  │  │
+│  │   Engine     │  │    (LLM)     │  │  • Channels      │  │
+│  │ • Planning   │  │ • Generation │  │  • Curves        │  │
+│  │ • Evaluation │  │ • Refinement │  │  • API Code      │  │
+│  └──────────────┘  └──────────────┘  └──────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+                           ↓ ↑
+                    [WebSocket / REST]
+                           ↓ ↑
+┌─────────────────────────────────────────────────────────────┐
+│               JETSON AGX ORIN (Tactical)                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐   │
+│  │ DMX Service  │  │  Execution   │  │ Vision Service  │   │
+│  │ • pyserial   │  │   Sandbox    │  │ • Camera        │   │
+│  │ • Break/MAB  │  │ • AST valid. │  │ • Blob detect   │   │
+│  │ • 512 ch buf │  │ • Timeouts   │  │ • Line analysis │   │
+│  └──────────────┘  └──────────────┘  └─────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+         ↓                  ↓                    ↑
+   [USB Serial]       [Generated Code]      [Camera]
+         ↓                  ↓                    ↑
+┌─────────────────────────────────────────────────────────────┐
+│                      HARDWARE LAYER                         │
+│  ┌─────────────┐   ┌──────────────┐   ┌─────────────────┐  │
+│  │ USB-to-DMX  │→  │ Laser Device │→  │   Projection    │  │
+│  │ Controller  │   │ (Unknown Cfg)│   │    Surface      │  │
+│  └─────────────┘   └──────────────┘   └─────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Learning Loop:** Host generates code → Jetson executes → Laser projects → Camera captures → Vision analyzes → Host evaluates → Knowledge updates → Repeat
+
+---
+
+## Discovery Process (9 Stages)
+
+| Stage | Task                           | Duration    | Outcome                                  |
+|-------|--------------------------------|-------------|------------------------------------------|
+| 1.1   | Initial Response Detection     | 15-30 min   | Identify responsive channels             |
+| 1.2   | Mode & Intensity Discovery     | 20-40 min   | Map control channels (mode, brightness)  |
+| 1.3   | Spatial Control Discovery      | 30-60 min   | Identify X/Y position channels           |
+| 1.4   | Color Discovery                | 20-40 min   | Map RGB or palette controls              |
+| 1.5   | Calibration & Non-linearity    | 40-80 min   | Build mathematical correction models     |
+| 1.6   | Advanced Feature Discovery     | 30-60 min   | Find rotation, zoom, pattern channels    |
+| 1.7   | Primitive Synthesis            | 60-120 min  | Generate draw_line(), draw_circle()      |
+| 1.8   | Complex Primitive Library      | 60-120 min  | Rectangles, polygons, bezier curves      |
+| 1.9   | Final Validation Suite         | 20-40 min   | Comprehensive testing (>92% quality)     |
+
+**Total Time:** ~4-7 hours for complete autonomous discovery and API generation
+
+---
+
+## Hardware Requirements
+
+### Tactical Edge Computer (Options)
+
+• **Primary:** NVIDIA Jetson AGX Orin 64GB (~$2,000) – 275 TOPS AI performance
+• **High-End:** NVIDIA Jetson Thor T5000 (~$3,500+) – 7.5× faster than AGX Orin
+• **Mid-Range:** Qualcomm Robotics RB5 (~$600-800) – 15 TOPS, 7 concurrent cameras
+• **Budget:** Rockchip RK3588 + Hailo-8 (~$300-500) – 32 TOPS combined
+
+### Camera System (Critical)
+
+• **Recommended:** FRAMOS FSM-IMX273C + FSA-FTX1 Adapter (~$530) – Sony Pregius sensor, maximum data fidelity
+• **Alternative:** Basler daA1920-160uc + BCON Adapter (~$630) – Industrial reliability, Pylon SDK
+• **Requirement:** Global shutter sensor (no rolling shutter artifacts)
+
+### Host PC (Strategist)
+
+• **Primary:** AMD Threadripper PRO 7995WX (96 cores Zen 4) + 128GB RAM + RTX 6000 Ada (~$20,000-25,000)
+• **2025 Next-Gen:** AMD Threadripper PRO 9995WX (Zen 5) + 128GB DDR5-6400 (~$22,000-28,000) – 49% faster LLM inference
+• **Intel Alternative:** Xeon W9-3495X (56 cores) + 128GB RAM + RTX 6000 Ada (~$18,000-22,000)
+• **Budget:** AMD Ryzen 9 7950X3D + 64GB RAM + RTX 4090 (~$5,000-8,000)
+
+### Total System Cost Estimates
+
+• **High-End:** $30,000-40,000 (Threadripper PRO 9995WX + Jetson Thor + FRAMOS)
+• **Recommended:** $22,000-27,000 (Threadripper PRO 7995WX + Jetson AGX Orin + FRAMOS)
+• **Budget:** $8,000-12,000 (Ryzen 9 7950X3D + RK3588+Hailo-8 + Basler)
+
+---
+
+## Implementation Status
+
+**Current:** Proposed architecture only. No implementation has begun.
+
+**Foundation:** The existing DMX512 control framework (in `laser/`) provides the starting point for Project PARTY's tactical layer. This is a fully functional, production-ready system for manual DMX laser control.
+
+For complete architectural details, see **[docs/FUTURE-DEVELOPMENT.md](docs/FUTURE-DEVELOPMENT.md)**
+
+---
+
+## Project Structure
+
+```
+party/
+├── laser/              # DMX512 control framework (foundation layer)
+│   └── README.md       # Laser library documentation
+├── cli/                # Command-line tools
+├── examples/           # Example scripts and demos
+├── docs/               # Project documentation
+├── test/               # Test suites
+├── device-profiles/    # Device configuration files
+└── patterns/           # Pattern library
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+• Node.js v16.0.0 or higher
+• DMX interface (ENTTEC DMX USB Pro or compatible)
+• Linux, macOS, or Windows
+
+### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/laser-resal.git
-cd laser-resal
+git clone https://github.com/yourusername/party.git
+cd party
 
 # Install dependencies
 npm install
 
-# Quick smoke test
+# Test the DMX framework
+npm test
+```
+
+### Quick Test (No Hardware Required)
+
+```bash
+# Run mock hardware tests
 node test/system/test-run.js
-
-# Optional: expose CLI globally
-npm link
 ```
 
-### System Requirements
+### Using the DMX Control Framework
 
-- Node.js v16.0.0 or higher
-- Windows, macOS, or Linux
-- DMX interface (ENTTEC DMX USB Pro, FTDI-based, or compatible)
-- Serial port access (may require `sudo` or group membership on Unix-like systems)
+The laser control framework is ready to use now. See **[laser/README.md](laser/README.md)** for complete documentation on:
 
-## Quick Start
+• Setting up DMX interfaces
+• Discovering device patterns
+• Creating device profiles
+• Real-time control interfaces
+• Pattern animation
 
-### 1. Initial Setup
+---
 
-```bash
-npm run setup
-# or
-node dmx-cli.js setup
-```
+## Roadmap
 
-The setup wizard helps you:
+### Phase 1: Foundation (Current)
+- [x] DMX512 control framework
+- [x] Device profile system
+- [x] Pattern discovery tools
+- [x] Mock hardware environment
 
-1. Select an existing device profile or create a new one
-2. Detect an attached DMX interface
-3. Configure DMX addressing
-4. Verify connectivity with a safe pattern
+### Phase 2: Vision & Feedback (Q1 2025)
+- [ ] Camera integration
+- [ ] Blob detection algorithms
+- [ ] Line/shape recognition
+- [ ] Visual feedback metrics
 
-#### Non-Interactive Setup
+### Phase 3: Agent Intelligence (Q2 2025)
+- [ ] LLM integration for code generation
+- [ ] Experiment planning engine
+- [ ] Knowledge base persistence
+- [ ] Multi-stage discovery pipeline
 
-```bash
-# First run – capture configuration
-node dmx-cli.js setup --profile generic-laser --port /dev/ttyUSB0 --address 1 --save
+### Phase 4: Calibration & API (Q3 2025)
+- [ ] Non-linearity modeling
+- [ ] High-level API generation
+- [ ] Validation framework
+- [ ] Performance benchmarking
 
-# Subsequent runs – reuse saved configuration
-node dmx-cli.js setup --non-interactive --config ./dmx-config.json
-```
+### Phase 5: Production & Scale (Q4 2025)
+- [ ] Multi-device support
+- [ ] Cloud orchestration
+- [ ] Web interface
+- [ ] Public dataset release
 
-### 2. Pattern Discovery
-
-```bash
-npm run discover
-# or
-node dmx-cli.js discover --channels 2,3,4 --step 5 --capture-state --output my-patterns.json
-```
-
-Discovery cycles DMX values across selected channels, allows you to name patterns, and emits a profile JSON file for later use.
-
-### 3. Control Interface
-
-```bash
-npm start
-# or
-node dmx-cli.js control --profile ehaho-l2400.json --port /dev/tty.usbserial-A50285BI --address 1
-```
-
-If no port is supplied the control command auto-selects the first detected device and defaults to DMX start address 1. Keyboard shortcuts: arrow keys for focus, `B` for blackout, `T` to run the test sequence, `Q` to quit.
-
-## Command Reference
-
-### CLI Commands
-
-| Command                  | Description                    | Selected Options                                                          |
-| ------------------------ | ------------------------------ | -------------------------------------------------------------------------- |
-| `dmx setup`              | Interactive setup wizard       | `--profile <id>`, `--port <path>`, `--save`, `--non-interactive`           |
-| `dmx discover`           | Pattern discovery mode         | `--channels <list>`, `--step <size>`, `--capture-state`, `--output <file>` |
-| `dmx control`            | Launch control panel           | `--profile <name>`, `--port <path>`, `--address <start>`                   |
-| `dmx pattern`            | Launch pattern editor          | `--demo` for demo mode                                                     |
-| `dmx test`               | Run test sequence              | `--mock` for simulated device                                              |
-| `dmx generate`           | Profile generator              | interactive prompts                                                        |
-| `dmx validate <profile>` | Validate a profile             | path to profile                                                            |
-| `dmx list`               | List available profiles        | reads `device-profiles/`                                                   |
-
-### NPM Scripts
-
-```bash
-npm start                 # Launch control panel
-npm run demo              # Legacy demo sequence
-npm test                  # Run unit + device tests
-npm run test:ehaho        # Ehaho L2400 regression using mock serial port
-npm run test:ehaho:hardware -- --port=/dev/tty.usbserial-XXXX  # Ehaho hardware validation
-npm run discover          # Pattern discovery helper
-npm run setup             # Setup wizard
-npm run pattern-editor    # Launch interactive pattern editor
-```
-
-## Understanding DMX Channels
-
-DMX512 uses channels (1–512) to control fixture parameters. Typical mappings for lasers:
-
-| Channel | Function          | Example Values                       |
-| ------- | ----------------- | ------------------------------------ |
-| 1       | Mode              | 0 Off, 50 Auto, 100 Sound, 200 DMX   |
-| 2       | Pattern           | 0–255 device-specific pattern codes  |
-| 3       | Size / Zoom       | 0–255                                |
-| 4–6     | Position          | 0–255 (128 is centered)              |
-| 7–9     | RGB colour        | 0–255 per channel                    |
-| 10      | Strobe            | 0 Off, 1–255 speed                   |
-| 11      | Rotation          | 0–255                                |
-| 12      | Animation speed   | 0–255                                |
-
-> Exact mappings vary by device; use `dmx discover` to map your hardware accurately.
-
-## Device Profiles
-
-Profiles live in `device-profiles/` and describe how channels map to functions.
-
-### Structure Example
-
-```json
-{
-  "name": "My Laser Model",
-  "manufacturer": "LaserCorp",
-  "channelCount": 32,
-  "channels": {
-    "mode": {
-      "channel": 1,
-      "type": "enum",
-      "values": {
-        "off": 0,
-        "auto": 50,
-        "sound": 100,
-        "dmx": 200
-      }
-    },
-    "pattern": {
-      "channel": 2,
-      "type": "range",
-      "min": 0,
-      "max": 255,
-      "patterns": {
-        "circle": 10,
-        "square": 20,
-        "triangle": 30
-      }
-    }
-  },
-  "presets": {
-    "test": {
-      "description": "Safe test pattern",
-      "channels": {
-        "mode": 200,
-        "pattern": 10,
-        "colorRed": 255
-      }
-    }
-  }
-}
-```
-
-### Workflow
-
-1. Discover channel behaviour with `dmx discover`
-2. Save the emitted profile to `device-profiles/`
-3. Reference it via `dmx control --profile <file>`
-
-## Testing
-
-### System and Integration
-
-- `node test/system/test-run.js` – high-level smoke test of the mock harness
-- `npm run test` – unit tests plus device suites
-
-### Device Suites
-
-| Script                                                   | Purpose                                      |
-| -------------------------------------------------------- | -------------------------------------------- |
-| `npm run test:ehaho`                                     | Ehaho L2400 regression using the mock serial |
-| `npm run test:ehaho:hardware -- --port=/dev/ttyUSB0`     | Ehaho L2400 hardware validation              |
-| `node test/devices/ehaho-l2400.test.js --list-ports`     | Enumerate serial ports prior to testing      |
-| `node test/devices/generic-laser.test.js --full`         | Generic profile hardware suite               |
-| `node test/devices/generic-laser.test.js --help`         | View options such as `--port` and `--safety` |
-| `node test/devices/generic-laser-mock.test.js --mock`    | Generic profile regression without hardware  |
-
-### Mock-Only Development
-
-- Launch `node test/devices/generic-laser-mock.test.js --channels` to inspect DMX channel effects
-- Use `node test/system/test-run.js` to verify profile loading and DMX controller behaviour without hardware
-
-## Logs
-
-| File                   | Description                  |
-| ---------------------- | ---------------------------- |
-| `dmx-cli.log`          | CLI session output           |
-| `dmx_received_log.txt` | Raw DMX traffic captures     |
-| `patterns-*.json`      | Generated pattern libraries  |
-
-Useful commands:
-
-```bash
-grep ERROR dmx-cli.log | tail -20      # Inspect recent failures
-tail -f dmx_received_log.txt            # Monitor DMX frames in real time
-```
-
-## Troubleshooting
-
-### Serial Port Issues
-
-```bash
-# Grant temporary access on Linux/macOS
-sudo chmod 666 /dev/ttyUSB0
-# Preferred: add your user to the dialout/uucp group
-sudo usermod -a -G dialout "$USER"
-```
-
-If the interface is reported as in use, close other DMX software and inspect with `lsof | grep tty`.
-
-### Device Not Detected
-
-1. Confirm the USB connection
-2. Install the vendor’s FTDI driver if required
-3. Run `node test/devices/ehaho-l2400.test.js --list-ports`
-
-### Pattern or Colour Misbehaviour
-
-- Ensure the fixture is in DMX mode
-- Verify the configured DMX start address
-- Re-run discovery to confirm channel mapping
-
-### Dependency Problems
-
-```bash
-npm install
-```
-
-## Architecture
-
-```mermaid
-graph TD
-    CLI[CLI & UI Layer] --> PB(Device Profile Control)
-    CLI --> PE(Pattern Editor)
-    PB --> DC(DMX Controller)
-    PE --> DC
-    DC --> SI(DMX Serial Interface)
-
-    subgraph Profiles & Patterns
-        PB --> PM(Profile Manager)
-        PE --> PL(Pattern Library)
-    end
-
-    subgraph Supporting Modules
-        DC --> LG(Logger)
-        DC --> ER(Error Handling)
-        PB --> MV(Mock & Validation)
-    end
-```
-
-### Testing Flow
-
-```mermaid
-flowchart LR
-    A[Edit profile or code] --> B[Run mock tests
-node test/system/test-run.js]
-    B --> C{Hardware available?}
-    C -- No --> D[Run
-node test/devices/generic-laser-mock.test.js]
-    C -- Yes --> E[Run
-npm run test:ehaho:hardware]
-    E --> F[Run
-node test/devices/generic-laser.test.js --full]
-    D --> G[Review logs]
-    F --> G
-    G --> H[Iterate or deploy]
-```
+---
 
 ## Contributing
 
-1. Fork the repository and branch from `main`
-2. Add or update tests alongside code changes
-3. Run `npm test` plus relevant device suites
-4. Submit a pull request with context on hardware used
+We welcome contributions! Areas of interest:
 
-### Coding Guidelines
+• Computer vision algorithms for laser pattern recognition
+• LLM prompt engineering for hardware discovery
+• DMX device profile creation
+• Test scenarios and benchmarks
 
-- Prefer ES6+ syntax
-- Document exported functions with JSDoc where relevant
-- Keep modules focused and covered by tests
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Submit a pull request
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+---
+
+## Research Applications
+
+Project PARTY is designed as a platform for studying:
+
+• **Embodied AI:** How LLMs interact with physical systems through sensing and actuation
+• **Active Learning:** Optimal experiment design for hardware characterization
+• **Code Generation:** LLM capabilities in generating domain-specific APIs
+• **Vision-Language Integration:** Closing the loop between visual feedback and code generation
+• **Robotic Calibration:** Automated parameter identification for complex systems
+
+We encourage researchers to use this platform for experiments and welcome academic collaborations.
+
+---
 
 ## License
 
 MIT License – see [LICENSE](LICENSE).
 
-## Support
+---
 
-- Issues: [GitHub Issues](https://github.com/yourusername/dmx-laser-control/issues)
-- Discussions: [GitHub Discussions](https://github.com/yourusername/dmx-laser-control/discussions)
-- Email: support@example.com
+## Citation
 
-_Remember to follow all safety regulations and wear approved laser safety equipment during testing._
+If you use Project PARTY in your research, please cite:
+
+```bibtex
+@software{party2024,
+  title = {Project PARTY: Perception-Action Reconstruction \& Tooling Yard},
+  author = {Your Name},
+  year = {2024},
+  url = {https://github.com/yourusername/party}
+}
+```
+
+---
+
+## Contact
+
+• Issues: [GitHub Issues](https://github.com/yourusername/party/issues)
+• Discussions: [GitHub Discussions](https://github.com/yourusername/party/discussions)
+• Email: research@example.com
+
+---
+
+**⚠ Safety Warning:** This project involves laser equipment and autonomous systems. Always follow laser safety regulations, wear appropriate protective equipment, and maintain human oversight during experiments.

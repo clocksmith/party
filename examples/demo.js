@@ -7,10 +7,10 @@ import readline from 'readline';
 import {
     DMXSerialInterface as DmxSerialInterface,
     DMXController as DmxController
-} from './dmx.js';
-import { ProfileBasedDeviceControl } from './dmx-profile-based-control.js';
-import { DeviceProfileManager } from './dmx-device-control.js';
-import { DMXLogger, LogLevel } from './dmx-logger.js';
+} from '../laser/dmx.js';
+import { ProfileBasedDeviceControl } from '../laser/dmx-profile-based-control.js';
+import { DeviceProfileManager } from '../laser/dmx-device-control.js';
+import { DMXLogger, LogLevel } from '../laser/dmx-logger.js';
 
 const LASER_START_ADDRESS = 1;
 const REFRESH_RATE_MS = 33;

@@ -4,12 +4,12 @@
  * Demonstrates the Pattern Animator system with various patterns
  */
 
-import { PatternAnimator } from './pattern-animator.js';
-import { PatternFactory } from './patterns/geometric-patterns.js';
-import { DMXSerialInterface, DMXController } from './dmx.js';
-import { ProfileBasedDeviceControl } from './dmx-profile-based-control.js';
-import { DeviceProfileManager } from './dmx-device-control.js';
-import { DMXLogger, LogLevel } from './dmx-logger.js';
+import { PatternAnimator } from '../laser/pattern-animator.js';
+import { PatternFactory } from '../laser/patterns/geometric-patterns.js';
+import { DMXSerialInterface, DMXController } from '../laser/dmx.js';
+import { ProfileBasedDeviceControl } from '../laser/dmx-profile-based-control.js';
+import { DeviceProfileManager } from '../laser/dmx-device-control.js';
+import { DMXLogger, LogLevel } from '../laser/dmx-logger.js';
 import readline from 'readline';
 import chalk from 'chalk';
 

@@ -14,13 +14,13 @@ import contrib from 'blessed-contrib';
 import fs from 'fs/promises';
 import path from 'path';
 
-import { DMXSerialInterface, DMXController } from './dmx.js';
-import { MockSerialPort, DMXTestHarness } from './dmx-mock.js';
-import { DMXLogger, LogLevel } from './dmx-logger.js';
-import { DeviceProfileManager } from './dmx-device-control.js';
-import { ProfileBasedDeviceControl } from './dmx-profile-based-control.js';
-import { ProfileValidator } from './dmx-profile-validator.js';
-import { ProfileGenerator } from './dmx-profile-generator.js';
+import { DMXSerialInterface, DMXController } from '../laser/dmx.js';
+import { MockSerialPort, DMXTestHarness } from '../laser/dmx-mock.js';
+import { DMXLogger, LogLevel } from '../laser/dmx-logger.js';
+import { DeviceProfileManager } from '../laser/dmx-device-control.js';
+import { ProfileBasedDeviceControl } from '../laser/dmx-profile-based-control.js';
+import { ProfileValidator } from '../laser/dmx-profile-validator.js';
+import { ProfileGenerator } from '../laser/dmx-profile-generator.js';
 
 const logger = new DMXLogger({
     moduleName: 'DMX-CLI',
@@ -897,7 +897,7 @@ program
             // Run the pattern demo
             console.log(chalk.cyan('Launching Pattern Animator Demo...'));
             const { spawn } = await import('child_process');
-            const demo = spawn('node', ['pattern-demo.js'], {
+            const demo = spawn('node', ['examples/pattern-demo.js'], {
                 stdio: 'inherit'
             });
             demo.on('close', (code) => {
@@ -907,7 +907,7 @@ program
             // Launch the pattern editor UI
             console.log(chalk.cyan('Launching Pattern Editor...'));
             const { spawn } = await import('child_process');
-            const editor = spawn('node', ['pattern-editor-cli.js'], {
+            const editor = spawn('node', ['cli/pattern-editor-cli.js'], {
                 stdio: 'inherit'
             });
             editor.on('close', (code) => {

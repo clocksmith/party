@@ -20,9 +20,9 @@
  *   - all            : Run all demos sequentially
  */
 
-import { DMXSerialInterface, DMXController } from './dmx.js';
-import { DMXCanvas } from './dmx-canvas.js';
-import * as Shapes from './dmx-shapes.js';
+import { DMXSerialInterface, DMXController } from '../laser/dmx.js';
+import { DMXCanvas } from '../laser/dmx-canvas.js';
+import * as Shapes from '../laser/dmx-shapes.js';
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 

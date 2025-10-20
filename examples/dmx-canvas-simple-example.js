@@ -3,9 +3,9 @@
  * Bare minimum code to get started with parametric curves
  */
 
-import { DMXSerialInterface, DMXController } from './dmx.js';
-import { DMXCanvas } from './dmx-canvas.js';
-import * as Shapes from './dmx-shapes.js';
+import { DMXSerialInterface, DMXController } from '../laser/dmx.js';
+import { DMXCanvas } from '../laser/dmx-canvas.js';
+import * as Shapes from '../laser/dmx-shapes.js';
 
 // Configuration
 const PORT = '/dev/tty.usbserial-A50285BI';  // Change to your port

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { DMXController, DMXSerialInterface } from '../../dmx.js';
-import { ProfileBasedDeviceControl } from '../../dmx-profile-based-control.js';
-import { DeviceProfileManager } from '../../dmx-device-control.js';
-import { MockSerialPort } from '../../dmx-mock.js';
+import { DMXController, DMXSerialInterface } from '../../laser/dmx.js';
+import { ProfileBasedDeviceControl } from '../../laser/dmx-profile-based-control.js';
+import { DeviceProfileManager } from '../../laser/dmx-device-control.js';
+import { MockSerialPort } from '../../laser/dmx-mock.js';
 import chalk from 'chalk';
 import ora from 'ora';
 import {

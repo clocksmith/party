@@ -1,4 +1,4 @@
-import { DMXSerialInterface } from '../../dmx.js';
+import { DMXSerialInterface } from '../../laser/dmx.js';
 import chalk from 'chalk';
 import ora from 'ora';
 

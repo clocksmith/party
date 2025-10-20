@@ -3,10 +3,10 @@
  * Quick test runner for the DMX system
  */
 
-import { DMXController } from '../../dmx.js';
-import { DMXTestHarness, MockSerialPort } from '../../dmx-mock.js';
-import { ProfileBasedDeviceControl } from '../../dmx-profile-based-control.js';
-import { DeviceProfileManager } from '../../dmx-device-control.js';
+import { DMXController } from '../../laser/dmx.js';
+import { DMXTestHarness, createMockDMXInterface } from '../../laser/dmx-mock.js';
+import { ProfileBasedDeviceControl } from '../../laser/dmx-profile-based-control.js';
+import { DeviceProfileManager } from '../../laser/dmx-device-control.js';
 import chalk from 'chalk';
 
 async function testSystem() {
@@ -40,16 +40,9 @@ async function testSystem() {
         
         // Step 3: Test DMX Controller with Mock
         console.log(chalk.yellow('3. Testing DMX Controller...'));
-        const mockPort = new MockSerialPort('/dev/mock');
-        
-        // Create a mock serial interface that matches what DMXController expects
-        const mockInterface = {
-            port: mockPort,
-            on: (event, handler) => mockPort.on(event, handler),
-            write: (data) => mockPort.write(data),
-            isOpen: () => true
-        };
-        
+        const mockInterface = await createMockDMXInterface({ path: '/dev/mock' });
+        await mockInterface.connect();
+
         const controller = new DMXController({
             serialInterface: mockInterface
         });

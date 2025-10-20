@@ -7,16 +7,16 @@ import { describe, it, before, after, beforeEach, afterEach } from 'mocha';
 import { expect } from 'chai';
 import sinon from 'sinon';
 
-import { DMXSerialInterface, DMXController, LaserDeviceControl } from '../dmx.js';
-import { MockSerialPort, MockDMXDevice, DMXTestHarness, DMX_CONSTANTS } from '../dmx-mock.js';
+import { DMXSerialInterface, DMXController, LaserDeviceControl } from '../laser/dmx.js';
+import { MockSerialPort, MockDMXDevice, DMXTestHarness, DMX_CONSTANTS } from '../laser/dmx-mock.js';
 import { 
     DMXError, 
     SerialConnectionError, 
     DMXProtocolError,
     ChannelRangeError,
     ErrorRecoveryManager 
-} from '../dmx-errors.js';
-import { DMXLogger, LogLevel } from '../dmx-logger.js';
+} from '../laser/dmx-errors.js';
+import { DMXLogger, LogLevel } from '../laser/dmx-logger.js';
 
 describe('DMX System Test Suite', () => {
     let harness;

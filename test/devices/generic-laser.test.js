@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { DMXController, DMXSerialInterface } from '../../dmx.js';
-import { DynamicDeviceControl } from '../../dmx-device-control.js';
-import { PatternAnimator } from '../../pattern-animator.js';
+import { DMXController, DMXSerialInterface } from '../../laser/dmx.js';
+import { DynamicDeviceControl } from '../../laser/dmx-device-control.js';
+import { PatternAnimator } from '../../laser/pattern-animator.js';
 import chalk from 'chalk';
 import ora from 'ora';
 import {

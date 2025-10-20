@@ -1,80 +1,14 @@
 #!/usr/bin/env node
 
-import { DMXController, DMXSerialInterface } from '../../dmx.js';
-import { DynamicDeviceControl } from '../../dmx-device-control.js';
+import { DMXController, DMXSerialInterface } from '../../laser/dmx.js';
+import { DynamicDeviceControl } from '../../laser/dmx-device-control.js';
+import { createMockDMXInterface } from '../../laser/dmx-mock.js';
 import chalk from 'chalk';
 import ora from 'ora';
-import { EventEmitter } from 'events';
 import { DEFAULT_PORT } from './hardware-test-utils.js';
 
 const DEVICE_PORT = DEFAULT_PORT;
-const PROFILE_PATH = './device-profiles/generic-laser.json';
-
-// Mock Serial Interface for testing without hardware
-class MockDMXSerialInterface extends EventEmitter {
-    constructor(options) {
-        super();
-        this.portPath = options.portPath;
-        this.isConnected = false;
-        this.dmxData = new Uint8Array(513); // DMX is 1-indexed
-        console.log(chalk.yellow('⚠️  Using MOCK DMX interface - no actual hardware control'));
-    }
-
-    async connect() {
-        console.log(chalk.gray(`Mock connecting to ${this.portPath}...`));
-        await this.sleep(500); // Simulate connection delay
-        this.isConnected = true;
-        this.emit('connect');
-        return true;
-    }
-
-    async disconnect() {
-        this.isConnected = false;
-        this.emit('disconnect');
-        return true;
-    }
-
-    async sendDMXData(data) {
-        if (!this.isConnected) {
-            throw new Error('Not connected');
-        }
-        this.dmxData = new Uint8Array(data);
-        // Log significant changes
-        this.logChannelChanges();
-        return true;
-    }
-
-    logChannelChanges() {
-        const significantChannels = {
-            1: 'Mode',
-            2: 'Pattern Size',
-            3: 'Gallery',
-            4: 'Pattern',
-            11: 'Red',
-            12: 'Green', 
-            13: 'Blue',
-            17: 'Strobe',
-            31: 'Global Strobe',
-            32: 'Reset'
-        };
-
-        const changes = [];
-        for (const [ch, name] of Object.entries(significantChannels)) {
-            const value = this.dmxData[ch];
-            if (value > 0) {
-                changes.push(`${name}:${value}`);
-            }
-        }
-
-        if (changes.length > 0) {
-            console.log(chalk.dim(`  DMX: [${changes.join(', ')}]`));
-        }
-    }
-
-    sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-}
+const PROFILE_PATH = 'generic-laser.json';
 
 class LaserTestSuite {
     constructor(useMock = false) {
@@ -93,10 +27,15 @@ class LaserTestSuite {
         try {
             // Initialize Serial Interface (mock or real)
             this.spinner.start('Initializing DMX serial interface...');
-            
-            const serialInterface = this.useMock 
-                ? new MockDMXSerialInterface({ portPath: DEVICE_PORT })
+
+            const serialInterface = this.useMock
+                ? await createMockDMXInterface({ path: DEVICE_PORT })
                 : new DMXSerialInterface({ portPath: DEVICE_PORT });
+
+            if (this.useMock) {
+                console.log(chalk.yellow('⚠️  Using MOCK DMX interface - no actual hardware control'));
+                console.log(chalk.gray(`Mock connecting to ${DEVICE_PORT}...`));
+            }
 
             // Initialize DMX Controller
             this.controller = new DMXController({
@@ -110,8 +49,9 @@ class LaserTestSuite {
 
             // Initialize Device Controller with laser profile
             this.spinner.start('Loading laser profile...');
-            this.device = new DynamicDeviceControl(this.controller, {
-                dmxStartAddress: 1
+            this.device = new DynamicDeviceControl({
+                dmxController: this.controller,
+                startAddress: 1
             });
 
             await this.device.loadProfile(PROFILE_PATH);
@@ -127,8 +67,8 @@ class LaserTestSuite {
 
     async showChannelMap() {
         console.log(chalk.yellow('\n📊 Channel Mapping\n'));
-        
-        const channels = this.device.currentProfile.channels;
+
+        const channels = this.device.profile.channels;
         const categories = {
             'Control': ['mode', 'reset'],
             'Pattern': ['pattern1', 'pattern2', 'patternSize1', 'patternSize2', 'gallery'],
@@ -253,9 +193,9 @@ class LaserTestSuite {
 
     async testChannelDump() {
         console.log(chalk.yellow('\n📝 Current Channel Values\n'));
-        
-        const state = this.controller.getCurrentState();
-        const channels = this.device.currentProfile.channels;
+
+        const state = this.controller.dmxState;
+        const channels = this.device.profile.channels;
         
         console.log(chalk.cyan('Active Channels:'));
         for (const [name, def] of Object.entries(channels)) {
@@ -293,13 +233,15 @@ class LaserTestSuite {
 
         } catch (error) {
             console.error(chalk.red.bold('\n❌ Test failed:'), error.message);
-            
+
             // Emergency cleanup
+            if (this.device) {
+                await this.device.blackout();
+            }
             if (this.controller) {
-                await this.controller.blackout();
                 await this.controller.disconnect();
             }
-            
+
             process.exit(1);
         } finally {
             await this.cleanup();
@@ -308,12 +250,14 @@ class LaserTestSuite {
 
     async cleanup() {
         console.log(chalk.cyan('\n🧹 Cleaning up...\n'));
-        
-        if (this.controller) {
-            this.spinner.start('Applying blackout...');
-            await this.controller.blackout();
-            this.spinner.succeed('Blackout applied');
 
+        if (this.device) {
+            this.spinner.start('Applying blackout...');
+            await this.device.blackout();
+            this.spinner.succeed('Blackout applied');
+        }
+
+        if (this.controller) {
             this.spinner.start('Disconnecting controller...');
             await this.controller.disconnect();
             this.spinner.succeed('Controller disconnected');

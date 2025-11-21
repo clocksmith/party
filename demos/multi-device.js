@@ -57,7 +57,7 @@ class MultiDeviceController {
     }
     
     startAll() {
-        console.log('▶️  Starting all animations');
+        console.log('☇️  Starting all animations');
         for (const [id, device] of this.devices) {
             device.startAnimation();
         }

@@ -8,6 +8,8 @@
 
 ---
 
+See [AGENTS.md](AGENTS.md) for the active code-writing agent profile.
+
 ## Vision
 
 An autonomous AI system that can reverse-engineer unknown DMX laser hardware using only visual feedback—transforming opaque devices into fully understood, programmable creative instruments without human intervention.

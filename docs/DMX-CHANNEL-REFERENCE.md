@@ -539,7 +539,7 @@ CH30 = 200      // Array mode!
 ```
 CH2 = 32 (Small)       CH2 = 96 (Medium)      CH2 = 160 (Large)
 
-     ○                      ●                      ⬤
+     ○                      ★                      ⬤
 ```
 
 ### Rotation Effect (CH6)
@@ -547,7 +547,7 @@ CH2 = 32 (Small)       CH2 = 96 (Medium)      CH2 = 160 (Large)
 ```
 CH6 = 0 (Static 0°)    CH6 = 64 (Static 90°)  CH6 = 160 (Rotating)
 
-    ▭                       |                      ⟳
+    ▭                       |                      ♺
                             ▭                      ▭
 ```
 
@@ -556,13 +556,13 @@ CH6 = 0 (Static 0°)    CH6 = 64 (Static 90°)  CH6 = 160 (Rotating)
 ```
 CH7 = 0 (Left)         CH7 = 64 (Center)      CH7 = 127 (Right)
 
-●                           ●                              ●
+★                           ★                              ★
 ```
 
 ```
 CH7 = 140 (Wave)       CH7 = 200 (Moving)
 
- ↝ ● ↜                 ● → → →
+ ↝ ★ ↜                 ★ → → →
 ```
 
 ### Color Examples (CH11)
@@ -577,9 +577,9 @@ CH11 = 112 (Yellow)    CH11 = 144 (Cyan)      CH11 = 176 (Magenta)
 ```
 Pattern 1 (CH4 = 30):          Pattern 2 (CH21 = 10):       Combined:
 
-        ●─●                           ▢                         ●─●
-       ●   ●                                                   ● ▢ ●
-        ●─●                                                     ●─●
+        ★─★                           ▢                         ★─★
+       ★   ★                                                   ★ ▢ ★
+        ★─★                                                     ★─★
 ```
 
 ---

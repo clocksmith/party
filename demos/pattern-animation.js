@@ -47,7 +47,7 @@ async function main() {
         });
         
         dmx.startAnimation();
-        console.log('▶️  Animation started');
+        console.log('☇️  Animation started');
         
         // Run for 3 seconds
         await sleep(3000);

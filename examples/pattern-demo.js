@@ -325,7 +325,7 @@ class PatternAnimatorDemo {
         } else {
             this.animator.start();
             this.isRunning = true;
-            console.log(chalk.green('\n▶ Animation running'));
+            console.log(chalk.green('\n☇ Animation running'));
         }
     }
     

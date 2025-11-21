@@ -210,7 +210,7 @@ class InteractiveController {
         console.log(`│ STATUS:                                    │`);
         console.log('├────────────────────────────────────────────┤');
         console.log(`│ Pattern:   ${(this.currentPattern || 'None').padEnd(31)} │`);
-        console.log(`│ Animation: ${(state.isAnimating ? '▶️ Running' : '⏸️ Stopped').padEnd(31)} │`);
+        console.log(`│ Animation: ${(state.isAnimating ? '☇️ Running' : '⏸️ Stopped').padEnd(31)} │`);
         console.log(`│ Speed:     ${this.speed.toFixed(1).padEnd(31)} │`);
         console.log(`│ Size:      ${this.size.toFixed(2).padEnd(31)} │`);
         console.log(`│ Color:     ${colorStr.padEnd(31)} │`);

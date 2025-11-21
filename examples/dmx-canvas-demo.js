@@ -400,7 +400,7 @@ async function main() {
 
         // Add event listeners
         canvas.on('start', () => {
-            console.log('▶️  Animation started');
+            console.log('☇️  Animation started');
         });
 
         canvas.on('stop', () => {

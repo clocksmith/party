@@ -166,7 +166,7 @@ npm run pattern-editor
 │ Pattern Preview          │ Patterns    │ Library    │
 │ (Canvas with grid)       │ ○ Circle    │ [New]      │
 │                         │ ○ Square    │ pattern1   │
-│      · · · · ·          │ ● Spiral    │ pattern2   │
+│      · · · · ·          │ ★ Spiral    │ pattern2   │
 │    · · · + · · ·        │ ○ Star      │ ...        │
 │  · · · · · · · · ·      │             │            │
 │    · · · + · · ·        ├─────────────┼────────────│

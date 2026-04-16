@@ -1,0 +1,16 @@
+{
+  "samples": [
+    {
+      "id": "codex_roboticist",
+      "label": "codex_roboticist",
+      "routines": "./_samples/codex_roboticist/candidate/routines.json",
+      "report": "./_samples/codex_roboticist/REPORT.md"
+    },
+    {
+      "id": "claude_roboticist",
+      "label": "claude_roboticist",
+      "routines": "./_samples/claude_roboticist/candidate/routines.json",
+      "report": "./_samples/claude_roboticist/REPORT.md"
+    }
+  ]
+}

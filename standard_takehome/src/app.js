@@ -11,7 +11,11 @@ const els = {
   pauseBtn: document.getElementById("pause"),
   resetBtn: document.getElementById("reset"),
   baselineBtn: document.getElementById("baseline"),
-  referenceBtn: document.getElementById("reference"),
+  modePill: document.getElementById("mode-pill"),
+  demoPanel: document.getElementById("demo-panel"),
+  sampleSelect: document.getElementById("sample-select"),
+  sampleRunBtn: document.getElementById("sample-run"),
+  sampleStatus: document.getElementById("sample-status"),
   bundleInput: document.getElementById("bundle-input"),
   bundleStatus: document.getElementById("bundle-status"),
   speed: document.getElementById("speed"),
@@ -44,7 +48,10 @@ const state = {
   fps: 60,
   activeTab: "log",
   phase2Catalog: [],
-  phase2Active: null
+  phase2Active: null,
+  demoMode: false,
+  demoSampleId: null,
+  samples: []
 };
 
 function log(msg, cls = "") {
@@ -74,13 +81,10 @@ async function init() {
   els.pauseBtn.addEventListener("click", () => { state.playing = !state.playing; els.pauseBtn.textContent = state.playing ? "■ pause" : "▶ resume"; });
   els.resetBtn.addEventListener("click", () => { state.frame = 0; state.playing = false; draw(); });
   els.baselineBtn.addEventListener("click", runBaseline);
-  const demoMode = new URLSearchParams(location.search).get("demo") === "1";
-  if (demoMode) {
-    els.referenceBtn.hidden = false;
-    els.referenceBtn.addEventListener("click", runReference);
-  }
+  configureDemoMode();
   els.bundleInput.addEventListener("change", onBundleUpload);
   els.exportBtn.addEventListener("click", exportResults);
+  els.sampleRunBtn.addEventListener("click", runSelectedSample);
   els.phase2Family.addEventListener("change", refreshPhase2SceneOptions);
   els.phase2LoadBtn.addEventListener("click", loadSelectedPhase2Scene);
   els.phase2RunBtn.addEventListener("click", runPhase2V2);
@@ -93,11 +97,62 @@ async function init() {
   };
   els.speed.addEventListener("input", () => { state.fps = parseInt(els.speed.value, 10); els.speedVal.textContent = `${state.fps}x`; updateSpeedFill(); });
   updateSpeedFill();
+  if (state.demoMode) await initDemoSamples();
   await initPhase2();
 
   await selectScene(state.scenes[0].id);
+  if (state.demoMode && state.demoSampleId) await runSelectedSample();
   log("simulator ready. select a scene, drop a routines.json, or use the baseline planner.", "ok");
   requestAnimationFrame(loop);
+}
+
+function configureDemoMode() {
+  const params = new URLSearchParams(location.search);
+  const demoParam = params.has("demo") ? params.get("demo") : params.get("cheat");
+  if (demoParam === null) return;
+
+  const normalized = String(demoParam).toLowerCase();
+  state.demoMode = !["0", "false", "off", "no"].includes(normalized);
+  if (!state.demoMode) return;
+
+  if (!["", "1", "true", "on", "samples"].includes(normalized)) {
+    state.demoSampleId = demoParam;
+  }
+  els.modePill.hidden = false;
+  els.demoPanel.hidden = false;
+}
+
+async function initDemoSamples() {
+  try {
+    const res = await fetch("./_samples/index.json");
+    if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
+    const idx = await res.json();
+    state.samples = Array.isArray(idx.samples) ? idx.samples : [];
+    els.sampleSelect.innerHTML = "";
+    for (const sample of state.samples) {
+      const opt = document.createElement("option");
+      opt.value = sample.id;
+      opt.textContent = sample.label ?? sample.id;
+      els.sampleSelect.appendChild(opt);
+    }
+    if (!state.samples.length) throw new Error("no samples listed");
+    if (state.demoSampleId) {
+      if (state.samples.some(s => s.id === state.demoSampleId)) {
+        els.sampleSelect.value = state.demoSampleId;
+      } else {
+        log(`demo sample ${state.demoSampleId} is not listed in _samples/index.json`, "warn");
+        state.demoSampleId = null;
+      }
+    }
+    els.sampleRunBtn.disabled = false;
+    els.sampleStatus.textContent = `${state.samples.length} known sample solution${state.samples.length === 1 ? "" : "s"} available.`;
+    log(`demo mode enabled: loaded ${state.samples.length} sample solution${state.samples.length === 1 ? "" : "s"} from _samples`, "warn");
+  } catch (e) {
+    state.samples = [];
+    els.sampleRunBtn.disabled = true;
+    els.sampleStatus.textContent = `_samples unavailable (${e.message}).`;
+    log(`demo mode enabled, but _samples could not be loaded: ${e.message}`, "warn");
+  }
 }
 
 async function selectScene(id) {
@@ -278,22 +333,31 @@ function runActive() {
   renderRoutine();
 }
 
-async function runReference() {
+async function runSelectedSample() {
+  const sample = state.samples.find(s => s.id === els.sampleSelect.value);
+  if (!sample) {
+    log("no demo sample selected", "warn");
+    return;
+  }
   try {
-    const res = await fetch("./_private/reference_routines.json");
+    const res = await fetch(sample.routines);
     if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
     const bundle = await res.json();
     const issues = validateRoutineBundle(bundle);
     if (issues.length) {
-      for (const i of issues) log(`reference bundle issue: ${i}`, "err");
+      for (const i of issues) log(`sample bundle issue: ${i}`, "err");
       return;
     }
     state.bundle = bundle;
-    els.bundleStatus.textContent = "reference (codex0)";
-    log(`loaded reference bundle: codex0 (10/10 on benchmark + bonus). click 'run scene' or cycle scenes.`, "ok");
+    els.bundleStatus.textContent = `sample:${sample.id}`;
+    els.sampleStatus.textContent = `${sample.label ?? sample.id} loaded from ${sample.routines}`;
+    const scenes = await Promise.all(state.scenes.map(s => loadScene(s.id)));
+    const summary = runBundle(scenes, bundle).summary;
+    log(`loaded demo sample ${sample.id}: ${summary.scenes_passed}/${summary.scenes_total} scenes, ${summary.parts_placed}/${summary.parts_total} parts, ${summary.total_violations} violations`, summary.total_violations ? "warn" : "ok");
     runActive();
   } catch (e) {
-    log(`reference bundle not available (${e.message}). this is expected in shipped kits — _private/ is stripped.`, "err");
+    els.sampleStatus.textContent = `${sample.label ?? sample.id} unavailable (${e.message}).`;
+    log(`demo sample ${sample.id} unavailable: ${e.message}`, "err");
   }
 }
 

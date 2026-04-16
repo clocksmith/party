@@ -52,6 +52,16 @@ header.bar .title {
   letter-spacing: 0.5px;
 }
 
+.mode-pill {
+  color: #1a1a1c;
+  background: #f4c430;
+  border: 1px solid #f4c430;
+  padding: 3px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
 header.bar .scene-select {
   margin-left: auto;
   display: flex;
@@ -73,14 +83,16 @@ header.bar select {
   gap: 8px;
 }
 
-.phase2-controls label {
+.phase2-controls label,
+.demo-panel label {
   display: grid;
   gap: 4px;
   color: var(--ink-dim);
   font-size: 11px;
 }
 
-.phase2-controls select {
+.phase2-controls select,
+.demo-panel select {
   background: #fff;
   color: var(--ink);
   border: 1px solid var(--panel-edge);
@@ -94,6 +106,28 @@ header.bar select {
   color: var(--ink-dim);
   font-size: 11px;
   line-height: 1.4;
+}
+
+.demo-panel {
+  display: grid;
+  gap: 8px;
+  background: #fff8d9;
+}
+
+.demo-panel[hidden] {
+  display: none;
+}
+
+.demo-note {
+  color: #5a4700;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.demo-note code {
+  font-family: var(--mono);
+  background: rgba(0, 0, 0, 0.08);
+  padding: 1px 4px;
 }
 
 .stage {

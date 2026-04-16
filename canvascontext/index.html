@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>canvas context</title>
+    <link rel="stylesheet" href="styles/rd.css">
+    <link rel="stylesheet" href="styles/viz.css">
+  </head>
+  <body>
+
+    <div class="app-container">
+      <div id="sidebar" class="sidebar panel">
+        <h1 class="type-h1">Sequence Autopsy</h1>
+        
+        <div class="type-body">
+          <div class="panel-header">1. The Induction Head Circuit</div>
+          <p class="panel-body">The model demonstrates a mechanistic "Induction Head" circuit rather than reasoning. When predicting the next token in a repetitive sequence like "Canvas Context," the attention head looks back exactly two steps to the previous identical token. It then copies the subsequent token from that history, proving the architecture is executing a literal, dumb copy-paste operation.</p>
+
+          <div class="panel-header">2. Quantifiable Semantic Satiation</div>
+          <p class="panel-body">Semantic satiation is mathematically quantifiable in the attention matrix. As the word "Canvas" repeats, the distinct vector signature dissolves into high-entropy noise. The model loses the ability to distinguish between specific instances of the token, resulting in a "smear" across the context window. This degradation confirms that excessive over-saturation forces the neural net into hallucination.</p>
+
+          <div class="panel-header">3. The Attention Sink Anchor</div>
+          <p class="panel-body">When the context becomes chaotic, the model utilizes an "Attention Sink" mechanism, dumping mass onto the &lt;bos&gt; token. This is a structural necessity of the Softmax function. <br><br><b>The Flicker:</b> If you see a row header blinking, it means the model has lost its Confidence Anchor. It can neither find a relevant past token nor safely dump its attention into &lt;bos&gt;. This "Entropy Flicker" marks the exact transition into pure hallucination.</p>
+
+          <div class="panel-header">Token Signatures & QKV</div>
+          <div class="panel-body">
+            <p>The <b>Fingerprint</b> represents the 3D projection of the token's <b>Query (Q)</b> and <b>Key (K)</b> manifold—the "decision signature" that determines alignment. The <b>Sparkline</b> represents the <b>Value (V)</b>—the actual information content extracted from the hidden state.</p>
+            <br>
+            <p><b>Position vs Identity:</b> Why do identical words have different signatures? The model injects <b>Rotary Positional Embeddings (RoPE)</b> into the hidden states, "bending" the vector space so it can distinguish between the 1st and 8th occurrences. When attention is high, the model is physically mixing these Value signatures into the current token's representation.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="main" class="main-view">
+        <div id="matrix-container">
+          <div class="axis-label label-top">Past Tokens (Key)</div>
+          <div class="axis-label label-left">Current Token (Query)</div>
+          <div id="grid" class="grid"></div>
+        </div>
+
+        <div id="info" class="panel w-full" style="max-width: 800px; display:flex; justify-content:center; margin-bottom: 60px;">
+          <div class="legend">
+            <span>Low</span>
+            <div class="legend-scale"></div>
+            <span>High</span>
+          </div>
+        </div>
+
+        <div id="main-controls" class="panel w-full" style="max-width: 800px; margin-bottom: 60px;">
+          <div class="panel-header">Current Sequence</div>
+          <div class="panel-body">
+            <div id="current-sequence" class="current-sequence">
+              <span class="muted">Empty</span>
+            </div>
+            <div style="display:flex; gap: 10px;">
+              <button id="undo-btn" class="btn btn-ghost w-full">Undo Last Block</button>
+              <button id="reset-btn" class="btn btn-ghost w-full">Clear All</button>
+            </div>
+          </div>
+
+          <div id="append-controls">
+            <div class="panel-header">Append Next Block (2 tokens)</div>
+            <div class="panel-body block-grid">
+              <button class="btn btn-default" onclick="appendBlock('canvas canvas')">CANVAS<br>CANVAS</button>
+              <button class="btn btn-default" onclick="appendBlock('canvas context')">CANVAS<br>CONTEXT</button>
+              <button class="btn btn-default" onclick="appendBlock('context canvas')">CONTEXT<br>CANVAS</button>
+              <button class="btn btn-default" onclick="appendBlock('context context')">CONTEXT<br>CONTEXT</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="vector-viz">
+          <div class="viz-label" id="viz-token-name">Hover Matrix to Inspect Vector Signature</div>
+          <div class="viz-row">
+            <div id="viz-fingerprint" class="fingerprint-box"></div>
+            <div id="viz-sparkline" class="sparkline"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let ATTENTION_DATA = {};
+      let currentSegments = [];
+      const MAX_SEGMENTS = 4; 
+
+      const grid = document.getElementById('grid');
+      const sequenceDisplay = document.getElementById('current-sequence');
+      const resetBtn = document.getElementById('reset-btn');
+      const undoBtn = document.getElementById('undo-btn');
+      
+      const vectorViz = document.getElementById('vector-viz');
+      const vizFingerprint = document.getElementById('viz-fingerprint');
+      const vizSparkline = document.getElementById('viz-sparkline');
+      const vizTokenName = document.getElementById('viz-token-name');
+
+      fetch('tree_attention_data.json')
+        .then(res => res.json())
+        .then(data => {
+          ATTENTION_DATA = data;
+          init();
+        });
+
+      function init() {
+        resetBtn.onclick = reset;
+        undoBtn.onclick = undo;
+        reset();
+      }
+
+      function reset() {
+        currentSegments = [];
+        updateUI();
+        
+        // Initial State: Render a 5x5 empty grid so the axis labels fit perfectly
+        grid.innerHTML = '';
+        grid.style.gridTemplateColumns = `120px repeat(5, 1fr)`;
+        for(let i=0; i<36; i++) { 
+            const cell = document.createElement('div');
+            const rowIdx = Math.floor(i / 6);
+            const colIdx = i % 6;
+            
+            if (rowIdx === 0 && colIdx === 0) {
+                cell.style.background = 'transparent';
+            } else if (rowIdx === 0) {
+                cell.className = 'header-col';
+                cell.style.background = '#111';
+            } else if (colIdx === 0) {
+                cell.className = 'header-row';
+                cell.style.background = '#111';
+            } else {
+                cell.className = 'cell';
+                cell.style.background = '#0a0a0a';
+                cell.style.border = '1px solid #222';
+            }
+            
+            cell.style.height = '60px';
+            if (colIdx > 0) cell.style.width = '60px';
+            grid.appendChild(cell);
+        }
+        
+        vizTokenName.innerText = "Hover Matrix to Inspect Vector Signature";
+        vizFingerprint.style.backgroundColor = '#eee';
+        vizSparkline.innerHTML = '';
+      }
+
+      function undo() {
+        if (currentSegments.length > 0) {
+          currentSegments.pop();
+          updateUI();
+          if (currentSegments.length > 0) renderCurrent();
+          else reset();
+        }
+      }
+
+      function appendBlock(block) {
+        if (currentSegments.length >= MAX_SEGMENTS) return;
+        currentSegments.push(block);
+        updateUI();
+        renderCurrent();
+      }
+
+      function updateUI() {
+        sequenceDisplay.innerHTML = '';
+        if (currentSegments.length === 0) {
+          sequenceDisplay.innerHTML = '<span class="muted">Empty</span>';
+        } else {
+          currentSegments.forEach(s => {
+            const span = document.createElement('span');
+            span.className = 'segment';
+            span.innerText = s;
+            sequenceDisplay.appendChild(span);
+          });
+        }
+        const buttons = document.querySelectorAll('#append-controls .btn');
+        buttons.forEach(b => b.disabled = (currentSegments.length >= MAX_SEGMENTS));
+      }
+
+      function getViridis(t) {
+        t = Math.max(0, Math.min(1, t));
+        const stops = [[68, 1, 84],[59, 82, 139],[33, 145, 140],[94, 201, 98],[253, 231, 37]];
+        const step = 1 / (stops.length - 1);
+        const segment = Math.floor(t / step);
+        const localT = (t - segment * step) / step;
+        const c1 = stops[Math.min(segment, stops.length - 1)];
+        const c2 = stops[Math.min(segment + 1, stops.length - 1)];
+        const r = Math.round(c1[0] + (c2[0] - c1[0]) * localT);
+        const g = Math.round(c1[1] + (c2[1] - c1[1]) * localT);
+        const b = Math.round(c1[2] + (c2[2] - c1[2]) * localT);
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+
+      function showVector(tokenIdx, tokenText, fingerprint, summary) {
+        vizTokenName.innerText = `Token ${tokenIdx} ("${tokenText.trim()}") Vector Signature`;
+        vizFingerprint.style.backgroundColor = `rgb(${fingerprint[0]}, ${fingerprint[1]}, ${fingerprint[2]})`;
+        
+        vizSparkline.innerHTML = '';
+        const min = Math.min(...summary);
+        const max = Math.max(...summary);
+        const range = max - min;
+        
+        summary.forEach(val => {
+          const bar = document.createElement('div');
+          bar.className = 'bar';
+          const height = range > 0 ? ((val - min) / range) * 100 : 50;
+          bar.style.height = `${Math.max(5, height)}%`; 
+          vizSparkline.appendChild(bar);
+        });
+      }
+
+      function renderCurrent() {
+        const fullKey = currentSegments.join(' ');
+        const entry = ATTENTION_DATA[fullKey];
+        if (!entry) return;
+
+        const { tokens, matrix, fingerprints, summaries } = entry;
+        const count = tokens.length;
+
+        grid.innerHTML = '';
+        grid.style.gridTemplateColumns = `120px repeat(${count}, 1fr)`;
+
+        grid.appendChild(document.createElement('div'));
+
+        tokens.forEach((t, i) => {
+          const th = document.createElement('div');
+          th.className = 'header-col';
+          th.innerText = t.replace('Ġ', ' ').replace('Ċ', '\n').trim() || t;
+          th.onmouseenter = () => showVector(i, t, fingerprints[i], summaries[i]);
+          grid.appendChild(th);
+        });
+
+        for (let row = 0; row < count; row++) {
+          const rowValues = matrix[row].slice(0, row + 1);
+          const rowMin = Math.min(...rowValues);
+          const rowMax = Math.max(...rowValues);
+          const range = rowMax - rowMin;
+
+          const rh = document.createElement('div');
+          rh.className = 'header-row';
+          rh.innerText = tokens[row].replace('Ġ', ' ').replace('Ċ', '\n').trim() || tokens[row];
+          
+          if (row > 0 && rowMax < 0.3) {
+            rh.classList.add('lost');
+          }
+
+          rh.onmouseenter = () => showVector(row, tokens[row], fingerprints[row], summaries[row]);
+          grid.appendChild(rh);
+
+          for (let col = 0; col < count; col++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.dataset.row = row;
+            cell.dataset.col = col;
+
+            const val = matrix[row][col];
+            let normVal = 0;
+            if (col <= row) {
+                normVal = range > 0.000001 ? (val - rowMin) / range : (val > 0 ? 1.0 : 0.0);
+            }
+            
+            cell.style.backgroundColor = getViridis(normVal);
+            cell.style.color = normVal > 0.6 ? '#000' : '#fff';
+            
+            if (val > 0.001) {
+              const span = document.createElement('span');
+              span.innerText = val.toFixed(2).replace(/^0+/, '');
+              cell.appendChild(span);
+            }
+
+            if (col > row) {
+              cell.style.background = '#333';
+              cell.style.backgroundImage = 'linear-gradient(45deg, #444 25%, transparent 25%, transparent 75%, #444 75%, #444)';
+              cell.style.backgroundSize = '8px 8px';
+              cell.style.opacity = 0.3;
+            }
+
+            cell.onmouseenter = () => {
+                showVector(col, tokens[col], fingerprints[col], summaries[col]);
+                
+                const qHeaders = document.querySelectorAll('.header-row');
+                const kHeaders = document.querySelectorAll('.header-col');
+                
+                if (qHeaders[row]) qHeaders[row].classList.add('active-query');
+                if (kHeaders[col]) kHeaders[col].classList.add('active-key');
+
+                if (row >= 2 && col >= 2) {
+                    const echo = document.querySelector(`.cell[data-row="${row-2}"][data-col="${col-2}"]`);
+                    if (echo) echo.classList.add('induction-highlight');
+                }
+            };
+
+            cell.onmouseleave = () => {
+                document.querySelectorAll('.header-row').forEach(h => h.classList.remove('active-query'));
+                document.querySelectorAll('.header-col').forEach(h => h.classList.remove('active-key'));
+                document.querySelectorAll('.cell').forEach(c => c.classList.remove('induction-highlight'));
+            };
+
+            grid.appendChild(cell);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,301 @@
+/* Proto Components - rd.css compliant
+   Cards, badges, modals, diff viewer, buttons */
+
+/* Button variants */
+.btn-small {
+  padding: 4px var(--space-sm);
+  background: var(--bg);
+  border: var(--border-sm) solid var(--fg);
+  color: var(--fg);
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--font);
+}
+
+.btn-small:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+/* Status utility classes - use border styles per rd.css */
+.success {
+  border-left: var(--border-lg) solid var(--fg);
+}
+
+.warning {
+  border-left: var(--border-lg) dashed var(--fg);
+}
+
+.error {
+  border-left: var(--border-lg) dashed var(--fg);
+  border-width: var(--border-lg);
+}
+
+/* Cards - extend rd.css .card */
+.card {
+  background: var(--bg);
+  border: var(--border-sm) solid var(--fg);
+  padding: var(--space-md);
+}
+
+.card:hover {
+  border-width: var(--border-md);
+}
+
+.card-header {
+  font-weight: bold;
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: var(--border-sm) solid var(--fg);
+}
+
+.card-body {
+  color: var(--fg);
+  line-height: 1.6;
+}
+
+.card-footer {
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: var(--border-sm) solid var(--fg);
+}
+
+/* Keyboard Hint */
+kbd {
+  background: var(--bg);
+  border: var(--border-sm) solid var(--fg);
+  padding: 2px 6px;
+  font-size: 10px;
+  font-family: var(--font);
+}
+
+/* Confirmation Modal - extend rd.css .modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.modal-content {
+  background: var(--bg);
+  border: var(--border-md) solid var(--fg);
+  min-width: 360px;
+  max-width: 560px;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.modal-content.modal-danger {
+  border-style: dashed;
+  border-width: var(--border-lg);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  border-bottom: var(--border-sm) solid var(--fg);
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-family: var(--font);
+  font-weight: 700;
+}
+
+.modal-content.modal-danger .modal-title {
+  /* Danger indicated by parent border style */
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  font-size: 16px;
+  cursor: pointer;
+  opacity: var(--opacity-soft);
+}
+
+.modal-close:hover {
+  opacity: 1;
+}
+
+.modal-body {
+  padding: var(--space-md);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-top: var(--border-sm) solid var(--fg);
+}
+
+/* Diff Viewer */
+.diff-viewer {
+  background: var(--bg);
+  border: var(--border-md) solid var(--fg);
+  color: var(--fg);
+  font-family: var(--font);
+  padding: var(--space-md);
+}
+
+.diff-header,
+.diff-footer {
+  border-bottom: var(--border-sm) solid var(--fg);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
+}
+
+.diff-footer {
+  border-top: var(--border-sm) solid var(--fg);
+  border-bottom: none;
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.diff-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.diff-files {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.diff-file {
+  background: var(--bg);
+  border: var(--border-sm) solid var(--fg);
+  overflow: hidden;
+}
+
+.diff-file-header {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-sm);
+  border-bottom: var(--border-sm) solid var(--fg);
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.diff-file-info {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Diff operation badges - use border styles */
+.diff-operation {
+  font-size: 11px;
+  padding: 2px var(--space-sm);
+  text-transform: uppercase;
+  font-weight: 700;
+  border: var(--border-sm) solid var(--fg);
+}
+
+.diff-operation.create {
+  /* Solid border = create/add */
+  border-width: var(--border-md);
+}
+
+.diff-operation.modify {
+  /* Dotted border = modify */
+  border-style: dotted;
+}
+
+.diff-operation.delete {
+  /* Dashed border = delete */
+  border-style: dashed;
+}
+
+.diff-file-actions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.side-by-side-diff {
+  display: flex;
+  gap: 2px;
+}
+
+.diff-pane {
+  flex: 1;
+  overflow-x: auto;
+}
+
+.diff-line {
+  display: flex;
+  min-height: 20px;
+}
+
+.diff-line.added {
+  border-left: var(--border-lg) solid var(--fg);
+}
+
+.diff-line.removed {
+  border-left: var(--border-lg) dashed var(--fg);
+  opacity: var(--opacity-soft);
+}
+
+.diff-line.changed {
+  border-left: var(--border-lg) dotted var(--fg);
+}
+
+.line-number {
+  width: 40px;
+  opacity: var(--opacity-soft);
+  text-align: right;
+  padding-right: var(--space-sm);
+  user-select: none;
+}
+
+.code-block {
+  background: var(--bg);
+  padding: var(--space-sm);
+  overflow-x: auto;
+  border: var(--border-sm) solid var(--fg);
+  font-size: 11px;
+}
+
+/* Genesis diff coding (border style variants) */
+.diff-added {
+  border-left: var(--border-lg) solid var(--fg);
+}
+
+.diff-deleted {
+  border-left: var(--border-lg) dashed var(--fg);
+  text-decoration: line-through;
+  opacity: var(--opacity-soft);
+}
+
+.diff-modified {
+  border-left: var(--border-lg) dotted var(--fg);
+}
+
+/* Scrollbar - use rd.css scrollbar (defined in rd.css) */
+
+/* Legacy - deprecated */
+.utility-panel {
+  display: none;
+}
+
+.utility-header {
+  display: none;
+}

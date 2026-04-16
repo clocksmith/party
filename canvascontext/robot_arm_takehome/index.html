@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robot Routine Planner — Simulator</title>
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="bar">
+      <span class="title">ROUTINE PLANNER</span>
+      <span style="color:#888;font-size:11px;">simulator</span>
+      <div class="scene-select">
+        <label for="scene-select" style="color:#aaa;">scene</label>
+        <select id="scene-select"></select>
+      </div>
+    </header>
+
+    <div class="stage">
+      <canvas id="stage"></canvas>
+      <pre id="overlay" class="overlay"></pre>
+    </div>
+
+    <aside class="panel">
+      <section>
+        <h3>routine bundle</h3>
+        <div class="upload">
+          <input type="file" id="bundle-input" accept=".json,application/json" />
+        </div>
+        <div style="font-size:11px;color:var(--ink-dim);margin-top:6px;">loaded: <span id="bundle-status">none</span></div>
+      </section>
+
+      <section>
+        <h3>controls</h3>
+        <div class="controls">
+          <button id="run" class="primary">▶ run scene</button>
+          <button id="pause">■ pause</button>
+          <button id="reset">↩ reset</button>
+        </div>
+        <div class="speed">
+          <span>speed</span>
+          <input type="range" id="speed" min="10" max="240" value="60" />
+          <span class="val" id="speed-val">60x</span>
+        </div>
+        <div class="controls" style="margin-top:8px;">
+          <button id="baseline">▶ run baseline</button>
+          <button id="reference" class="primary" hidden>★ run reference</button>
+          <button id="export-results">⏎ export results.json</button>
+        </div>
+      </section>
+
+      <section>
+        <h3>result</h3>
+        <div class="result" id="result"></div>
+      </section>
+
+      <section>
+        <h3>phase 2 v2</h3>
+        <div class="phase2-controls">
+          <label>
+            family
+            <select id="phase2-family"></select>
+          </label>
+          <label>
+            variant
+            <select id="phase2-scene"></select>
+          </label>
+          <div class="controls">
+            <button id="phase2-load">load variant</button>
+            <button id="phase2-run" class="primary">▶ run v2 in sim</button>
+          </div>
+          <div class="phase2-note" id="phase2-status">loading variants...</div>
+        </div>
+      </section>
+
+      <section>
+        <h3>legend</h3>
+        <div style="font-size:11px;line-height:1.6;color:var(--ink-dim);">
+          <div>● green LED gripper closed</div>
+          <div>○ dim LED gripper open</div>
+          <div>◆ part (color = kind)</div>
+          <div>▣ bin (dashed)</div>
+          <div>■ obstacle (solid black)</div>
+        </div>
+      </section>
+    </aside>
+
+    <div class="bottom-panel">
+      <div class="bottom-tabs">
+        <button type="button" class="tab-btn active" data-tab="log">Log</button>
+        <button type="button" class="tab-btn" data-tab="routine">Routine</button>
+      </div>
+      <div class="tab-body log active" id="log"></div>
+      <div class="tab-body routine-view" id="routine-view"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

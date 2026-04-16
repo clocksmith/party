@@ -1,0 +1,11 @@
+{
+  "name": "robot-routine-planner-takehome",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser-based 2D robot arm simulator and take-home harness.",
+  "scripts": {
+    "serve": "python3 -m http.server 8000",
+    "smoke": "node tests/smoke.mjs"
+  }
+}

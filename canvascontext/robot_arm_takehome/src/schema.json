@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "robot-routine-takehome/schema.json",
+  "title": "Robot Routine Take-home Wire Format",
+  "description": "Canonical formats for scenes and routines. The simulator only consumes these; how you produce them is up to you.",
+  "$defs": {
+    "vec2": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "rect": {
+      "type": "object",
+      "required": ["x", "y", "w", "h"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "w": { "type": "number", "exclusiveMinimum": 0 },
+        "h": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "scene": {
+      "type": "object",
+      "required": ["id", "arm", "parts", "bins"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "world": {
+          "type": "object",
+          "properties": {
+            "x_min": { "type": "number" },
+            "x_max": { "type": "number" },
+            "y_min": { "type": "number" },
+            "y_max": { "type": "number" }
+          }
+        },
+        "arm": {
+          "type": "object",
+          "required": ["base", "links"],
+          "properties": {
+            "base": { "$ref": "#/$defs/vec2" },
+            "links": {
+              "type": "array",
+              "minItems": 2,
+              "items": {
+                "type": "object",
+                "required": ["length"],
+                "properties": {
+                  "length": { "type": "number", "exclusiveMinimum": 0 },
+                  "limit": {
+                    "type": "array",
+                    "items": { "type": "number" },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                }
+              }
+            },
+            "thickness": { "type": "number", "default": 0.015 },
+            "gripper_radius": { "type": "number", "default": 0.04 },
+            "initial_angles": {
+              "type": "array",
+              "items": { "type": "number" }
+            }
+          }
+        },
+        "obstacles": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/rect" }
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "x", "y"],
+            "properties": {
+              "id": { "type": "string" },
+              "x": { "type": "number" },
+              "y": { "type": "number" },
+              "r": { "type": "number", "default": 0.025 },
+              "kind": { "type": "string", "default": "default" },
+              "requires": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Ids of parts that must be placed before this part becomes graspable."
+              }
+            }
+          }
+        },
+        "bins": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "x", "y", "w", "h"],
+            "properties": {
+              "id": { "type": "string" },
+              "x": { "type": "number" },
+              "y": { "type": "number" },
+              "w": { "type": "number", "exclusiveMinimum": 0 },
+              "h": { "type": "number", "exclusiveMinimum": 0 },
+              "accepts": {
+                "oneOf": [
+                  { "type": "string", "const": "any" },
+                  { "type": "array", "items": { "type": "string" } }
+                ],
+                "default": "any"
+              },
+              "capacity": { "type": "integer", "minimum": 1 }
+            }
+          }
+        }
+      }
+    },
+    "step": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "angles"],
+          "properties": {
+            "type": { "const": "move_joint" },
+            "angles": { "type": "array", "items": { "type": "number" } }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "x", "y"],
+          "properties": {
+            "type": { "const": "move_pose" },
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type"],
+          "properties": { "type": { "const": "grip_open" } }
+        },
+        {
+          "type": "object",
+          "required": ["type"],
+          "properties": { "type": { "const": "grip_close" } }
+        },
+        {
+          "type": "object",
+          "required": ["type", "duration"],
+          "properties": {
+            "type": { "const": "wait" },
+            "duration": { "type": "number", "minimum": 0 }
+          }
+        }
+      ]
+    },
+    "routineBundle": {
+      "type": "object",
+      "required": ["scenarios"],
+      "properties": {
+        "candidate": { "type": "string" },
+        "generator": { "type": "string", "description": "Free-form note about how this was produced." },
+        "scenarios": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "steps": { "type": "array", "items": { "$ref": "#/$defs/step" } },
+              "notes": { "type": "string" }
+            },
+            "required": ["steps"]
+          }
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "success": { "type": "boolean" },
+        "termination_reason": {
+          "enum": ["completed", "violation", "step_limit", "ik_failure", "invalid_step"]
+        },
+        "parts_placed": { "type": "integer" },
+        "parts_total": { "type": "integer" },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["kind", "step_index"],
+            "properties": {
+              "kind": {
+                "enum": ["collision_obstacle", "collision_self", "collision_floor",
+                         "joint_limit", "ik_no_converge", "carry_collision",
+                         "double_grip", "drop_outside_bin", "bin_rejects",
+                         "bin_full", "step_limit", "invalid_target",
+                         "precedence_violation"]
+              },
+              "step_index": { "type": "integer" },
+              "detail": { "type": "string" }
+            }
+          }
+        },
+        "elapsed_micro_steps": { "type": "integer" },
+        "path_length": { "type": "number" }
+      }
+    }
+  }
+}

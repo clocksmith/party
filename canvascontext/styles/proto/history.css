@@ -1,0 +1,229 @@
+/* Proto History - rd.css compliant
+   History stream, reflections, arena results */
+
+/* History/Reflections Streams */
+.history-stream, .reflections-stream {
+  font-size: 11px;
+  line-height: 1.6;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.history-stream {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.reflections-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* History Entries */
+.history-entry {
+  margin-bottom: var(--space-md);
+  border: var(--border-sm) solid var(--fg);
+  overflow: hidden;
+}
+
+.history-header {
+  background: var(--bg);
+  padding: var(--space-sm) var(--space-md);
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: var(--border-sm) solid var(--fg);
+}
+
+.history-content {
+  margin: 0;
+  padding: var(--space-md);
+  font-size: 11px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Streaming animation - use dotted border for streaming state */
+.history-entry.streaming {
+  border-style: dotted;
+}
+
+.history-entry.streaming .history-header::after {
+  content: ' ...';
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: var(--opacity-soft); }
+}
+
+/* History Actions */
+.history-actions {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: var(--border-sm) dotted var(--fg);
+}
+
+/* Error state - dashed border */
+.history-error {
+  border-style: dashed;
+  border-width: var(--border-md);
+}
+
+/* Error Badge */
+.error-badge {
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 11px;
+  padding: 2px 6px;
+  margin-left: var(--space-sm);
+  text-transform: uppercase;
+  font-weight: bold;
+  border: var(--border-sm) dashed var(--fg);
+}
+
+/* Reflection Entries */
+.reflection-entry {
+  padding: var(--space-sm);
+  margin-bottom: 4px;
+  border-left: var(--border-lg) solid transparent;
+}
+
+/* Success = solid border */
+.reflection-success {
+  border-left-color: var(--fg);
+}
+
+/* Error = dashed border */
+.reflection-error {
+  border-left-style: dashed;
+  border-left-color: var(--fg);
+}
+
+.reflection-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 12px;
+}
+
+.reflection-icon {
+  font-weight: bold;
+}
+
+.reflection-tool {
+  font-weight: 600;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reflection-cycle {
+  opacity: var(--opacity-soft);
+  font-size: 11px;
+}
+
+.reflection-detail {
+  margin-top: 4px;
+  font-size: 11px;
+  opacity: var(--opacity-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Arena Results */
+.arena-result {
+  border-left: var(--border-lg) solid var(--fg);
+}
+
+.arena-header {
+  background: var(--bg);
+  font-weight: 700;
+}
+
+.arena-solutions {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.arena-solution {
+  padding: var(--space-sm);
+  border: var(--border-sm) solid var(--fg);
+  background: var(--bg);
+}
+
+/* Winner = elevated border */
+.arena-solution.arena-winner {
+  border-width: var(--border-md);
+}
+
+.arena-solution-header {
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.winner-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Log Container */
+.log-container {
+  height: calc(100% - 30px);
+  overflow-y: auto;
+  font-family: var(--font);
+  font-size: 12px;
+  background: var(--bg);
+  padding: var(--space-md);
+  border: var(--border-sm) solid var(--fg);
+}
+
+.log-entry {
+  padding: 4px 0;
+  border-bottom: var(--border-sm) dotted var(--fg);
+}
+
+/* Log levels - use opacity and border styles */
+.log-info {
+  /* default */
+}
+
+.log-warn {
+  border-left: var(--border-md) dashed var(--fg);
+  padding-left: var(--space-sm);
+}
+
+.log-error {
+  border-left: var(--border-lg) dashed var(--fg);
+  padding-left: var(--space-sm);
+}
+
+.log-debug {
+  opacity: var(--opacity-soft);
+}
+
+/* Agent Status */
+#agent-status-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}

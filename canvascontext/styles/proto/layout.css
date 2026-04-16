@@ -1,0 +1,233 @@
+/* Proto Layout - rd.css compliant
+   App shell, grid, sidebar, workspace */
+
+#app {
+  display: none;
+}
+
+#app.active {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-shell {
+  --vfs-panel-width: 240px;
+  display: grid;
+  grid-template-columns: 50px var(--vfs-panel-width) 1fr;
+  height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  overflow: hidden;
+}
+
+.app-shell[data-vfs-width="0"] {
+  --vfs-panel-width: 0%;
+}
+
+.app-shell[data-vfs-width="25"] {
+  --vfs-panel-width: 25%;
+}
+
+.app-shell[data-vfs-width="50"] {
+  --vfs-panel-width: 50%;
+}
+
+.app-shell[data-vfs-width="0"] .vfs-browser-panel {
+  display: none;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-right: var(--border-sm) solid var(--fg);
+  padding: var(--space-sm) 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.sidebar-btn {
+  position: relative;
+  width: 100%;
+  height: 40px;
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  opacity: var(--opacity-soft);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.sidebar-btn:hover {
+  background: var(--fg);
+  color: var(--bg);
+  opacity: 1;
+}
+
+.sidebar-btn.active {
+  background: var(--fg);
+  color: var(--bg);
+  opacity: 1;
+  border-left: var(--border-md) solid var(--bg);
+}
+
+.sidebar-spacer {
+  flex: 1;
+}
+
+/* Main Workspace */
+.workspace {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  position: relative;
+}
+
+.workspace-header {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: var(--border-sm) solid var(--fg);
+  background: var(--bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.workspace-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-md);
+  min-height: 0;
+}
+
+.workspace-title {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  font-size: 13px;
+  overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.workspace-title .goal-text {
+  flex: 1;
+  max-height: 2.8em;
+  line-height: 1.4;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.workspace-title .goal-text::-webkit-scrollbar {
+  display: none;
+}
+
+.workspace-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 13px;
+}
+
+/* Proto Container (legacy) */
+.proto-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  overflow: hidden;
+}
+
+/* Dashboard Layout */
+.dashboard-header {
+  padding: var(--space-lg);
+  border-bottom: var(--border-sm) solid var(--fg);
+  background: var(--bg);
+}
+
+.dashboard-header h1 {
+  margin: 0 0 var(--space-sm) 0;
+  font-size: 20px;
+}
+
+.dashboard-main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.panel {
+  flex: 1;
+  padding: var(--space-lg);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.left-panel {
+  border-right: var(--border-sm) solid var(--fg);
+}
+
+.right-panel {
+  background: var(--bg);
+}
+
+/* Controls */
+.status-bar {
+  font-size: 12px;
+  opacity: var(--opacity-soft);
+  margin-bottom: var(--space-md);
+}
+
+.controls {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.controls input {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg);
+  border: var(--border-sm) solid var(--fg);
+  color: var(--fg);
+  font-size: 14px;
+  font-family: var(--font);
+}
+
+.controls input:focus {
+  outline: none;
+  border-width: var(--border-md);
+}
+
+.controls button {
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--bg);
+  border: var(--border-sm) solid var(--fg);
+  color: var(--fg);
+  cursor: pointer;
+  font-weight: 600;
+  font-family: var(--font);
+}
+
+.controls button:hover:not(:disabled) {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.controls button:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RD Design System — 256one canvascontext</title>
+  <link rel="stylesheet" href="styles/rd.css">
+  <style>
+    .design-page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-xl) var(--space-md);
+    }
+    .design-header {
+      margin-bottom: var(--space-xl);
+    }
+    .design-header h1 {
+      font-size: var(--font-size-display);
+      font-weight: var(--font-weight-light);
+      line-height: var(--font-leading-tight);
+      letter-spacing: var(--font-tracking-display);
+      margin: 0 0 var(--space-sm) 0;
+    }
+    .design-header p {
+      opacity: var(--opacity-soft);
+      margin: 0;
+    }
+    .design-section {
+      margin-bottom: var(--space-xl);
+    }
+    .design-section h2 {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      text-transform: uppercase;
+      letter-spacing: var(--font-tracking-label);
+      border-bottom: var(--border-sm) solid var(--fg);
+      padding-bottom: var(--space-sm);
+      margin-bottom: var(--space-lg);
+    }
+    .design-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+      align-items: center;
+    }
+    .design-label {
+      font-size: var(--font-size-sm);
+      opacity: var(--opacity-soft);
+      margin-bottom: var(--space-sm);
+    }
+    .design-group {
+      margin-bottom: var(--space-lg);
+    }
+    .token {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) 0;
+      font-size: var(--font-size-base);
+    }
+    .token-swatch {
+      width: var(--space-lg);
+      height: var(--space-lg);
+      border: var(--border-md) solid var(--fg);
+    }
+    .token-swatch.fg { background: var(--fg); }
+    .token-swatch.bg { background: var(--bg); }
+    .token-scale {
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-xs);
+    }
+    .token-scale-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-xxs);
+      font-size: var(--font-size-xs);
+      opacity: var(--opacity-soft);
+    }
+    .token-scale-bar {
+      background: var(--fg);
+    }
+  </style>
+</head>
+<body>
+  <div class="design-page">
+    <header class="design-header">
+      <h1>RD &mdash; 256one canvascontext</h1>
+      <p>Subset: panels, buttons, accordion, progress, status indicators, badges</p>
+    </header>
+
+    <!-- ========== LAYER 1: TOKENS ========== -->
+
+    <section class="design-section">
+      <h2>Layer 1 &mdash; Tokens</h2>
+
+      <div class="design-group">
+        <div class="design-label">Colors</div>
+        <div class="design-row">
+          <div class="token"><div class="token-swatch fg"></div> --fg #000000</div>
+          <div class="token"><div class="token-swatch bg"></div> --bg #FFFFFF</div>
+          <div class="token"><div class="token-swatch" style="background: conic-gradient(#ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0080ff, #8000ff, #ff0080, #ff0000);"></div> --prism</div>
+        </div>
+      </div>
+
+      <div class="design-group">
+        <div class="design-label">Font</div>
+        <div class="token">--font: SF Mono / Menlo / Consolas / DejaVu Sans Mono</div>
+      </div>
+
+      <div class="design-group">
+        <div class="design-label">Font Sizes &mdash; 7-step ~1.2x scale</div>
+        <div class="token-scale">
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 20px; height: 10px;"></div>xs 10</div>
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 20px; height: 12px;"></div>sm 12</div>
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 20px; height: 15px;"></div>base 15</div>
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 20px; height: 18px;"></div>lg 18</div>
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 20px; height: 22px;"></div>xl 22</div>
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 20px; height: 26px;"></div>2xl 26</div>
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 20px; height: 32px;"></div>display 32</div>
+        </div>
+      </div>
+
+      <div class="design-group">
+        <div class="design-label">Spacing &mdash; base-8 scale</div>
+        <div class="token-scale">
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 2px; height: 16px;"></div>xxs 2</div>
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 4px; height: 16px;"></div>xs 4</div>
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 8px; height: 16px;"></div>sm 8</div>
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 16px; height: 16px;"></div>md 16</div>
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 24px; height: 16px;"></div>lg 24</div>
+          <div class="token-scale-step"><div class="token-scale-bar" style="width: 32px; height: 16px;"></div>xl 32</div>
+        </div>
+      </div>
+
+      <div class="design-group">
+        <div class="design-label">Border Widths</div>
+        <div class="design-row">
+          <div class="token" style="border-bottom: 0.5px solid var(--fg); padding-bottom: var(--space-xs);">--border-sm: 0.5px</div>
+          <div class="token" style="border-bottom: 1px solid var(--fg); padding-bottom: var(--space-xs);">--border-md: 1px</div>
+          <div class="token" style="border-bottom: 2px solid var(--fg); padding-bottom: var(--space-xs);">--border-lg: 2px</div>
+        </div>
+      </div>
+
+      <div class="design-group">
+        <div class="design-label">Opacity</div>
+        <div class="design-row">
+          <div class="token" style="opacity: var(--opacity-soft);">--opacity-soft: 0.777</div>
+          <div class="token" style="opacity: var(--opacity-disabled);">--opacity-disabled: 0.444</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== LAYER 2: PRIMITIVES ========== -->
+
+    <section class="design-section">
+      <h2>Layer 2 &mdash; Primitives</h2>
+
+      <div class="design-group">
+        <div class="design-label">Typography &mdash; type classes</div>
+        <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+          <div><span class="design-label" style="display: inline;">.type-display</span><div class="type-display">Welcome to the Future</div></div>
+          <div><span class="design-label" style="display: inline;">.type-h1</span><div class="type-h1" style="margin-bottom: 0;">Primary Heading</div></div>
+          <div><span class="design-label" style="display: inline;">.type-h2</span><div class="type-h2">Secondary Heading</div></div>
+          <div><span class="design-label" style="display: inline;">.type-body</span><div class="type-body">Body text for paragraphs and readable content.</div></div>
+          <div><span class="design-label" style="display: inline;">.type-label</span><div class="type-label">Status</div></div>
+          <div><span class="design-label" style="display: inline;">.type-caption</span><div class="type-caption">Last updated 2 hours ago</div></div>
+        </div>
+      </div>
+
+      <div class="design-group">
+        <div class="design-label">Border utilities</div>
+        <div class="design-row" style="flex-wrap: wrap;">
+          <div class="border-default" style="padding: var(--space-sm) var(--space-md);">.border-default</div>
+          <div class="border-subtle" style="padding: var(--space-sm) var(--space-md);">.border-subtle</div>
+          <div class="border-ghost" style="padding: var(--space-sm) var(--space-md);">.border-ghost</div>
+          <div class="border-warning" style="padding: var(--space-sm) var(--space-md);">.border-warning</div>
+          <div class="border-error" style="padding: var(--space-sm) var(--space-md);">.border-error</div>
+        </div>
+      </div>
+
+      <div class="design-group">
+        <div class="design-label">States &amp; utilities</div>
+        <div class="design-row">
+          <span class="soft">.soft (0.777)</span>
+          <span class="inverted" style="padding: var(--space-xs) var(--space-sm);">.inverted</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== LAYER 3: COMPONENTS ========== -->
+
+    <section class="design-section">
+      <h2>Layer 3 &mdash; Components</h2>
+      <p class="design-label" style="margin-bottom: var(--space-lg);">Subset for 256one canvascontext &mdash; panels, buttons, accordion, progress, status, badges.</p>
+    </section>
+
+    <!-- PANELS -->
+    <section class="design-section">
+      <h2>Panel</h2>
+      <p class="design-label">Variants: default, soft | With optional header</p>
+      <div class="design-row" style="align-items: stretch;">
+        <div class="panel" style="flex: 1;">
+          <div class="panel-body">Default panel</div>
+        </div>
+        <div class="panel panel-soft" style="flex: 1;">
+          <div class="panel-body">Soft panel (0.777 opacity)</div>
+        </div>
+      </div>
+      <div class="design-group" style="margin-top: var(--space-md);">
+        <div class="panel" style="max-width: 300px; padding: 0;">
+          <div class="panel-header">Panel Title</div>
+          <div class="panel-body">Panel body content.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BUTTONS -->
+    <section class="design-section">
+      <h2>Button</h2>
+      <p class="design-label">Variants: secondary (default), ghost | States: hover, active, disabled</p>
+      <div class="design-row">
+        <button class="btn">Secondary</button>
+        <button class="btn btn-ghost">Ghost</button>
+      </div>
+      <div class="design-row">
+        <button class="btn" disabled>Disabled</button>
+      </div>
+    </section>
+
+    <!-- ACCORDION -->
+    <section class="design-section">
+      <h2>Accordion</h2>
+      <p class="design-label">Variants: default (solid), ghost (dotted) | aria-expanded toggles state</p>
+      <div class="design-row" style="align-items: flex-start; gap: var(--space-lg);">
+        <div class="accordion" style="flex: 1; max-width: 300px;">
+          <div class="accordion-item">
+            <button class="accordion-header" aria-expanded="true">Section one</button>
+            <div class="accordion-content" aria-hidden="false">Content for section one. Visible when aria-expanded is true.</div>
+          </div>
+          <div class="accordion-item">
+            <button class="accordion-header" aria-expanded="false">Section two</button>
+            <div class="accordion-content" aria-hidden="true">Content for section two.</div>
+          </div>
+          <div class="accordion-item">
+            <button class="accordion-header" aria-expanded="false">Section three</button>
+            <div class="accordion-content" aria-hidden="true">Content for section three.</div>
+          </div>
+        </div>
+        <div class="accordion accordion-ghost" style="flex: 1; max-width: 300px;">
+          <div class="accordion-item">
+            <button class="accordion-header" aria-expanded="true">Ghost variant</button>
+            <div class="accordion-content" aria-hidden="false">Dotted borders throughout.</div>
+          </div>
+          <div class="accordion-item">
+            <button class="accordion-header" aria-expanded="false">Collapsed</button>
+            <div class="accordion-content" aria-hidden="true">Hidden content.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROGRESS -->
+    <section class="design-section">
+      <h2>Progress</h2>
+      <div class="design-group">
+        <div class="design-label">Determinate (60%)</div>
+        <div class="progress" style="max-width: 300px;">
+          <div class="progress-fill" style="width: 60%;"></div>
+        </div>
+      </div>
+      <div class="design-group">
+        <div class="design-label">Indeterminate</div>
+        <div class="progress progress-indeterminate" style="max-width: 300px;">
+          <div class="progress-fill"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATUS LIST -->
+    <section class="design-section">
+      <h2>Status Indicators</h2>
+      <p class="design-label">Border style encodes status: solid=ready, dotted=pending, dashed=warn, double=error</p>
+      <div class="status-list" style="max-width: 500px;">
+        <div class="status-row ready">
+          <div class="status-meta">
+            <span class="status-label">Core module</span>
+            <span class="status-detail">v2.1.0 loaded</span>
+          </div>
+          <span class="status-badge ready">Ready</span>
+        </div>
+        <div class="status-row pending">
+          <div class="status-meta">
+            <span class="status-label">Worker pool</span>
+            <span class="status-detail">Initializing 4 threads</span>
+          </div>
+          <span class="status-badge pending">Pending</span>
+        </div>
+        <div class="status-row warn">
+          <div class="status-meta">
+            <span class="status-label">Cache layer</span>
+            <span class="status-detail">Stale data detected</span>
+          </div>
+          <span class="status-badge warn">Warn</span>
+        </div>
+        <div class="status-row error">
+          <div class="status-meta">
+            <span class="status-label">Network</span>
+            <span class="status-detail">Connection refused</span>
+          </div>
+          <span class="status-badge error">Error</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- BADGES -->
+    <section class="design-section">
+      <h2>Badge</h2>
+      <div class="design-row">
+        <span class="badge">Outline</span>
+        <span class="badge badge-filled">Filled</span>
+      </div>
+    </section>
+
+    <footer style="margin-top: var(--space-xl); padding-top: var(--space-md); border-top: var(--border-sm) solid var(--fg); opacity: var(--opacity-soft); font-size: var(--font-size-sm);">
+      RD Design System &mdash; 256one canvascontext subset
+    </footer>
+  </div>
+
+  <script>
+    // Accordion interaction
+    document.querySelectorAll('.accordion-header').forEach(function(header) {
+      header.addEventListener('click', function() {
+        var expanded = header.getAttribute('aria-expanded') === 'true';
+        var content = header.nextElementSibling;
+        header.setAttribute('aria-expanded', String(!expanded));
+        content.setAttribute('aria-hidden', String(expanded));
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "id": "p2_precedence_example",
+  "world": { "x_min": -1.0, "x_max": 1.0, "y_min": -0.05, "y_max": 0.9 },
+  "arm": {
+    "base": [0, 0],
+    "thickness": 0.018,
+    "gripper_radius": 0.04,
+    "initial_angles": [0.9, 0.8, 0.3],
+    "links": [
+      { "length": 0.4, "limit": [-0.3, 3.14] },
+      { "length": 0.3, "limit": [-2.6, 2.6] },
+      { "length": 0.2, "limit": [-2.6, 2.6] }
+    ]
+  },
+  "obstacles": [],
+  "parts": [
+    { "id": "p1", "x": 0.72, "y": 0.10, "r": 0.026, "kind": "a", "requires": [] },
+    { "id": "p2", "x": 0.52, "y": 0.10, "r": 0.026, "kind": "b", "requires": [] },
+    { "id": "p3", "x": 0.34, "y": 0.16, "r": 0.026, "kind": "a", "requires": ["p1"] },
+    { "id": "p4", "x": 0.62, "y": 0.27, "r": 0.026, "kind": "b", "requires": ["p1", "p2"] },
+    { "id": "p5", "x": 0.42, "y": 0.31, "r": 0.026, "kind": "c", "requires": ["p3", "p4"] }
+  ],
+  "bins": [
+    { "id": "bin_a", "x": -0.84, "y": 0.02, "w": 0.18, "h": 0.12, "accepts": ["a"], "capacity": 2 },
+    { "id": "bin_b", "x": -0.56, "y": 0.02, "w": 0.18, "h": 0.12, "accepts": ["b"], "capacity": 2 },
+    { "id": "bin_c", "x": -0.30, "y": 0.02, "w": 0.16, "h": 0.12, "accepts": ["c"], "capacity": 1 }
+  ]
+}

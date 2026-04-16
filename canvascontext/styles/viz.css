@@ -1,0 +1,225 @@
+
+/* Specific styles for Canvas Context Viz
+   Keeps logic for the attention matrix and specific visualizers 
+   while deferring layout to RD system.
+*/
+
+/* Layout Overrides specific to this app's 2-pane need */
+/* We use a simple flex layout for the main container */
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.sidebar {
+  width: 550px;
+  border-right: var(--border-md) solid var(--fg);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.main-view {
+  flex: 1;
+  padding: 48px var(--space-lg) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+/* Matrix Specifics */
+#matrix-container {
+  position: relative;
+  border: var(--border-md) solid var(--fg);
+  padding: var(--space-md);
+  background: var(--bg);
+  margin-bottom: 30px;
+}
+
+.grid {
+  display: grid;
+  gap: 2px;
+  background: var(--fg); /* Gap color */
+  border: 2px solid var(--fg);
+}
+
+.header-col, .header-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--fg);
+  background: var(--bg);
+  padding: var(--space-sm);
+  transition: background 0.2s, color 0.2s;
+}
+
+.header-col {
+  writing-mode: vertical-lr; 
+  transform: rotate(180deg);
+  height: 100px;
+  border-bottom: var(--border-sm) solid var(--fg);
+}
+
+.header-row {
+  width: 120px;
+  justify-content: flex-end;
+  padding-right: var(--space-md);
+  border-right: var(--border-sm) solid var(--fg);
+}
+
+.cell {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: crosshair;
+}
+
+.cell:hover {
+  z-index: 10;
+  outline: 2px solid var(--fg);
+}
+
+.induction-highlight {
+  outline: 2px dashed var(--fg);
+  z-index: 9;
+}
+
+@keyframes flicker {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.lost {
+  animation: flicker 0.8s infinite;
+  color: #ff0055 !important;
+  font-weight: bold;
+}
+
+.active-query {
+  background: var(--fg) !important;
+  color: var(--bg) !important;
+}
+
+.active-key {
+  background: var(--fg) !important;
+  color: var(--bg) !important;
+}
+
+.axis-label {
+  position: absolute;
+  font-family: var(--font);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fg);
+  opacity: 0.5;
+}
+.label-top { top: -25px; width: 100%; text-align: center; left: 60px; }
+.label-left { left: -45px; height: 100%; writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; top: 80px; }
+
+/* Sequence Builder specific */
+.current-sequence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm);
+  border: var(--border-sm) dotted var(--fg);
+  min-height: 40px;
+}
+
+.segment {
+  padding: 4px 8px;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.block-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+/* Vector Viz Specific */
+#vector-viz {
+  margin-top: 20px;
+  padding: var(--space-md);
+  border: var(--border-sm) solid var(--fg);
+  background: #fff;
+  color: #000;
+  width: 100%;
+  max-width: 800px;
+  min-height: 120px;
+  box-shadow: 10px 10px 0 rgba(0,0,0,0.1);
+}
+
+.viz-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.fingerprint-box {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #000;
+  background: #eee;
+}
+
+.sparkline {
+  flex: 1;
+  height: 60px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: 5px;
+}
+
+.bar {
+  flex: 1;
+  background: #000;
+  min-height: 2px;
+}
+
+.viz-label {
+  font-family: var(--font);
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 10px;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font);
+  font-size: 11px;
+}
+.legend-scale {
+  display: flex;
+  height: 12px;
+  width: 100px;
+  border: 1px solid var(--fg);
+  background: linear-gradient(to right, #440154, #3b528b, #21918c, #5ec962, #fde725);
+}

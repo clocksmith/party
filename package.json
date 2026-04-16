@@ -18,7 +18,9 @@
     "discover": "node cli/dmx-cli.js discover",
     "setup": "node cli/dmx-cli.js setup",
     "control": "node cli/dmx-cli.js control",
-    "pattern-editor": "node cli/pattern-editor-cli.js"
+    "pattern-editor": "node cli/pattern-editor-cli.js",
+    "preview:canvascontext": "firebase hosting:channel:deploy preview --config firebase.canvascontext.json --project canvascontext-9da05",
+    "deploy:canvascontext": "firebase deploy --config firebase.canvascontext.json --project canvascontext-9da05 --only hosting"
   },
   "keywords": ["dmx", "dmx512", "laser", "lighting", "control", "serial"],
   "author": "",

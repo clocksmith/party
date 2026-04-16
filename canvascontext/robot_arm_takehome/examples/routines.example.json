@@ -1,0 +1,15 @@
+{
+  "candidate": "example (hand-authored for 01_warmup only)",
+  "generator": "hand-authored",
+  "scenarios": {
+    "01_warmup": {
+      "notes": "Demonstrates the wire format on the simplest scene.",
+      "steps": [
+        { "type": "move_pose", "x": 0.5, "y": 0.06 },
+        { "type": "grip_close" },
+        { "type": "move_pose", "x": -0.54, "y": 0.08 },
+        { "type": "grip_open" }
+      ]
+    }
+  }
+}

@@ -1,0 +1,421 @@
+/* Proto VFS - rd.css compliant
+   Browser, Tree, Content, Editor */
+
+/* VFS Browser Panel (middle column) */
+.vfs-browser-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border-right: var(--border-sm) solid var(--fg);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.vfs-browser-panel.collapsed {
+  width: 40px;
+  min-width: 40px;
+}
+
+.vfs-browser-header {
+  padding: var(--space-md);
+  border-bottom: var(--border-sm) solid var(--fg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  opacity: var(--opacity-soft);
+  flex-shrink: 0;
+}
+
+.vfs-tree {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-sm);
+  font-size: 12px;
+}
+
+.vfs-tree .vfs-dir {
+  font-weight: 600;
+  margin-top: 4px;
+  cursor: pointer;
+  padding: 2px var(--space-sm);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vfs-tree .vfs-dir:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.vfs-tree .vfs-file {
+  padding: 2px var(--space-sm);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.vfs-tree .vfs-file:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+/* VFS File selected state */
+.vfs-tree .vfs-file.selected,
+.vfs-item.vfs-file.selected {
+  background: var(--fg);
+  color: var(--bg);
+  border-left: var(--border-md) solid var(--fg);
+  font-weight: 500;
+}
+
+/* VFS Search highlight - dotted border */
+.vfs-tree .vfs-file.highlight,
+.vfs-item.vfs-file.highlight {
+  border-left: var(--border-md) dotted var(--fg);
+}
+
+.vfs-tree .vfs-file.highlight.selected,
+.vfs-item.vfs-file.highlight.selected {
+  background: var(--fg);
+  color: var(--bg);
+  border-left: var(--border-md) solid var(--fg);
+}
+
+/* VFS File state icon */
+.vfs-state-icon {
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: 4px;
+  padding: 0 3px;
+  line-height: 1;
+}
+
+/* VFS File modification indicators - use border styles */
+.vfs-tree .vfs-file-created,
+.vfs-item.vfs-file-created {
+  border-left: var(--border-lg) solid var(--fg);
+  font-weight: 500;
+}
+
+.vfs-file-created .vfs-state-icon {
+  border: var(--border-sm) solid var(--fg);
+}
+
+.vfs-tree .vfs-file-modified,
+.vfs-item.vfs-file-modified {
+  border-left: var(--border-lg) dotted var(--fg);
+  font-weight: 500;
+}
+
+.vfs-file-modified .vfs-state-icon {
+  border: var(--border-sm) dotted var(--fg);
+}
+
+.vfs-tree .vfs-file-deleted,
+.vfs-item.vfs-file-deleted {
+  border-left: var(--border-lg) dashed var(--fg);
+  text-decoration: line-through;
+  opacity: var(--opacity-soft);
+}
+
+.vfs-file-deleted .vfs-state-icon {
+  border: var(--border-sm) dashed var(--fg);
+}
+
+@keyframes vfs-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: var(--opacity-soft); }
+}
+
+@keyframes vfs-fade-out {
+  0% { opacity: var(--opacity-soft); }
+  70% { opacity: var(--opacity-soft); }
+  100% { opacity: 0; }
+}
+
+.vfs-dir-icon {
+  font-size: 11px;
+  opacity: var(--opacity-soft);
+  width: 12px;
+}
+
+/* VFS Search */
+.vfs-search-container {
+  padding: var(--space-sm);
+  border-bottom: var(--border-sm) solid var(--fg);
+  flex-shrink: 0;
+}
+
+.vfs-search-input {
+  width: 100%;
+  padding: var(--space-sm);
+  background: var(--bg);
+  border: var(--border-sm) solid var(--fg);
+  color: var(--fg);
+  font-size: 12px;
+  font-family: var(--font);
+}
+
+.vfs-search-input:focus {
+  outline: none;
+  border-width: var(--border-md);
+}
+
+/* VFS Width Control (workspace header) */
+.vfs-width-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.vfs-width-label {
+  opacity: var(--opacity-soft);
+}
+
+.vfs-width-select {
+  background: var(--bg);
+  color: var(--fg);
+  border: var(--border-sm) solid var(--fg);
+  padding: 2px 6px;
+  font-family: var(--font);
+  font-size: 11px;
+}
+
+.vfs-width-select:focus {
+  outline: none;
+  border-width: var(--border-md);
+}
+
+/* VFS Content (in workspace) */
+.vfs-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  font-size: 12px;
+  overflow: hidden;
+  padding: var(--space-md);
+  min-height: 0;
+}
+
+.vfs-content.hidden {
+  display: none;
+}
+
+.vfs-file-path {
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+  padding-bottom: 4px;
+  border-bottom: var(--border-sm) dotted var(--fg);
+}
+
+/* VFS Content Header with Actions */
+.vfs-content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  border-bottom: var(--border-sm) dotted var(--fg);
+}
+
+.vfs-content-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.vfs-content-body {
+  overflow: auto;
+  flex: 1;
+}
+
+.vfs-content-body pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--fg);
+}
+
+/* VFS Editor */
+.vfs-editor {
+  width: 100%;
+  min-height: 200px;
+  flex: 1;
+  background: var(--bg);
+  border: var(--border-sm) solid var(--fg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: 13px;
+  padding: var(--space-sm);
+  resize: vertical;
+}
+
+.vfs-editor:focus {
+  border-width: var(--border-md);
+  outline: none;
+}
+
+/* VFS Browser Collapsed State (desktop) */
+.vfs-browser-panel.collapsed .vfs-browser-header {
+  justify-content: center;
+  padding: var(--space-sm);
+}
+
+/* VFS Preview, Diff, and Snapshot Panels */
+.vfs-preview-panel,
+.vfs-diff-panel,
+.vfs-snapshot-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.vfs-preview-panel.hidden,
+.vfs-diff-panel.hidden,
+.vfs-snapshot-panel.hidden {
+  display: none;
+}
+
+.vfs-preview-header,
+.vfs-diff-header,
+.vfs-snapshot-header {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg);
+  border-bottom: var(--border-sm) solid var(--fg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+#vfs-preview-iframe {
+  flex: 1;
+  border: none;
+  width: 100%;
+  background: var(--bg);
+}
+
+#vfs-diff-content,
+#vfs-snapshot-timeline {
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-md);
+}
+
+#vfs-snapshot-viewer {
+  flex: 1;
+  overflow: auto;
+  border-top: var(--border-sm) solid var(--fg);
+  padding: var(--space-md);
+}
+
+/* Snapshot timeline */
+.snapshot-item {
+  padding: var(--space-sm);
+  margin-bottom: var(--space-sm);
+  background: var(--bg);
+  border: var(--border-sm) solid var(--fg);
+  cursor: pointer;
+}
+
+.snapshot-item:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.snapshot-item.active {
+  border-width: var(--border-md);
+}
+
+.snapshot-timestamp {
+  font-size: 11px;
+  opacity: var(--opacity-soft);
+}
+
+.snapshot-stats {
+  font-size: 11px;
+  opacity: var(--opacity-soft);
+  margin-top: 4px;
+}
+
+.snapshot-actions {
+  margin-top: var(--space-sm);
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.snapshot-actions .btn {
+  font-size: 11px;
+  padding: 4px var(--space-sm);
+}
+
+/* Diff Content Styles */
+.diff-header {
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: var(--border-sm) solid var(--fg);
+}
+
+.diff-stats {
+  font-size: 11px;
+  opacity: var(--opacity-soft);
+  margin-bottom: var(--space-md);
+}
+
+.diff-content {
+  font-family: var(--font);
+  font-size: 11px;
+  line-height: 1.5;
+  background: var(--bg);
+  border: var(--border-sm) solid var(--fg);
+  padding: var(--space-md);
+  overflow: auto;
+}
+
+.diff-same {
+  opacity: var(--opacity-soft);
+}
+
+/* Diff add/del - use border left styles */
+.diff-add {
+  border-left: var(--border-lg) solid var(--fg);
+  display: block;
+  padding-left: var(--space-sm);
+}
+
+.diff-del {
+  border-left: var(--border-lg) dashed var(--fg);
+  display: block;
+  padding-left: var(--space-sm);
+  text-decoration: line-through;
+  opacity: var(--opacity-soft);
+}
+
+/* Snapshot List Styles */
+.snapshot-name {
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.snapshot-date {
+  font-size: 11px;
+  opacity: var(--opacity-soft);
+  margin-right: var(--space-md);
+}
+
+.snapshot-files {
+  font-size: 11px;
+}

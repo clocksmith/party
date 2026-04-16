@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "required": ["01_warmup", "02_row", "03_kinds", "04_wall", "05_maze", "06_combined"],
+  "stretch": ["07_precedence", "08_dense"],
+  "bonus": ["09_precedence_wall", "10_capacity_trap"],
+  "scenes": [
+    { "id": "01_warmup" },
+    { "id": "02_row" },
+    { "id": "03_kinds" },
+    { "id": "04_wall" },
+    { "id": "05_maze" },
+    { "id": "06_combined" },
+    { "id": "07_precedence",                            "stretch": true },
+    { "id": "08_dense", "stretch": true },
+    { "id": "09_precedence_wall", "bonus": true },
+    { "id": "10_capacity_trap", "bonus": true }
+  ]
+}

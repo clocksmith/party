@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "sealed_at": "2026-04-16T22:05:19.223Z",
+  "files": {
+    "index.html": "72231fc717bb1d758aee05e1b355d71d19e6525b0a817a464e371f7651086836",
+    "phase2_examples/capacity_example.json": "51c24e578c5821d1cc6d00479cde33e7bbd4907c97bfd3e3ab2cbd40306ea426",
+    "phase2_examples/index.json": "bdff5b065902a2761e68d2cdfff6e57e540498bc9bad5528870cf5b52ac5a8da",
+    "phase2_examples/obstacle_routing_example.json": "c7301cf92bf1181c48d76e5e384fde974685dd2bb823b2b4c16f94fd47384041",
+    "phase2_examples/precedence_example.json": "f22418b2c92eedb062705036edfe65b938e6f55f1982c917b724587e2bb09855",
+    "scenarios/01_warmup.json": "2d9d3071fecd0d97db50e08dbb58feb9061d2b9f6b5cfbd49cafb509c7b7ff14",
+    "scenarios/02_row.json": "a17f69e97a92e875d8a55b0e3bf75fec765aa9b15c15207f608d1f045b4fc71f",
+    "scenarios/03_kinds.json": "75fb0987992f8407d492723a22c9637ab073267c09c9ac0d6f7959b4d8170df4",
+    "scenarios/04_wall.json": "7e96260b4b7903a8890d19a98864caff4224a33539fc5eeb6161dbe0ed64aa73",
+    "scenarios/05_maze.json": "e48aaad91e462abca74845fea028a993059f8166cbe5ece27082a82e78897dfd",
+    "scenarios/06_combined.json": "8a442393b000700ce2b85d5975c7e730d901206787f3878cb4dfe40d57e9a6d4",
+    "scenarios/07_precedence.json": "97e7c6b70845e9080a640d513b92c8994b9c482401d2f67e7b6f41f1a8e6ac20",
+    "scenarios/08_dense.json": "b67a3afb245e2b842fa17983182a2d97c524ad2bc3eeee335e8eeedae6342525",
+    "scenarios/09_precedence_wall.json": "3631e1384b94b2308fd7950b514b3bee1499147010077d5ef182de87c8d0c3ca",
+    "scenarios/10_capacity_trap.json": "6756d908664fce60b6dcdff74ae3e00e35be59de26e5fe60b2584409d1402461",
+    "scenarios/index.json": "55bdbe12c1bcd93e7ffbc4847650a35a202973a6cc4a283122e1dbf59b5f92e6",
+    "src/app.js": "82ea2bbc5b038879077c3b2318f50ac0810829cd2c43f07409a45a827f1e49ea",
+    "src/arm.js": "8fb92f07563ca9a6e3c75874fda7b5e442df79adf28404e7ddef620246d305ee",
+    "src/harness.js": "2a684566061e90aa2843359460a7c084bf3b1f58c07bdea041b9077d051eef79",
+    "src/renderer.js": "5560ea89e87f4b58067509ac3a2d12e5e4e8d30b2afe7834e3e9e856fdab9c6f",
+    "src/scene.js": "28341bba3eaa9ad146a8a37d434366b4e43109dde82fcbf85dbf9e4a02ae1369",
+    "src/schema.json": "cdf8b498d8ea754b0a2279c24d972985d4a28da69648fc47079209878c939a96",
+    "src/sim.js": "ab2acbc4eef93c3642dae6242a52cd721f6ba39157f644f6f94725fdc60d9de9",
+    "src/style.css": "7bab83cf05d147588b8978b0b87950c3a9260256caed86291d13692202806df3"
+  }
+}

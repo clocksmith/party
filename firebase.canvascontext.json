@@ -1,0 +1,14 @@
+{
+  "hosting": {
+    "public": "canvascontext",
+    "ignore": [
+      "firebase.canvascontext.json",
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "**/_private/**",
+      "**/_samples/**"
+    ],
+    "cleanUrls": true
+  }
+}

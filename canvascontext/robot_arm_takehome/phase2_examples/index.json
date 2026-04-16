@@ -1,0 +1,13 @@
+{
+  "families": {
+    "capacity": [
+      { "id": "p2_capacity_example", "path": "capacity_example.json" }
+    ],
+    "precedence": [
+      { "id": "p2_precedence_example", "path": "precedence_example.json" }
+    ],
+    "obstacle_routing": [
+      { "id": "p2_obstacle_routing_example", "path": "obstacle_routing_example.json" }
+    ]
+  }
+}

@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "canvascontext",
+    "public": "sites/canvascontext",
     "ignore": [
       "firebase.canvascontext.json",
       "firebase.json",

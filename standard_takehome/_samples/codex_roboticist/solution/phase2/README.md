@@ -1,4 +1,4 @@
-# Planning API v2
+# Phase 2
 
 Chosen family: `obstacle_routing`.
 
@@ -21,6 +21,13 @@ It does not import Node APIs and does not load precomputed routines. If the
 simulator asks for a non-`obstacle_routing` family, it throws a clear error
 instead of pretending to support that family.
 
+Before, the caller had to hand-author pickup, carry, and drop steps. After,
+the simulator calls:
+
+```js
+plan(scene, { family: "obstacle_routing", source: "public" });
+```
+
 `dryRun.js` and `dryRun_test.js` are optional local smoke-test helpers; the
 reviewed contract is the browser-runnable `index.js`.
 
@@ -28,3 +35,7 @@ There is intentionally no second `routines.json` for Phase 2. Phase 1 is a
 static benchmark bundle; Phase 2 is the generator itself. The simulator calls
 `plan(scene, context)` for each variant and uses the routine returned by that
 function.
+
+What v2 makes worse: failure diagnosis is wrapped inside `plan()`, so the
+README and routine notes have to explain whether a refusal came from IK,
+routing, or full simulator replay.

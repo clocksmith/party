@@ -1,4 +1,4 @@
-// Safety checks and route-shape generators for planning_api_v2.
+// Safety checks and route-shape generators for Phase 2.
 //
 // The inflation math below mirrors checkConfiguration in src/sim.js:
 // obstacles get a (gripper_radius + part.r) pad during carry, and

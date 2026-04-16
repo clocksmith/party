@@ -52,8 +52,8 @@ function solveScene(scene) {
   return {
     steps,
     notes: placed.size === scene.parts.length
-      ? `planning_api_v2 ${family}: completed ${scene.id}`
-      : `planning_api_v2 ${family}: safely placed ${placed.size}/${scene.parts.length}`
+      ? `phase2 ${family}: completed ${scene.id}`
+      : `phase2 ${family}: safely placed ${placed.size}/${scene.parts.length}`
   };
 }
 

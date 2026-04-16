@@ -42,7 +42,7 @@ export function initialState(scene) {
 // Default options. Every flag is "safe on" — the caller opts OUT of safety,
 // not in. retryOnIK is flagged false by default because the sim's IK is
 // deterministic and our restart seeds already cover the usual failure modes;
-// see REPORT.md for why I kept the flag in the signature anyway.
+// see solution/phase2/README.md for why I kept the flag in the signature anyway.
 const DEFAULT_OPTS = {
   avoidObstacles: true,
   refuseUnsafe: true,

@@ -3,7 +3,7 @@
 // This is the higher-level layer that sits on top of the fixed Robot API
 // (the five wire step types in src/schema.json). It is provided for Phase 1.
 // You may use it, ignore it, or replace it entirely in Phase 2 (your
-// redesign lives at candidate/planning_api_v2/).
+// redesign lives at solution/phase2/).
 //
 // Design notes that you should feel free to push back on:
 //   - It is imperative and step-emitting; you may prefer declarative goals.

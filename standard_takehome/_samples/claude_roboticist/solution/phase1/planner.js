@@ -592,7 +592,7 @@ function tryPart(scene, part, angles, placed, usedBin) {
 function planScene(scene, opts = {}) {
   const r = new Routine();
   r.notes = "wavefront + shape heuristics + safety pre-check";
-  if (opts.skipEmpty) { r.notes = "intentionally skipped; see REPORT.md"; return r.build(); }
+  if (opts.skipEmpty) { r.notes = "intentionally skipped; see solution/phase1/README.md"; return r.build(); }
 
   const lengths = scene.arm.links.map(l => l.length);
   const base = { x: scene.arm.base[0], y: scene.arm.base[1] };

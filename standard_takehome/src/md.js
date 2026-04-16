@@ -111,7 +111,7 @@ function inline(s) {
   s = String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
   s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
   s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-  s = s.replace(/(?:^|(?<=[^*]))\*([^*\n]+)\*(?=[^*]|$)/g, "<em>$1</em>");
+  s = s.replace(/(^|[^*])\*([^*\n]+)\*([^*]|$)/g, "$1<em>$2</em>$3");
   s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, u) =>
     `<a href="${u.replace(/"/g, "&quot;")}" target="_blank" rel="noopener">${t}</a>`);
   return s;

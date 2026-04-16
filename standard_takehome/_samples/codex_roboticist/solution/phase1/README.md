@@ -1,23 +1,27 @@
-# Phase 1 Planner
+# Phase 1
 
-Generated with:
+## Regenerate
 
 ```bash
 node _samples/codex_roboticist/solution/phase1/planner.js
 ```
 
-The planner emits static wire-format routines to
-`_samples/codex_roboticist/solution/phase1/routines.json`.
+This writes `_samples/codex_roboticist/solution/phase1/routines.json`.
 
-Implementation summary:
+## Strategy
 
-- Generates IK endpoint candidates for grasp/drop targets.
-- Emits `move_joint` steps instead of `move_pose` so submitted routines do not
-  depend on reviewer-time IK choices.
-- Checks every candidate joint interpolation with `checkConfiguration` before
-  committing it.
-- Uses transit poses plus a bounded bidirectional RRT fallback for obstacle
-  scenes.
-- Replays the full routine prefix with `runRoutine` before committing each
-  pickup, because local edge checks alone are not enough to catch every carry
-  failure.
+This sample solves from scene data: IK endpoint candidates, kind-aware bin
+assignment, transit poses, bounded bidirectional RRT, and full simulator replay
+before each committed pickup. The planner emits `move_joint` steps to avoid
+depending on reviewer-time IK branch choices.
+
+## Walkthrough
+
+On `06_combined`, the sample routes held parts through high transit poses when
+the direct joint segment would collide with an obstacle, while preserving
+restricted bin capacity for matching part kinds.
+
+## Tradeoffs
+
+The search is bounded and still local: it rejects unsafe candidates and moves
+on rather than proving global optimality across every possible ordering.

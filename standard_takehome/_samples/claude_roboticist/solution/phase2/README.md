@@ -9,6 +9,14 @@ Axis of improvement: intent expression. The v2 surface wraps the repeated
 route/replay/update pattern behind a higher-level place-part operation, so
 safety checking and state updates are owned by the API instead of every callsite.
 
+Before, each caller assembled a fragile sequence of move, grip, route, and
+drop commands. After, the planner owns the repeated place-part loop and emits
+the same Robot API wire steps only after local safety checks.
+
 There is no Phase 2 `routines.json`: Phase 2 is the generator. The simulator
 passes each variant scene to `plan(scene, context)` and runs the returned
 routine.
+
+What v2 makes worse: some low-level debugging context is hidden behind the
+higher-level operation, so route refusal needs better structured diagnostics in
+a production version.

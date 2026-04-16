@@ -1,22 +1,18 @@
 # Robot Routine Planner — Take-home
 
-Welcome, and thanks for spending time on this. This exercise is meant to look like the work you would actually do here: planning safe motion for a multi-axis arm, making tradeoffs under ambiguity, and explaining your reasoning to other engineers. An engineer will review your submission through the same lens as a production PR.
-
-It is **not** a kinematics quiz, and it is **not** a harness-gaming puzzle. We care about how you frame the problem, where you choose to spend your hours, and how clearly you can defend your choices.
-
-Several scenes have no single "correct" answer — you will have to decide what to prioritize, and defend it.
+Plan safe motion for a multi-axis arm, make tradeoffs under ambiguity, and explain your reasoning clearly.
 
 ---
 
 ## TL;DR
 
-- **Phase 1:** produce `routines.json` for the fixed benchmark scenes. This is the safety/planning floor.
+- **Phase 1:** produce `routines.json` for the fixed benchmark scenes.
 - **Phase 2:** ship a browser-runnable Planning API v2 for one variant family. The simulator imports your v2, runs it on small scene variants, and plays the generated routine.
-- **Both phases are required.** A perfect Phase 1 scoreboard with a facade Phase 2 is not a strong submission.
-- **Deliverable:** a single `REPORT.md` that reads cold *and* doubles as the slide deck for the live walkthrough.
-- **Timebox:** 4–6 hours. Stop at 6. We do not score the hours you spend; we score what you ship and how you explain it. An honest stopper beats a stealth overrun.
+- **Complete both phases.**
+- **Deliverable:** `candidate/` plus a top-level `REPORT.md`.
+- **Typical time:** most candidates spend about 4–6 hours implementing, testing, and writing up their approach. The number of hours spent is not part of evaluation.
 
-Suggested time split:
+Typical time split:
 
 | Work | Time |
 | --- | ---: |
@@ -26,26 +22,24 @@ Suggested time split:
 | `REPORT.md` | 30–45 min |
 | Packaging/checks | 15 min |
 
-If Phase 1 takes longer than expected, skip bonus scenes before cutting Phase 2. Phase 2 must still contain a runnable browser module; design notes can supplement it, not replace it.
+If Phase 1 takes longer than expected, skip bonus scenes before cutting Phase 2. Phase 2 should still contain a runnable browser module; design notes can supplement it, not replace it.
 
 ---
 
 ## Frozen surface — do not modify
 
-These files define the Robot API and the benchmark. **Do not modify any of them.** Their contents are checksummed in `SEALED.json`; the reviewer runs `node tests/reval.mjs` to detect tampering.
+These files define the Robot API and benchmark. Please do not modify them. Their contents are checksummed in `SEALED.json`.
 
 - `index.html`, `src/app.js`, `src/renderer.js`, `src/style.css`
 - `src/schema.json`, `src/sim.js`, `src/arm.js`, `src/scene.js`, `src/harness.js`
 - `scenarios/*.json` (six required scenes, two stretch scenes, two bonus scenes + `scenarios/index.json`)
 - `phase2_examples/*.json` (public Phase 2 variant examples)
 
-Put your work under `candidate/` plus a top-level `REPORT.md`. If you find a real bug in a frozen file, leave it as-is and document it in the report. Do not patch around it.
+Put your work under `candidate/` plus a top-level `REPORT.md`. If you think you found a real bug in a frozen file, leave it as-is and document it in the report.
 
 ---
 
 ## Simulator contract
-
-The simulator is a *documented interface*, not a puzzle to be reverse-engineered. Everything below is load-bearing; nothing else is.
 
 - **World.** 2D planar. X right, Y up, meters. Floor safety boundary at `y = -0.12` (the visual workbench is `y = 0`; the gripper is allowed to dip between them to grasp).
 - **Task plane.** The view is a 2D vertical fixture board, not a gravity/tabletop simulation. Parts are staged in shallow visual nests on the same plane as the robot; a part's JSON `x/y` is its graspable center. These nests are non-colliding decoration. Only the arm, held parts, other unplaced parts during carry checks, explicit `obstacles`, and the floor boundary affect safety.
@@ -74,34 +68,34 @@ The simulator is a *documented interface*, not a puzzle to be reverse-engineered
 
 **Grip semantics.** `grip_close` picks up the nearest un-placed, dependency-met part within range, or no-op if the EE is far from any part. `grip_open` places the held part if the EE is inside a bin that accepts this kind and has capacity; otherwise the appropriate violation above.
 
-**What the sim does NOT model:** dynamics, inertia, gravity, sensor noise, gripper force, part weight, stochastic execution, mobile bases, continuous time. Don't assume any of these. If you want to argue a Phase 2 API should handle them, that is a report observation, not an implementation ask.
+**What the sim does NOT model:** dynamics, inertia, gravity, sensor noise, gripper force, part weight, stochastic execution, mobile bases, continuous time. Do not assume any of these for Phase 1. If you think a future API should handle them, mention that in the report rather than implementing new physics here.
 
-**Scene and result formats:** see `src/schema.json`. Scoring inputs are only the fields defined there. There is no hidden score.
+**Scene and result formats:** see `src/schema.json`. Scoring inputs are only the fields defined there.
 
 ---
 
 ## Phase 1 — optimize routines using Planning API v1
 
-Use `src/planning_api.js` to build a `routines.json` bundle. How you produce it is your business: a JS planner, a Python solver, a hand-authored plan, an LLM-generated plan, whatever. The simulator only consumes the wire format (`src/schema.json`).
+Use `src/planning_api.js` if it helps you build a `routines.json` bundle. You may also use your own JS/Python planner, hand-authored routines, AI-assisted code, or another approach. The simulator only consumes the wire format (`src/schema.json`).
 
-> **Scoring policy (read this before you optimize anything):**
+> **Review priority:**
 >
-> 1. **Tamper-free and schema-valid** (gate — nothing else counts if this fails)
+> 1. **Schema-valid and benchmark-compatible** (gate)
 > 2. **Fewer safety violations** — a plan that crashes the arm is worse than a plan that skips the scene
 > 3. **More parts placed** — partial completion counts; it's not a binary pass/fail
 > 4. **More scenes completed** — required set (below) first, then stretch. Bonus scenes are discussion material, not scene-completion scoring.
 > 5. **Lower path length** — tie-breaker
 > 6. **Lower elapsed micro-steps** — weak tie-breaker only
 >
-> `reval.mjs` exits 0 regardless of scene pass/fail; the ordered list above is how we actually compare submissions.
+> `reval.mjs` exits 0 regardless of scene pass/fail.
 
 **Required set (6 scenes):** `01_warmup`, `02_row`, `03_kinds`, `04_wall`, `05_maze`, `06_combined`.
 **Stretch (2 scenes):** `07_precedence`, `08_dense`.
 **Bonus top-end exploration (2 scenes):** `09_precedence_wall`, `10_capacity_trap`.
 
-A **complete submission** is one that attempts all six required scenes — partial safe completion across them beats risky full completion on any of them. Stretch scenes are optional. Bonus scenes are top-end exploration only: do not attempt them until the required set, Phase 2, and `REPORT.md` are complete. A strong submission can leave both bonus scenes empty, and saying so in the report is better than quietly overrunning the timebox.
+Attempt all six required scenes. Partial safe completion across them is better than risky full completion on any one scene. Stretch scenes are optional. Bonus scenes are top-end exploration only: do not attempt them until the required set, Phase 2, and `REPORT.md` are complete. It is fine to leave bonus scenes empty and say why.
 
-**Scenario guide.** This is orientation, not a recipe. Each scene exercises several things; the column below names the most visible pressure.
+**Scenario guide.**
 
 | Scene | Status | What this scene exercises | Baseline expectation |
 | --- | --- | --- | --- |
@@ -119,7 +113,7 @@ A **complete submission** is one that attempts all six required scenes — parti
 **Focus on:**
 
 - correctness on solvable scenes
-- safety first: a careful planner that skips a scene is better than a confident one that crashes the arm
+- safety first: a careful planner that skips a scene is better than one that crashes the arm
 - honest handling of unreachable targets, tight clearances, and bin capacity
 
 **Nice-to-haves, in rough order of value:**
@@ -130,13 +124,13 @@ A **complete submission** is one that attempts all six required scenes — parti
 4. partial completion under failure
 5. priority handling when bins fill or parts conflict
 
-Do not attempt all of them. We would rather see two done thoughtfully than five done shallowly.
+Prioritize a few thoughtful improvements over many shallow ones.
 
 ---
 
 ## Phase 2 — runnable Planning API v2 under variation
 
-Phase 1 produces static routines for fixed scenes. Phase 2 asks a harder question: can your API regenerate a safe routine when a scene changes slightly?
+Phase 1 produces static routines for fixed scenes. Phase 2 regenerates routines for small scene variants.
 
 Ship a browser-runnable `candidate/planning_api_v2/index.js` module. The simulator imports this module, calls your planner on a Phase 2 variant scene, loads the returned routine, and plays it on the canvas.
 
@@ -154,7 +148,7 @@ Choose exactly one family:
 | `precedence` | dependency edges and part order constraints | `phase2_examples/precedence_example.json` |
 | `obstacle_routing` | obstacle placement and pick/drop geometry | `phase2_examples/obstacle_routing_example.json` |
 
-Your v2 only needs to support your chosen family. It should cleanly refuse unsupported families rather than pretend to solve everything.
+Your v2 only needs to support your chosen family. It is fine to cleanly refuse unsupported families.
 
 ### Browser module contract
 
@@ -164,7 +158,7 @@ Create:
 candidate/planning_api_v2/index.js
 ```
 
-It must be a browser-native ES module with no build step and no network dependency. Export a planner function:
+It should be a browser-native ES module with no build step and no network dependency. Export a planner function:
 
 ```js
 export const family = "capacity"; // or "precedence" / "obstacle_routing"
@@ -190,9 +184,9 @@ The `context` object contains:
 
 Start the simulator, open the Phase 2 panel, choose the public example for your family, and click **run v2 in sim**. The simulator imports your module, runs your planner, shows the routine in the Routine tab, and animates the result.
 
-Reviewers have private variants for the same three families. You will not see those JSON files. They are small deterministic variants of the public examples, not new physics.
+Your v2 may be run on small deterministic variants from the same family. They use the same scene format and simulator rules as the public examples.
 
-What counts as enough:
+Phase 2 should include:
 
 - one chosen family
 - one browser-runnable `plan(scene, context)` implementation
@@ -201,7 +195,7 @@ What counts as enough:
 - the report names how v2 refuses unsupported or unsafe variants
 - what v2 makes worse
 
-A focused v2 is better than a broad facade. A v2 that simply emits hardcoded public-scene routines is weak even if Phase 1 is perfect.
+Avoid hardcoded output for one public example. Use scene data in the API boundary.
 
 ---
 
@@ -221,7 +215,7 @@ REPORT.md                         Single written walkthrough (template below). R
 
 **Notes:**
 
-- `planning_api_v2/` must contain working browser code at `index.js`. A design-only submission with no runnable v2 is incomplete.
+- `planning_api_v2/` should contain working browser code at `index.js`. A design-only submission with no runnable v2 is incomplete.
 - Your v2 does not need to overwrite `routines.json`; Phase 2 runs directly in the simulator against variant scenes.
 - The `routines.json` you ship should cover the 6 required scenes at minimum. Stretch scenes are optional. Bonus scenes are top-end exploration and do not count toward scene-completion scoring; omitting them is fine.
 - A submission with `routines.json` but no `phase1_planner.*` and no `phase1/README.md` is incomplete — we need to know how the bundle was produced.
@@ -230,7 +224,7 @@ REPORT.md                         Single written walkthrough (template below). R
 
 ## How your submission is reviewed
 
-A reviewer opens three things, in order:
+Review order:
 
 1. `REPORT.md` — your framing, cold.
 2. `candidate/routines.json` — what you shipped.
@@ -241,17 +235,17 @@ Then they run the scored evaluation from a clean checkout:
 - `node tests/reval.mjs --bundle candidate/routines.json --suite benchmark` — scores your pre-generated `routines.json` against the visible scenes. The output is split into required, stretch, and bonus bands; bonus scenes are discussion material, not scene-completion scoring.
 - In the simulator UI, the reviewer opens the Phase 2 panel, selects the family you chose, and runs your `candidate/planning_api_v2/index.js` on public and private variants. The generated routine is animated in the same canvas as Phase 1.
 
-There is no Phase 1 hidden-scene runner contract. Phase 2 is the generalization check.
+There is no Phase 1 hidden-scene runner contract.
 
-The live session is 30 minutes. The first ~10 minutes, you walk us through `REPORT.md` on screen. The rest is discussion — one scene of the reviewer's choice, one Phase 2 decision, one curveball, your questions. Your report is your deck.
+The live session is 30 minutes: `REPORT.md` walkthrough, one scene discussion, one Phase 2 decision, one curveball, and your questions.
 
 ---
 
 ## Ground rules
 
-- **Timebox: 4–6 hours.** We do not reward going over; we reward stopping on time and naming what you cut. Do not spend bonus-scene time before Phase 2 runs in the simulator.
+- **Time spent:** most candidates spend about 4–6 hours implementing, testing, and writing up their approach. We do not grade the number of hours you spend. If you make scope cuts, name them in `REPORT.md`.
 - **Use whatever tools you want** — AI assistants, libraries, reference code. Say in the report which decisions were yours and which were the AI's. We probe judgment in the Q&A.
-- **Do not modify the frozen surface** — see above. Tampering is detected.
+- **Do not modify the frozen surface** — see above. The checksum exists so everyone is evaluated against the same benchmark.
 - **Ask questions.** Email <takehome@standardbots.example> if anything is genuinely ambiguous. "I assumed X because the prompt was unclear" is a fine answer in the report.
 - **Keep your submission private.** The base kit lives at `https://github.com/clocksmith/party/tree/main/standard_takehome` — your candidate/ work and REPORT.md should go in a private fork or private repo. No public posts, gists, or blog write-ups of your solution.
 
@@ -268,7 +262,7 @@ node tests/smoke.mjs                             # sanity-check the sim
 node tests/reval.mjs --bundle your_bundle.json   # scored reviewer run
 ```
 
-In the simulator UI: pick a scene, click "run baseline" to see the provided naive planner, upload your own `routines.json` to evaluate, click "export results.json" to save scores (for your own debugging — the reviewer regenerates). For Phase 2, use the Phase 2 panel to run your `candidate/planning_api_v2/index.js` against public variant examples.
+In the simulator UI: pick a scene, click "run baseline" to see the provided naive planner, upload your own `routines.json` to evaluate, and click "export results.json" to save scores. For Phase 2, use the Phase 2 panel to run your `candidate/planning_api_v2/index.js` against public variant examples.
 
 Read in this order: `src/schema.json` → `src/planning_api.js` → `examples/example_planner.js` → `scenarios/`.
 
@@ -284,15 +278,11 @@ Read in this order: `src/schema.json` → `src/planning_api.js` → `examples/ex
 - [ ] `REPORT.md` is filled in (template below), including before/after callsites, variant behavior, and what v2 makes worse.
 - [ ] `node tests/reval.mjs --bundle candidate/routines.json` runs cleanly — no `TAMPER` warning.
 - [ ] `git diff` against the original repo shows changes only outside the frozen surface.
-- [ ] You stopped at 8 hours. If not, you've said so in `REPORT.md` and named what you would cut.
-
-Good luck. We are looking forward to the conversation.
-
----
+- [ ] If you made scope cuts, `REPORT.md` names what you cut and what you would do next.
 
 ## REPORT.md template (copy this section)
 
-Copy the block below into `REPORT.md` at the repo root and fill it in. The arc doubles as your live walkthrough — keep each section scannable (short bullets, one small code block, one small diagram if helpful). Three pages ceiling.
+Copy the block below into `REPORT.md` at the repo root and fill it in. Keep each section scannable: short bullets, one small code block, one small diagram if helpful. Three pages ceiling.
 
 ```markdown
 # REPORT
@@ -304,15 +294,15 @@ How I read the problem in one paragraph. The one assumption that shaped everythi
 The algorithm in 3–6 sentences. Scenes I skipped or partially solved, and why. What didn't work and what I cut.
 
 ## One scene walked end-to-end
-Pick one scene and walk the routine. Name a specific ordering/routing decision you made and why you rejected the alternative. This is the anchor for the live walkthrough — make it concrete.
+Pick one scene and walk the routine. Name a specific ordering/routing decision you made and why you rejected the alternative.
 
 ## Phase 2 — v2
 - **The rough edge in v1.** A code snippet from my Phase 1 planner that felt wrong.
 - **Family I chose:** one of {capacity, precedence, obstacle_routing}. Why this family.
 - **My axis of "better":** one of {callsite LOC, concept count, reuse, testability, extensibility, readability, robustness under variation} (or a different axis I defend in 1–2 sentences).
 - **v2 design:** a small code sample or diagram. Include the exported `plan(scene, context)` boundary.
-- **Before/after callsite:** a literal v1 snippet and the equivalent v2 snippet. Keep both small; reviewers should be able to see the claimed simplification, not just the LOC count.
-- **Named guarantee (if applicable):** if v2 prevents or detects a class of invalid routine earlier than v1, name it. If your chosen axis is not about correctness guarantees, say so explicitly; this is not a penalty.
+- **Before/after callsite:** a literal v1 snippet and the equivalent v2 snippet. Keep both small enough to compare directly.
+- **Named guarantee (if applicable):** if v2 prevents or detects a class of invalid routine earlier than v1, name it. If your chosen axis is not about correctness guarantees, say so explicitly.
 - **Variant behavior:** what recomputes when the scene changes? What is cached or reused? How does v2 refuse unsupported variants?
 - **Public Phase 2 example result:** which `phase2_examples/*.json` scene I ran in the simulator, and what happened.
 - **Extension seam:** if oriented parts, a second arm sharing the workspace, or a second variant family were added later, what part of v2 would change first? What part should not need to change?
@@ -334,5 +324,5 @@ The 2–3 design calls I'm least sure about. The case for and against each.
 **AI disclosure:** which specific decisions did the AI make, and where did I diverge from it? (One or two bullets.)
 
 ## What this exercise tests well, and what it doesn't
-Push back. Where is this a realistic proxy for the work? Where is it not? Honest criticism is part of the signal.
+Where is this a realistic proxy for the work? Where is it not?
 ```

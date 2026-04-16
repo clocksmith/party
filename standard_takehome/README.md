@@ -157,7 +157,7 @@ Yes. Say which decisions were yours and which were the AI's in `REPORT.md`. We p
 Most successful submissions land in 4–6 hours. Stop at 6 — an honest stopper beats a stealth overrun. We do not score hours.
 
 **What if a scene looks unsolvable?**
-Document the geometric argument and emit an empty routine. Do not ship an unsafe routine.
+Document the geometric argument and emit an empty routine.
 
 ## REPORT.md template
 

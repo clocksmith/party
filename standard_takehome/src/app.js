@@ -12,7 +12,7 @@ const els = {
   resetBtn: document.getElementById("reset"),
   baselineBtn: document.getElementById("baseline"),
   modePill: document.getElementById("mode-pill"),
-  demoPanel: document.getElementById("demo-panel"),
+  samplePanel: document.getElementById("sample-panel"),
   sampleSelect: document.getElementById("sample-select"),
   sampleRunBtn: document.getElementById("sample-run"),
   sampleStatus: document.getElementById("sample-status"),
@@ -49,8 +49,8 @@ const state = {
   activeTab: "log",
   phase2Catalog: [],
   phase2Active: null,
-  demoMode: false,
-  demoSampleId: null,
+  sampleMode: false,
+  requestedSampleId: null,
   samples: []
 };
 
@@ -81,7 +81,7 @@ async function init() {
   els.pauseBtn.addEventListener("click", () => { state.playing = !state.playing; els.pauseBtn.textContent = state.playing ? "■ pause" : "▶ resume"; });
   els.resetBtn.addEventListener("click", () => { state.frame = 0; state.playing = false; draw(); });
   els.baselineBtn.addEventListener("click", runBaseline);
-  configureDemoMode();
+  configureSampleMode();
   els.bundleInput.addEventListener("change", onBundleUpload);
   els.exportBtn.addEventListener("click", exportResults);
   els.sampleRunBtn.addEventListener("click", runSelectedSample);
@@ -97,32 +97,32 @@ async function init() {
   };
   els.speed.addEventListener("input", () => { state.fps = parseInt(els.speed.value, 10); els.speedVal.textContent = `${state.fps}x`; updateSpeedFill(); });
   updateSpeedFill();
-  if (state.demoMode) await initDemoSamples();
+  if (state.sampleMode) await initSamples();
   await initPhase2();
 
   await selectScene(state.scenes[0].id);
-  if (state.demoMode && state.demoSampleId) await runSelectedSample();
+  if (state.sampleMode && state.requestedSampleId) await runSelectedSample();
   log("simulator ready. select a scene, drop a routines.json, or use the baseline planner.", "ok");
   requestAnimationFrame(loop);
 }
 
-function configureDemoMode() {
+function configureSampleMode() {
   const params = new URLSearchParams(location.search);
-  const demoParam = params.has("demo") ? params.get("demo") : params.get("cheat");
-  if (demoParam === null) return;
+  if (!params.has("sample")) return;
 
-  const normalized = String(demoParam).toLowerCase();
-  state.demoMode = !["0", "false", "off", "no"].includes(normalized);
-  if (!state.demoMode) return;
+  const sampleParam = params.get("sample");
+  const normalized = String(sampleParam).toLowerCase();
+  state.sampleMode = !["0", "false", "off", "no"].includes(normalized);
+  if (!state.sampleMode) return;
 
   if (!["", "1", "true", "on", "samples"].includes(normalized)) {
-    state.demoSampleId = demoParam;
+    state.requestedSampleId = sampleParam;
   }
   els.modePill.hidden = false;
-  els.demoPanel.hidden = false;
+  els.samplePanel.hidden = false;
 }
 
-async function initDemoSamples() {
+async function initSamples() {
   try {
     const res = await fetch("./_samples/index.json");
     if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
@@ -136,22 +136,22 @@ async function initDemoSamples() {
       els.sampleSelect.appendChild(opt);
     }
     if (!state.samples.length) throw new Error("no samples listed");
-    if (state.demoSampleId) {
-      if (state.samples.some(s => s.id === state.demoSampleId)) {
-        els.sampleSelect.value = state.demoSampleId;
+    if (state.requestedSampleId) {
+      if (state.samples.some(s => s.id === state.requestedSampleId)) {
+        els.sampleSelect.value = state.requestedSampleId;
       } else {
-        log(`demo sample ${state.demoSampleId} is not listed in _samples/index.json`, "warn");
-        state.demoSampleId = null;
+        log(`sample ${state.requestedSampleId} is not listed in _samples/index.json`, "warn");
+        state.requestedSampleId = null;
       }
     }
     els.sampleRunBtn.disabled = false;
     els.sampleStatus.textContent = `${state.samples.length} known sample solution${state.samples.length === 1 ? "" : "s"} available.`;
-    log(`demo mode enabled: loaded ${state.samples.length} sample solution${state.samples.length === 1 ? "" : "s"} from _samples`, "warn");
+    log(`sample mode enabled: loaded ${state.samples.length} sample solution${state.samples.length === 1 ? "" : "s"} from _samples`, "warn");
   } catch (e) {
     state.samples = [];
     els.sampleRunBtn.disabled = true;
     els.sampleStatus.textContent = `_samples unavailable (${e.message}).`;
-    log(`demo mode enabled, but _samples could not be loaded: ${e.message}`, "warn");
+    log(`sample mode enabled, but _samples could not be loaded: ${e.message}`, "warn");
   }
 }
 
@@ -336,7 +336,7 @@ function runActive() {
 async function runSelectedSample() {
   const sample = state.samples.find(s => s.id === els.sampleSelect.value);
   if (!sample) {
-    log("no demo sample selected", "warn");
+    log("no sample selected", "warn");
     return;
   }
   try {
@@ -353,11 +353,11 @@ async function runSelectedSample() {
     els.sampleStatus.textContent = `${sample.label ?? sample.id} loaded from ${sample.routines}`;
     const scenes = await Promise.all(state.scenes.map(s => loadScene(s.id)));
     const summary = runBundle(scenes, bundle).summary;
-    log(`loaded demo sample ${sample.id}: ${summary.scenes_passed}/${summary.scenes_total} scenes, ${summary.parts_placed}/${summary.parts_total} parts, ${summary.total_violations} violations`, summary.total_violations ? "warn" : "ok");
+    log(`loaded sample ${sample.id}: ${summary.scenes_passed}/${summary.scenes_total} scenes, ${summary.parts_placed}/${summary.parts_total} parts, ${summary.total_violations} violations`, summary.total_violations ? "warn" : "ok");
     runActive();
   } catch (e) {
     els.sampleStatus.textContent = `${sample.label ?? sample.id} unavailable (${e.message}).`;
-    log(`demo sample ${sample.id} unavailable: ${e.message}`, "err");
+    log(`sample ${sample.id} unavailable: ${e.message}`, "err");
   }
 }
 

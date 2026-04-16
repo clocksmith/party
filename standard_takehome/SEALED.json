@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "sealed_at": "2026-04-16T22:45:00.000Z",
+  "sealed_at": "2026-04-16T22:51:00.000Z",
   "files": {
-    "index.html": "0fce4c9d23663820cfe4776a0412051bded9991befa9144e0ee807a1b84543ba",
+    "index.html": "b47ed9905058aa6620f0b03a747005075cb4b24d7387bac42e5503b2dec9eb6f",
     "phase2_examples/capacity_example.json": "51c24e578c5821d1cc6d00479cde33e7bbd4907c97bfd3e3ab2cbd40306ea426",
     "phase2_examples/index.json": "bdff5b065902a2761e68d2cdfff6e57e540498bc9bad5528870cf5b52ac5a8da",
     "phase2_examples/obstacle_routing_example.json": "c7301cf92bf1181c48d76e5e384fde974685dd2bb823b2b4c16f94fd47384041",
@@ -18,13 +18,13 @@
     "scenarios/09_precedence_wall.json": "3631e1384b94b2308fd7950b514b3bee1499147010077d5ef182de87c8d0c3ca",
     "scenarios/10_capacity_trap.json": "6756d908664fce60b6dcdff74ae3e00e35be59de26e5fe60b2584409d1402461",
     "scenarios/index.json": "55bdbe12c1bcd93e7ffbc4847650a35a202973a6cc4a283122e1dbf59b5f92e6",
-    "src/app.js": "593227bf17e903bfe97a48f5f6a3026fc53dcb4cbb21c3f7260c23af54e6e9b1",
+    "src/app.js": "722b673a481e9490ce1f3ad32e226af73bc29d6d64ec6b7cbe141079b7f95486",
     "src/arm.js": "8fb92f07563ca9a6e3c75874fda7b5e442df79adf28404e7ddef620246d305ee",
     "src/harness.js": "2a684566061e90aa2843359460a7c084bf3b1f58c07bdea041b9077d051eef79",
     "src/renderer.js": "5560ea89e87f4b58067509ac3a2d12e5e4e8d30b2afe7834e3e9e856fdab9c6f",
     "src/scene.js": "28341bba3eaa9ad146a8a37d434366b4e43109dde82fcbf85dbf9e4a02ae1369",
     "src/schema.json": "cdf8b498d8ea754b0a2279c24d972985d4a28da69648fc47079209878c939a96",
     "src/sim.js": "ab2acbc4eef93c3642dae6242a52cd721f6ba39157f644f6f94725fdc60d9de9",
-    "src/style.css": "795efa70a6168f0416ad174ac93f95d2b3d4b5b7368b8a59e43fba458eaa2b1d"
+    "src/style.css": "650abae157723685de29253016c3e4e5605bbe3753b242a106203adb61f6ec49"
   }
 }

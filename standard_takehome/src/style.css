@@ -84,7 +84,7 @@ header.bar select {
 }
 
 .phase2-controls label,
-.demo-panel label {
+.sample-panel label {
   display: grid;
   gap: 4px;
   color: var(--ink-dim);
@@ -92,7 +92,7 @@ header.bar select {
 }
 
 .phase2-controls select,
-.demo-panel select {
+.sample-panel select {
   background: #fff;
   color: var(--ink);
   border: 1px solid var(--panel-edge);
@@ -108,23 +108,23 @@ header.bar select {
   line-height: 1.4;
 }
 
-.demo-panel {
+.sample-panel {
   display: grid;
   gap: 8px;
   background: #fff8d9;
 }
 
-.demo-panel[hidden] {
+.sample-panel[hidden] {
   display: none;
 }
 
-.demo-note {
+.sample-note {
   color: #5a4700;
   font-size: 11px;
   line-height: 1.4;
 }
 
-.demo-note code {
+.sample-note code {
   font-family: var(--mono);
   background: rgba(0, 0, 0, 0.08);
   padding: 1px 4px;

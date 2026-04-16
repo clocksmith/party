@@ -3,11 +3,11 @@
 Generated with:
 
 ```bash
-node candidate/phase1_planner.js
+node solution/phase1/planner.js
 ```
 
 The planner emits static wire-format routines to
-`candidate/routines.json`.
+`solution/phase1/routines.json`.
 
 Implementation summary:
 

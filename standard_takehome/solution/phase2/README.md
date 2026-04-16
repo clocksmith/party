@@ -23,3 +23,8 @@ instead of pretending to support that family.
 
 `dryRun.js` and `dryRun_test.js` are optional local smoke-test helpers; the
 reviewed contract is the browser-runnable `index.js`.
+
+There is intentionally no second `routines.json` for Phase 2. Phase 1 is a
+static benchmark bundle; Phase 2 is the generator itself. The simulator calls
+`plan(scene, context)` for each variant and uses the routine returned by that
+function.

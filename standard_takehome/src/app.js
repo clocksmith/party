@@ -17,8 +17,8 @@ const els = {
   sampleSelect: document.getElementById("sample-select"),
   sampleRunBtn: document.getElementById("sample-run"),
   sampleStatus: document.getElementById("sample-status"),
-  reportTabBtn: document.getElementById("report-tab-btn"),
-  reportView: document.getElementById("report-view"),
+  notesTabBtn: document.getElementById("notes-tab-btn"),
+  notesView: document.getElementById("notes-view"),
   bundleInput: document.getElementById("bundle-input"),
   bundleStatus: document.getElementById("bundle-status"),
   speed: document.getElementById("speed"),
@@ -124,8 +124,8 @@ function configureSampleMode() {
   }
   els.modePill.hidden = false;
   els.samplePanel.hidden = false;
-  els.reportTabBtn.hidden = false;
-  els.reportView.innerHTML = `<p class="report-empty">Select and run a sample to view its REPORT.md.</p>`;
+  els.notesTabBtn.hidden = false;
+  els.notesView.innerHTML = `<p class="notes-empty">Select and run a sample to view its phase READMEs.</p>`;
 }
 
 async function initSamples() {
@@ -277,8 +277,8 @@ async function runPhase2V2() {
     await loadSelectedPhase2Scene();
   }
   try {
-    const v2Base = state.sampleActive?.planning_api_v2
-      ?? "../candidate/planning_api_v2/index.js";
+    const v2Base = state.sampleActive?.phase2
+      ?? "../solution/phase2/index.js";
     const v2Path = `${v2Base}${v2Base.includes("?") ? "&" : "?"}cache=${Date.now()}`;
     const mod = await import(v2Path);
     if (state.sampleActive) {
@@ -286,7 +286,7 @@ async function runPhase2V2() {
     }
     const planner = mod.plan ?? mod.default;
     if (typeof planner !== "function") {
-      throw new Error("candidate/planning_api_v2/index.js must export plan(scene, context) or a default function");
+      throw new Error("solution/phase2/index.js must export plan(scene, context) or a default function");
     }
     if (mod.family && mod.family !== meta.family) {
       log(`v2 module declares family=${mod.family}; running selected family=${meta.family}`, "warn");
@@ -298,7 +298,7 @@ async function runPhase2V2() {
     });
     const entry = normalizePhase2Routine(produced, state.scene.id);
     state.bundle = {
-      generator: "candidate/planning_api_v2/index.js",
+      generator: "solution/phase2/index.js",
       scenarios: { [state.scene.id]: entry }
     };
     els.bundleStatus.textContent = `phase2:${state.scene.id}`;
@@ -319,23 +319,31 @@ function normalizePhase2Routine(value, sceneId) {
 
 function setTab(tab) {
   state.activeTab = tab;
-  const bodyId = tab === "log" ? "log" : tab === "routine" ? "routine-view" : "report-view";
+  const bodyId = tab === "log" ? "log" : tab === "routine" ? "routine-view" : "notes-view";
   for (const btn of els.tabBtns) btn.classList.toggle("active", btn.dataset.tab === tab);
   for (const body of els.tabBodies) body.classList.toggle("active", body.id === bodyId);
 }
 
-async function loadSampleReport(sample) {
-  if (!sample?.report) {
-    els.reportView.innerHTML = `<p class="report-empty">Sample ${esc(sample?.id ?? "?")} has no REPORT.md path in _samples/index.json.</p>`;
+async function loadSampleNotes(sample) {
+  const docs = [
+    ["Phase 1", sample?.phase1_readme],
+    ["Phase 2", sample?.phase2_readme]
+  ].filter(([, href]) => href);
+  if (!docs.length) {
+    els.notesView.innerHTML = `<p class="notes-empty">Sample ${esc(sample?.id ?? "?")} has no README paths in _samples/index.json.</p>`;
     return;
   }
   try {
-    const res = await fetch(sample.report);
-    if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
-    const md = await res.text();
-    els.reportView.innerHTML = `<div class="report-header">${esc(sample.label ?? sample.id)} — ${esc(sample.report)}</div>${renderMarkdown(md)}`;
+    const rendered = [];
+    for (const [label, href] of docs) {
+      const res = await fetch(href);
+      if (!res.ok) throw new Error(`${href} fetch failed: ${res.status}`);
+      const md = await res.text();
+      rendered.push(`<div class="notes-header">${esc(sample.label ?? sample.id)} — ${esc(label)} — ${esc(href)}</div>${renderMarkdown(md)}`);
+    }
+    els.notesView.innerHTML = rendered.join("<hr />");
   } catch (e) {
-    els.reportView.innerHTML = `<p class="report-empty">Report for ${esc(sample.id)} unavailable (${esc(e.message)}).</p>`;
+    els.notesView.innerHTML = `<p class="notes-empty">Notes for ${esc(sample.id)} unavailable (${esc(e.message)}).</p>`;
   }
 }
 
@@ -387,7 +395,7 @@ async function runSelectedSample() {
     const scenes = await Promise.all(state.scenes.map(s => loadScene(s.id)));
     const summary = runBundle(scenes, bundle).summary;
     log(`loaded sample ${sample.id}: ${summary.scenes_passed}/${summary.scenes_total} scenes, ${summary.parts_placed}/${summary.parts_total} parts, ${summary.total_violations} violations`, summary.total_violations ? "warn" : "ok");
-    loadSampleReport(sample);
+    loadSampleNotes(sample);
     runActive();
   } catch (e) {
     els.sampleStatus.textContent = `${sample.label ?? sample.id} unavailable (${e.message}).`;

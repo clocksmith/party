@@ -1,10 +1,10 @@
 // Tiny browser markdown renderer. No dependencies, no build step.
-// Handles what REPORT.md templates actually use: headings, paragraphs, fenced
+// Handles what solution README files actually use: headings, paragraphs, fenced
 // + inline code, ordered/unordered lists, blockquotes, bold/italic, links,
 // horizontal rules, and GitHub-style pipe tables.
 //
 // Not a spec-compliant CommonMark parser — just enough to render reviewer-
-// facing candidate reports legibly.
+// facing solution notes legibly.
 
 export function renderMarkdown(md) {
   if (!md) return "";

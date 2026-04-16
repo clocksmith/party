@@ -2,11 +2,11 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { endEffector, ik } from "../src/arm.js";
-import { checkConfiguration, runRoutine } from "../src/sim.js";
+import { endEffector, ik } from "../../src/arm.js";
+import { checkConfiguration, runRoutine } from "../../src/sim.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, "..");
+const ROOT = path.resolve(__dirname, "../..");
 const OUT = path.join(__dirname, "routines.json");
 
 const MICRO_STEP = 0.02;
@@ -569,7 +569,7 @@ function main() {
   const idx = loadJson("scenarios/index.json");
   const bundle = {
     candidate: "codex_roboticist",
-    generator: "candidate/phase1_planner.js",
+    generator: "solution/phase1/planner.js",
     scenarios: {}
   };
 

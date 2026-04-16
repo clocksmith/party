@@ -20,7 +20,9 @@
     "control": "node cli/dmx-cli.js control",
     "pattern-editor": "node cli/pattern-editor-cli.js",
     "preview:canvascontext": "firebase hosting:channel:deploy preview --config firebase.canvascontext.json --project canvascontext-9da05",
-    "deploy:canvascontext": "firebase deploy --config firebase.canvascontext.json --project canvascontext-9da05 --only hosting"
+    "deploy:canvascontext": "firebase deploy --config firebase.canvascontext.json --project canvascontext-9da05 --only hosting",
+    "preview:standard_takehome": "firebase hosting:channel:deploy preview --config firebase.standard_takehome.json --project canvascontext-9da05",
+    "deploy:standard_takehome": "firebase deploy --config firebase.standard_takehome.json --project canvascontext-9da05 --only hosting"
   },
   "keywords": ["dmx", "dmx512", "laser", "lighting", "control", "serial"],
   "author": "",

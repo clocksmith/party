@@ -1,0 +1,13 @@
+{
+  "hosting": {
+    "public": "standard_takehome",
+    "ignore": [
+      "firebase.standard_takehome.json",
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "**/_private/**"
+    ],
+    "cleanUrls": true
+  }
+}

@@ -94,5 +94,5 @@ It does not test physical dynamics, calibration, sensing, gripper force, control
 - [x] `candidate/phase1/README.md` documents the production method.
 - [x] `candidate/planning_api_v2/index.js` is browser-importable and exports `family` plus `plan(scene, context)`.
 - [x] `REPORT.md` includes before/after callsites, variant behavior, what v2 makes worse, and AI disclosure.
-- [x] `node tests/reval.mjs --bundle _samples/codex_roboticist/candidate/routines.json --suite benchmark` runs without `TAMPER`.
+- [x] `node tests/reval.mjs --bundle candidate/routines.json --suite benchmark` runs without `TAMPER`.
 - [x] I would stop at 6 hours in a real submission; additional time would go to reducing duplicated collision math in v2.

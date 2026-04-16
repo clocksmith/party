@@ -4,12 +4,14 @@
       "id": "codex_roboticist",
       "label": "codex_roboticist",
       "routines": "./_samples/codex_roboticist/candidate/routines.json",
+      "planning_api_v2": "./_samples/codex_roboticist/candidate/planning_api_v2/index.js",
       "report": "./_samples/codex_roboticist/REPORT.md"
     },
     {
       "id": "claude_roboticist",
       "label": "claude_roboticist",
       "routines": "./_samples/claude_roboticist/candidate/routines.json",
+      "planning_api_v2": "./_samples/claude_roboticist/candidate/planning_api_v2/index.js",
       "report": "./_samples/claude_roboticist/REPORT.md"
     }
   ]

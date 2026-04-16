@@ -4,7 +4,7 @@ import fs from "fs";
 import { plan } from "./index.js";
 import { dryRun } from "./dryRun.js";
 
-const scene = JSON.parse(fs.readFileSync(new URL("../../../../phase2_examples/obstacle_routing_example.json", import.meta.url), "utf8"));
+const scene = JSON.parse(fs.readFileSync(new URL("../../phase2_examples/obstacle_routing_example.json", import.meta.url), "utf8"));
 
 const routine = plan(scene, {
   family: "obstacle_routing",

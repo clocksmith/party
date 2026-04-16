@@ -3,6 +3,7 @@ import { runRoutine } from "./sim.js";
 import { validateRoutineBundle, runBundle } from "./harness.js";
 import { naiveSolve } from "./planning_api.js";
 import { makeView, render } from "./renderer.js";
+import { renderMarkdown } from "./md.js";
 
 const els = {
   canvas: document.getElementById("stage"),
@@ -16,6 +17,8 @@ const els = {
   sampleSelect: document.getElementById("sample-select"),
   sampleRunBtn: document.getElementById("sample-run"),
   sampleStatus: document.getElementById("sample-status"),
+  reportTabBtn: document.getElementById("report-tab-btn"),
+  reportView: document.getElementById("report-view"),
   bundleInput: document.getElementById("bundle-input"),
   bundleStatus: document.getElementById("bundle-status"),
   speed: document.getElementById("speed"),
@@ -51,7 +54,8 @@ const state = {
   phase2Active: null,
   sampleMode: false,
   requestedSampleId: null,
-  samples: []
+  samples: [],
+  sampleActive: null
 };
 
 function log(msg, cls = "") {
@@ -120,6 +124,8 @@ function configureSampleMode() {
   }
   els.modePill.hidden = false;
   els.samplePanel.hidden = false;
+  els.reportTabBtn.hidden = false;
+  els.reportView.innerHTML = `<p class="report-empty">Select and run a sample to view its REPORT.md.</p>`;
 }
 
 async function initSamples() {
@@ -271,7 +277,13 @@ async function runPhase2V2() {
     await loadSelectedPhase2Scene();
   }
   try {
-    const mod = await import(`../candidate/planning_api_v2/index.js?cache=${Date.now()}`);
+    const v2Base = state.sampleActive?.planning_api_v2
+      ?? "../candidate/planning_api_v2/index.js";
+    const v2Path = `${v2Base}${v2Base.includes("?") ? "&" : "?"}cache=${Date.now()}`;
+    const mod = await import(v2Path);
+    if (state.sampleActive) {
+      log(`v2 resolved to sample:${state.sampleActive.id} → ${v2Base}`, "warn");
+    }
     const planner = mod.plan ?? mod.default;
     if (typeof planner !== "function") {
       throw new Error("candidate/planning_api_v2/index.js must export plan(scene, context) or a default function");
@@ -307,8 +319,28 @@ function normalizePhase2Routine(value, sceneId) {
 
 function setTab(tab) {
   state.activeTab = tab;
+  const bodyId = tab === "log" ? "log" : tab === "routine" ? "routine-view" : "report-view";
   for (const btn of els.tabBtns) btn.classList.toggle("active", btn.dataset.tab === tab);
-  for (const body of els.tabBodies) body.classList.toggle("active", body.id === (tab === "log" ? "log" : "routine-view"));
+  for (const body of els.tabBodies) body.classList.toggle("active", body.id === bodyId);
+}
+
+async function loadSampleReport(sample) {
+  if (!sample?.report) {
+    els.reportView.innerHTML = `<p class="report-empty">Sample ${esc(sample?.id ?? "?")} has no REPORT.md path in _samples/index.json.</p>`;
+    return;
+  }
+  try {
+    const res = await fetch(sample.report);
+    if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
+    const md = await res.text();
+    els.reportView.innerHTML = `<div class="report-header">${esc(sample.label ?? sample.id)} — ${esc(sample.report)}</div>${renderMarkdown(md)}`;
+  } catch (e) {
+    els.reportView.innerHTML = `<p class="report-empty">Report for ${esc(sample.id)} unavailable (${esc(e.message)}).</p>`;
+  }
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
 }
 
 function runActive() {
@@ -349,11 +381,13 @@ async function runSelectedSample() {
       return;
     }
     state.bundle = bundle;
+    state.sampleActive = sample;
     els.bundleStatus.textContent = `sample:${sample.id}`;
-    els.sampleStatus.textContent = `${sample.label ?? sample.id} loaded from ${sample.routines}`;
+    els.sampleStatus.textContent = `${sample.label ?? sample.id} loaded. Phase 2 v2 now resolves to this sample's module.`;
     const scenes = await Promise.all(state.scenes.map(s => loadScene(s.id)));
     const summary = runBundle(scenes, bundle).summary;
     log(`loaded sample ${sample.id}: ${summary.scenes_passed}/${summary.scenes_total} scenes, ${summary.parts_placed}/${summary.parts_total} parts, ${summary.total_violations} violations`, summary.total_violations ? "warn" : "ok");
+    loadSampleReport(sample);
     runActive();
   } catch (e) {
     els.sampleStatus.textContent = `${sample.label ?? sample.id} unavailable (${e.message}).`;

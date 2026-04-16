@@ -54,7 +54,7 @@ See `src/schema.json` for the full scene and result formats.
 
 ## Phase 1 — routines for fixed scenes
 
-Use `src/planning_api.js` to build `routines.json`. How you produce it is your business: a JS planner, a Python solver, a hand-authored plan, an LLM-generated plan, whatever.
+Use `src/planning_api.js` as a starter/reference if it helps. How you produce `routines.json` is your business: a JS planner, a Python solver, a hand-authored plan, an LLM-generated plan, whatever.
 
 > **Scoring policy (read before optimizing):**
 >
@@ -147,6 +147,9 @@ Then read: `src/schema.json`, `src/planning_api.js`, `examples/example_planner.j
 
 ## FAQ
 
+**Can I look at `_samples/`?**
+Not if you are treating this as a real take-home. `_samples/` is included so the simulator can show completed example runs in sample mode. In a real candidate packet, `_samples/` would not be included.
+
 **Does the programming language matter for Phase 1?**
 No. Any language. The simulator only consumes `routines.json`. Phase 2's module must be browser-runnable JS (ES module, no build step).
 
@@ -154,7 +157,7 @@ No. Any language. The simulator only consumes `routines.json`. Phase 2's module 
 Yes. Say which decisions were yours and which were the AI's in `REPORT.md`. We probe this in the Q&A.
 
 **How long do candidates typically spend?**
-Most successful submissions land in 4–6 hours. Stop at 6 — an honest stopper beats a stealth overrun. We do not score hours.
+Most successful submissions land in 4–6 hours. We do not score hours; make the submission clear to a human reviewer.
 
 **What if a scene looks unsolvable?**
 Document the geometric argument and emit an empty routine.
@@ -204,4 +207,4 @@ Push back. Where is this a realistic proxy for the work? Where is it not?
 - [ ] `candidate/planning_api_v2/index.js` is browser-importable and exports `plan(scene, context)`.
 - [ ] `REPORT.md` filled in: before/after callsites, variant behavior, what v2 makes worse.
 - [ ] `node tests/reval.mjs --bundle candidate/routines.json` runs without `TAMPER`.
-- [ ] You stopped at 6 hours; if not, `REPORT.md` names what you would cut.
+- [ ] If you made scope cuts, `REPORT.md` names what you cut and what you would do next.

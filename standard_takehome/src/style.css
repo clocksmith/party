@@ -571,3 +571,28 @@ button.primary:hover { background: #e85a10; }
 }
 .canvas-overlay-btn:hover { background: #e85a10; }
 .canvas-overlay-btn:focus { outline: 2px solid #1a1a1c; outline-offset: 1px; }
+
+.header-subtitle {
+  color: #888;
+  font-size: 11px;
+}
+.header-link {
+  color: var(--accent);
+  font-size: 11px;
+  text-decoration: none;
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 106, 31, 0.3);
+  border-radius: 3px;
+  transition: background 0.12s ease;
+}
+.header-link:hover {
+  background: rgba(255, 106, 31, 0.18);
+  border-color: var(--accent);
+}
+.header-link:focus { outline: 1px solid var(--accent); }
+
+.sample-note a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.sample-note a:hover { color: #e85a10; }

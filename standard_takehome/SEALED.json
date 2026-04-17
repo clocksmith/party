@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "sealed_at": "2026-04-17T01:06:31.141Z",
+  "sealed_at": "2026-04-17T01:12:12.937Z",
   "files": {
-    "index.html": "16d97f2309a5a1d175c33004f379ceeb36418fe4793c59713735b5d13abda614",
+    "index.html": "2850f3f6b6d108c6174300bd140c648a82b05ef4aba2ef7262aaf18c91493dc4",
     "phase2_examples/capacity_example.json": "51c24e578c5821d1cc6d00479cde33e7bbd4907c97bfd3e3ab2cbd40306ea426",
     "phase2_examples/index.json": "bdff5b065902a2761e68d2cdfff6e57e540498bc9bad5528870cf5b52ac5a8da",
     "phase2_examples/obstacle_routing_example.json": "c7301cf92bf1181c48d76e5e384fde974685dd2bb823b2b4c16f94fd47384041",
@@ -27,6 +27,6 @@
     "src/schema.json": "cdf8b498d8ea754b0a2279c24d972985d4a28da69648fc47079209878c939a96",
     "src/sim.js": "a22274a82f78105a903517c60948f3f19b0c70851ec4f568996fad9fa836cb38",
     "src/sparklines.js": "1d181b23c1b5daa623c2b3c0bd04694cf633d019e34aaf702443af1a7d70f570",
-    "src/style.css": "74e884ca1c4e07ddbaf106172ff53c12e181921d8a06fbc0c9f908fa981ddf26"
+    "src/style.css": "e09b4ae50fd04e375ffb8a42f32331d487c479a6400c2185427de8eb6e6ceefe"
   }
 }

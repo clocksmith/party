@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "sealed_at": "2026-04-17T01:00:12.121Z",
+  "sealed_at": "2026-04-17T01:00:49.753Z",
   "files": {
     "index.html": "886dcb5168724f447a0b5325280fc77ab906e1d531ea34fc55b2325a263f4427",
     "phase2_examples/capacity_example.json": "51c24e578c5821d1cc6d00479cde33e7bbd4907c97bfd3e3ab2cbd40306ea426",
@@ -27,6 +27,6 @@
     "src/schema.json": "cdf8b498d8ea754b0a2279c24d972985d4a28da69648fc47079209878c939a96",
     "src/sim.js": "a22274a82f78105a903517c60948f3f19b0c70851ec4f568996fad9fa836cb38",
     "src/sparklines.js": "1d181b23c1b5daa623c2b3c0bd04694cf633d019e34aaf702443af1a7d70f570",
-    "src/style.css": "d155e92323dfa52d6a8af8240c133e475d1a9535f9ca763af575d6161485b70f"
+    "src/style.css": "2a9764fead956d87e854ed535ba91a47428e384b9afb2c22d7883fa11b8c32bb"
   }
 }

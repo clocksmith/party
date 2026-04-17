@@ -510,7 +510,7 @@ button.primary:hover { background: #e85a10; }
   font-size: 11px;
   color: var(--ink-dim);
   pointer-events: none;
-  max-width: 260px;
+  max-width: 320px;
 }
 .overlay .overlay-scene {
   margin: 0 0 4px 0;

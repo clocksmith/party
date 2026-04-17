@@ -124,6 +124,15 @@ header.bar select {
   line-height: 1.4;
 }
 
+.challenge-note {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.challenge-note b { color: var(--ink); }
+.challenge-note i { color: var(--accent); font-style: normal; }
+.challenge-section { border-left: 2px solid var(--accent); padding-left: 8px; }
+
 .sample-note code {
   font-family: var(--mono);
   background: rgba(0, 0, 0, 0.08);

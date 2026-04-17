@@ -16,10 +16,10 @@ const COLORS = {
   fixtureNestEdge: "rgba(26,26,28,0.28)",
   fixtureNestInner: "rgba(26,26,28,0.08)",
   partKinds: {
-    a: "#0a0a0c",
+    a: "#9a4ad6",
     b: "#ffffff",
     c: "#cf6a3a",
-    d: "#9a4ad6"
+    d: "#0a0a0c"
   },
   partMissing: "#ff00ff",
   link: "#0c0c0e",

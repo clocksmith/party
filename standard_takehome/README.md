@@ -56,7 +56,7 @@ The sim does **not** model dynamics, inertia, gravity, sensing, force, weight, r
 
 See `src/schema.json` for the full scene and result formats.
 
-**Frozen surface (do not modify):** `index.html`, `src/app.js`, `src/md.js`, `src/renderer.js`, `src/style.css`, `src/schema.json`, `src/sim.js`, `src/arm.js`, `src/scene.js`, `src/harness.js`, `scenarios/*.json`, `phase2_examples/*.json`. Contents are checksummed in `SEALED.json`; tampering is detected. Put your work under `solution/`.
+**Frozen surface (do not modify):** `index.html`, `src/analytics.js`, `src/app.js`, `src/md.js`, `src/renderer.js`, `src/sparklines.js`, `src/style.css`, `src/schema.json`, `src/sim.js`, `src/arm.js`, `src/scene.js`, `src/harness.js`, `scenarios/*.json`, `phase2_examples/*.json`. Contents are checksummed in `SEALED.json`; tampering is detected. Put your work under `solution/`.
 
 ## Phase 1 - Static Routines
 

@@ -5,6 +5,7 @@ import { naiveSolve } from "./planning_api.js";
 import { makeView, render } from "./renderer.js";
 import { renderMarkdown } from "./md.js";
 import { createRingBuffer, pushRing, drawSpark } from "./sparklines.js";
+import { initAnalytics } from "./analytics.js";
 
 const DEFAULT_WORLD = { x_min: -1.0, x_max: 1.0, y_min: -0.05, y_max: 0.9 };
 
@@ -30,6 +31,7 @@ const els = {
   resetBtn: document.getElementById("reset"),
   baselineBtn: document.getElementById("baseline"),
   modePill: document.getElementById("mode-pill"),
+  githubLink: document.querySelector(".header-link"),
   samplePanel: document.getElementById("sample-panel"),
   sampleSelect: document.getElementById("sample-select"),
   sampleRunBtn: document.getElementById("sample-run"),
@@ -73,7 +75,10 @@ const state = {
   requestedSampleId: null,
   samples: [],
   sampleActive: null,
-  activeRoutineStep: null
+  activeRoutineStep: null,
+  viaSharedLink: location.hash.length > 0,
+  analytics: null,
+  analyticsQueue: []
 };
 
 function log(msg, cls = "") {
@@ -104,7 +109,11 @@ async function init() {
     draw();
   });
   els.baselineBtn.addEventListener("click", runBaseline);
+  if (els.githubLink) els.githubLink.addEventListener("click", () => trackAnalytics("click_github", { via: state.viaSharedLink ? "shared_link" : "direct" }));
+  if (els.modePill) els.modePill.addEventListener("click", () => trackAnalytics("click_exit_sample", { via: state.viaSharedLink ? "shared_link" : "direct" }));
   configureSampleMode();
+  if (state.viaSharedLink) history.replaceState(null, "", location.pathname + location.search);
+  startAnalytics();
   els.bundleInput.addEventListener("change", onBundleUpload);
   els.exportBtn.addEventListener("click", exportResults);
   els.sampleRunBtn.addEventListener("click", runSelectedSample);
@@ -127,6 +136,36 @@ async function init() {
   if (state.sampleMode && state.requestedSampleId) await runSelectedSample();
   log("simulator ready. select a scene, drop a routines.json, or use the baseline planner.", "ok");
   requestAnimationFrame(loop);
+}
+
+function analyticsContext() {
+  return {
+    sampleMode: state.sampleMode,
+    sampleId: state.requestedSampleId || state.sampleActive?.id || "none",
+    via: state.viaSharedLink ? "shared_link" : "direct"
+  };
+}
+
+function startAnalytics() {
+  const context = analyticsContext();
+  trackAnalytics("takehome_start", {
+    sample_mode: context.sampleMode ? "on" : "off",
+    sample_id: context.sampleId,
+    via: context.via
+  });
+  initAnalytics(context).then(tracker => {
+    state.analytics = tracker;
+    const queued = state.analyticsQueue.splice(0);
+    for (const [name, params] of queued) tracker.logEvent(name, params);
+  });
+}
+
+function trackAnalytics(name, params = {}) {
+  if (state.analytics) {
+    state.analytics.logEvent(name, params);
+    return;
+  }
+  if (state.analyticsQueue.length < 30) state.analyticsQueue.push([name, params]);
 }
 
 function configureSampleMode() {
@@ -216,6 +255,10 @@ async function selectScene(id) {
   renderResult();
   renderRoutine();
   draw();
+  trackAnalytics("select_scene", {
+    scene_id: id,
+    sample_mode: state.sampleMode ? "on" : "off"
+  });
 }
 
 function updateSceneNav() {
@@ -302,6 +345,10 @@ function updateSparklines(snap) {
 
 async function runNextFromOverlay() {
   els.runNextOverlay.hidden = true;
+  trackAnalytics("run_next_overlay", {
+    scene_index: state.sceneIndex,
+    phase2_active: !!state.phase2Active
+  });
   const nextIdx = state.sceneIndex + 1;
   if (nextIdx < state.scenes.length) {
     await selectSceneByIndex(nextIdx);
@@ -407,6 +454,11 @@ async function loadSelectedPhase2Scene() {
   state.playing = false;
   els.overlay.textContent = `${state.scene.id}\nPhase 2 ${meta.family} | ${meta.source}\n${state.scene.parts.length} parts | ${state.scene.bins.length} bins | ${state.scene.obstacles?.length ?? 0} obstacles`;
   log(`loaded Phase 2 ${meta.source} variant ${state.scene.id} (${meta.family})`, "ok");
+  trackAnalytics("load_phase2_variant", {
+    family: meta.family,
+    variant_id: meta.id,
+    source: meta.source
+  });
   renderResult();
   renderRoutine();
   draw();
@@ -418,6 +470,7 @@ async function runPhase2V2() {
     log("no Phase 2 variant selected", "warn");
     return;
   }
+  trackAnalytics("run_phase2", { family: meta.family, variant: meta.id, via: analyticsContext().via });
   if (!state.phase2Active || state.phase2Active.id !== meta.id) {
     await loadSelectedPhase2Scene();
   }
@@ -448,6 +501,13 @@ async function runPhase2V2() {
     };
     els.bundleStatus.textContent = `phase2:${state.scene.id}`;
     log(`v2 generated ${entry.steps.length} steps for ${state.scene.id}`, "ok");
+    trackAnalytics("generate_phase2_routine", {
+      family: meta.family,
+      variant_id: state.scene.id,
+      source: meta.source,
+      steps: entry.steps.length,
+      sample_mode: state.sampleMode ? "on" : "off"
+    });
     runActive({ generatePhase2: false });
   } catch (e) {
     log(`Phase 2 v2 failed: ${e.message}`, "err");
@@ -520,6 +580,16 @@ function runActive(options) {
   state.playing = true;
   els.pauseBtn.textContent = "■ pause";
   log(`ran ${state.activeSceneId}: ${result.success ? "PASS" : "FAIL"} (${result.parts_placed}/${result.parts_total}, ${result.violations.length} violations, ${result.elapsed_micro_steps} steps)`, result.success ? "ok" : "err");
+  trackAnalytics("run_routine", {
+    scene_id: state.activeSceneId,
+    sample_mode: state.sampleMode ? "on" : "off",
+    sample_id: state.sampleActive?.id || "none",
+    phase2_active: !!state.phase2Active,
+    success: result.success,
+    parts_placed: result.parts_placed,
+    parts_total: result.parts_total,
+    violations: result.violations.length
+  });
   for (const v of result.violations) log(`  violation @ step ${v.step_index}: ${v.kind} — ${v.detail}`, "err");
   renderResult();
   renderRoutine();
@@ -532,6 +602,7 @@ async function runSelectedSample() {
     log("no sample selected", "warn");
     return;
   }
+  trackAnalytics("run_sample", { sample_id: sample.id, via: analyticsContext().via });
   try {
     const res = await fetch(sample.routines);
     if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
@@ -543,6 +614,9 @@ async function runSelectedSample() {
     }
     state.bundle = bundle;
     state.sampleActive = sample;
+    trackAnalytics("load_sample", {
+      sample_id: sample.id
+    });
     els.bundleStatus.textContent = `sample:${sample.id}`;
     els.sampleStatus.textContent = `${sample.label ?? sample.id} loaded. Phase 2 v2 now resolves to this sample's module.`;
     const scenes = await Promise.all(state.scenes.map(s => loadScene(s.id)));
@@ -587,6 +661,10 @@ function onBundleUpload(ev) {
       state.bundle = bundle;
       els.bundleStatus.textContent = f.name;
       log(`loaded bundle ${f.name} with ${Object.keys(bundle.scenarios).length} scenarios`, "ok");
+      trackAnalytics("upload_bundle", {
+        scenarios: Object.keys(bundle.scenarios).length,
+        sample_mode: state.sampleMode ? "on" : "off"
+      });
       renderRoutine();
     } catch (e) {
       log(`failed to parse bundle: ${e.message}`, "err");
@@ -607,6 +685,12 @@ function exportResults() {
     a.click();
     URL.revokeObjectURL(url);
     log(`exported results.json: ${out.summary.scenes_passed}/${out.summary.scenes_total} scenes passed`, "ok");
+    trackAnalytics("export_results", {
+      scenes_passed: out.summary.scenes_passed,
+      scenes_total: out.summary.scenes_total,
+      parts_placed: out.summary.parts_placed,
+      violations: out.summary.total_violations
+    });
   });
 }
 

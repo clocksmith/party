@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "sealed_at": "2026-04-17T01:29:23.735Z",
+  "sealed_at": "2026-04-17T01:45:47.499Z",
   "files": {
     "index.html": "576f855dc78f7606182b1092aabc88c7148898f4078a5cc5e024380c17232dca",
     "phase2_examples/capacity_example.json": "51c24e578c5821d1cc6d00479cde33e7bbd4907c97bfd3e3ab2cbd40306ea426",
@@ -18,7 +18,8 @@
     "scenarios/09_precedence_wall.json": "3631e1384b94b2308fd7950b514b3bee1499147010077d5ef182de87c8d0c3ca",
     "scenarios/10_capacity_trap.json": "6756d908664fce60b6dcdff74ae3e00e35be59de26e5fe60b2584409d1402461",
     "scenarios/index.json": "55bdbe12c1bcd93e7ffbc4847650a35a202973a6cc4a283122e1dbf59b5f92e6",
-    "src/app.js": "69cafe7a6cdbae35ad99b272ad4d10005404fd09d2039a81bccdf3ccbe761dfa",
+    "src/analytics.js": "1a0741c4e93048b5efc2d082a230b1ff78381cd87668cd1d251587db704eb18d",
+    "src/app.js": "c8f4b16b53f86449a75d2733524fa23333a618aafb3f151a98129da272381446",
     "src/arm.js": "8fb92f07563ca9a6e3c75874fda7b5e442df79adf28404e7ddef620246d305ee",
     "src/harness.js": "2a684566061e90aa2843359460a7c084bf3b1f58c07bdea041b9077d051eef79",
     "src/md.js": "7514f362f1427e995a62703d052f6466cd2dbd768a8b8f091c9021302c953e0a",

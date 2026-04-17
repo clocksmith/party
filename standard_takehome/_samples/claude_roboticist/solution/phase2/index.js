@@ -31,6 +31,21 @@ import { endEffector } from "../../../../src/arm.js";
 import { binCenter, compatibleBins, precedenceMet } from "../../../../src/planning_api.js";
 import { isReachable, shapeCandidates, replaySteps } from "./safety_checks.js";
 
+export const family = "obstacle_routing";
+
+export function plan(scene, context = {}) {
+  if (context.family && context.family !== family) {
+    throw new Error(`claude_roboticist v2 supports ${family}, not ${context.family}`);
+  }
+  const result = solveScene(scene);
+  return {
+    steps: result.steps,
+    notes: result.state.placed.size === scene.parts.length
+      ? `phase2 ${family}: completed ${scene.id}`
+      : `phase2 ${family}: safely placed ${result.state.placed.size}/${scene.parts.length}`
+  };
+}
+
 export function initialState(scene) {
   return {
     angles: (scene.arm.initial_angles ?? [0, 1.2, 0]).slice(),

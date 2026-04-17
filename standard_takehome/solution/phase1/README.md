@@ -26,15 +26,13 @@ collisions and bin-state failures after earlier placements.
 ## Scene Cuts
 
 The intended behavior is conservative: skip a part or stop a scene before
-emitting a known-unsafe move. On the current fixed benchmark geometry, the
-planner is expected to solve the required obstacle scenes instead of arguing
-that they are disconnected. `08_dense`, `09_precedence_wall`, and
-`10_capacity_trap` are still allowed to be partial if the safe search budget
-runs out.
+emitting a known-unsafe move. On the current fixed benchmark geometry, this
+bundle solves all 10 visible scenes, including the bonus scenes, with zero
+violations.
 
 ## Walkthrough
 
-On `06_combined`, the planner first orders reachable parts by obstacle-aware
+On `06_combined`, the planner orders reachable parts by obstacle-aware
 position instead of raw input order. It protects restricted bin capacity by
 assigning kind-specific bins before `any` bins, then routes each held part
 through a high transit configuration when the direct pickup-to-drop joint

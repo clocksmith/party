@@ -1,6 +1,6 @@
 {
-  "candidate": "claude_robotics_sample",
-  "generator": "phase1_planner.js (wavefront + shape heuristics + safety pre-check)",
+  "candidate": "claude_roboticist_sample",
+  "generator": "_samples/claude_roboticist/solution/phase1/planner.js",
   "scenarios": {
     "01_warmup": {
       "steps": [

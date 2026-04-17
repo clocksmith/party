@@ -1,6 +1,6 @@
 {
   "candidate": "codex_roboticist",
-  "generator": "candidate/phase1_planner.js",
+  "generator": "solution/phase1/planner.js",
   "scenarios": {
     "01_warmup": {
       "steps": [

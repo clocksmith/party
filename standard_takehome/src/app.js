@@ -317,7 +317,8 @@ async function runNextFromOverlay() {
   refreshPhase2SceneOptions();
   els.phase2Scene.value = firstPublic.id;
   await loadSelectedPhase2Scene();
-  log(`end of benchmark — loaded Phase 2 ${firstPublic.family} example. click 'run v2 in sim' to continue.`, "ok");
+  log(`end of benchmark — loaded Phase 2 ${firstPublic.family} example, running v2 now.`, "ok");
+  await runPhase2V2();
 }
 
 async function initPhase2() {
@@ -447,7 +448,7 @@ async function runPhase2V2() {
     };
     els.bundleStatus.textContent = `phase2:${state.scene.id}`;
     log(`v2 generated ${entry.steps.length} steps for ${state.scene.id}`, "ok");
-    runActive();
+    runActive({ generatePhase2: false });
   } catch (e) {
     log(`Phase 2 v2 failed: ${e.message}`, "err");
   }
@@ -496,7 +497,12 @@ function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
 }
 
-function runActive() {
+function runActive(options) {
+  const generatePhase2 = options?.generatePhase2 ?? true;
+  if (generatePhase2 && state.phase2Active && state.phase2Active.id === state.activeSceneId) {
+    runPhase2V2();
+    return;
+  }
   if (!state.bundle) {
     log("no bundle loaded — drop a routines.json or click 'baseline'", "warn");
     return;
@@ -543,6 +549,9 @@ async function runSelectedSample() {
     const summary = runBundle(scenes, bundle).summary;
     log(`loaded sample ${sample.id}: ${summary.scenes_passed}/${summary.scenes_total} scenes, ${summary.parts_placed}/${summary.parts_total} parts, ${summary.total_violations} violations`, summary.total_violations ? "warn" : "ok");
     loadSampleNotes(sample);
+    if (state.phase2Active && state.phase2Active.id === state.activeSceneId) {
+      await selectSceneByIndex(0);
+    }
     runActive();
   } catch (e) {
     els.sampleStatus.textContent = `${sample.label ?? sample.id} unavailable (${e.message}).`;

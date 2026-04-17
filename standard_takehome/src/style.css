@@ -456,7 +456,19 @@ button.primary:hover { background: #e85a10; }
   border-radius: 3px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
+.mode-pill .mode-pill-exit {
+  font-weight: 500;
+  opacity: 0.7;
+  border-left: 1px solid rgba(26, 26, 28, 0.3);
+  padding-left: 6px;
+}
+.mode-pill:hover { background: #e85a10; }
+.mode-pill:hover .mode-pill-exit { opacity: 1; }
 
 /* scene navigator (header) */
 .scene-nav {

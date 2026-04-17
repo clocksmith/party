@@ -6,6 +6,16 @@ import { makeView, render } from "./renderer.js";
 import { renderMarkdown } from "./md.js";
 import { createRingBuffer, pushRing, drawSpark } from "./sparklines.js";
 
+const DEFAULT_WORLD = { x_min: -1.0, x_max: 1.0, y_min: -0.05, y_max: 0.9 };
+
+// Add ~12cm of below-floor padding in the viewport so the warning band is not
+// flush against the bottom edge. Coordinate system is unchanged — world x/y
+// still mean the same meters; we just extend the visible y_min downward.
+function viewBounds(scene) {
+  const w = scene?.world ?? DEFAULT_WORLD;
+  return { ...w, y_min: w.y_min - 0.12 };
+}
+
 const els = {
   canvas: document.getElementById("stage"),
   scenePrev: document.getElementById("scene-prev"),
@@ -121,16 +131,25 @@ async function init() {
 
 function configureSampleMode() {
   const params = new URLSearchParams(location.search);
-  if (!params.has("sample")) return;
-
   const sampleParam = params.get("sample");
-  const normalized = String(sampleParam).toLowerCase();
-  state.sampleMode = !["0", "false", "off", "no"].includes(normalized);
-  if (!state.sampleMode) return;
+  const normalized = String(sampleParam ?? "").toLowerCase();
 
-  if (!["", "1", "true", "on", "samples"].includes(normalized)) {
-    state.requestedSampleId = sampleParam;
+  // Explicit opt-out: ?sample=off (also accepts 0/false/no/candidate)
+  if (["0", "false", "off", "no", "candidate"].includes(normalized)) {
+    state.sampleMode = false;
+    log("candidate view. Add ?sample=1 to the URL for reviewer/demo mode.", "warn");
+    return;
   }
+
+  // Default: sample mode ON. ?sample=<id> picks a specific sample; bare URL
+  // lands on codex_roboticist.
+  state.sampleMode = true;
+  if (normalized && !["1", "true", "on", "samples"].includes(normalized)) {
+    state.requestedSampleId = sampleParam;
+  } else {
+    state.requestedSampleId = "codex_roboticist";
+  }
+
   els.modePill.hidden = false;
   els.samplePanel.hidden = false;
   els.notesTabBtn.hidden = false;
@@ -184,7 +203,7 @@ async function selectScene(id) {
   state.activeSceneId = id;
   state.scene = await loadScene(id);
   state.phase2Active = null;
-  state.view = makeView(els.canvas, state.scene.world ?? { x_min: -1.0, x_max: 1.0, y_min: -0.05, y_max: 0.9 });
+  state.view = makeView(els.canvas, viewBounds(state.scene));
   state.trace = null;
   state.result = null;
   state.frame = 0;
@@ -228,7 +247,7 @@ function buildSparklinePanel(scene) {
       read: snap => snap.angles[i]
     });
   }
-  const w = scene.world ?? { x_min: -1.0, x_max: 1.0, y_min: -0.05, y_max: 0.9 };
+  const w = scene.world ?? DEFAULT_WORLD;
   state.sparks.push({
     key: "ee_x", label: "EE.x",
     min: w.x_min, max: w.x_max,
@@ -380,7 +399,7 @@ async function loadSelectedPhase2Scene() {
   state.scene = await res.json();
   state.activeSceneId = state.scene.id;
   state.phase2Active = meta;
-  state.view = makeView(els.canvas, state.scene.world ?? { x_min: -1.0, x_max: 1.0, y_min: -0.05, y_max: 0.9 });
+  state.view = makeView(els.canvas, viewBounds(state.scene));
   state.trace = null;
   state.result = null;
   state.frame = 0;
@@ -733,7 +752,7 @@ function onPlaybackEnded() {
 }
 
 window.addEventListener("resize", () => {
-  if (state.scene) state.view = makeView(els.canvas, state.scene.world ?? { x_min: -1.0, x_max: 1.0, y_min: -0.05, y_max: 0.9 });
+  if (state.scene) state.view = makeView(els.canvas, viewBounds(state.scene));
 });
 
 init().catch(e => log(`init failed: ${e.message}`, "err"));

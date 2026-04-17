@@ -40,6 +40,7 @@ const els = {
   notesView: document.getElementById("notes-view"),
   bundleInput: document.getElementById("bundle-input"),
   bundleStatus: document.getElementById("bundle-status"),
+  bundleLinks: document.getElementById("bundle-links"),
   speed: document.getElementById("speed"),
   speedVal: document.getElementById("speed-val"),
   result: document.getElementById("result"),
@@ -355,16 +356,26 @@ async function runNextFromOverlay() {
     runActive();
     return;
   }
-  const firstPublic = state.phase2Catalog.find(v => v.source === "public");
-  if (!firstPublic) {
+  let pick = null;
+  if (state.sampleActive) {
+    try {
+      const v2Url = new URL(state.sampleActive.phase2, document.baseURI).href;
+      const mod = await import(`${v2Url}?probe=${Date.now()}`);
+      if (mod.family) {
+        pick = state.phase2Catalog.find(v => v.source === "public" && v.family === mod.family);
+      }
+    } catch { /* fall through */ }
+  }
+  if (!pick) pick = state.phase2Catalog.find(v => v.source === "public");
+  if (!pick) {
     log("no Phase 2 public example available", "warn");
     return;
   }
-  els.phase2Family.value = firstPublic.family;
+  els.phase2Family.value = pick.family;
   refreshPhase2SceneOptions();
-  els.phase2Scene.value = firstPublic.id;
+  els.phase2Scene.value = pick.id;
   await loadSelectedPhase2Scene();
-  log(`end of benchmark — loaded Phase 2 ${firstPublic.family} example, running v2 now.`, "ok");
+  log(`end of benchmark — loaded Phase 2 ${pick.family} example, running v2 now.`, "ok");
   await runPhase2V2();
 }
 
@@ -475,8 +486,9 @@ async function runPhase2V2() {
     await loadSelectedPhase2Scene();
   }
   try {
-    const v2Base = state.sampleActive?.phase2
+    const v2Rel = state.sampleActive?.phase2
       ?? "../solution/phase2/index.js";
+    const v2Base = new URL(v2Rel, document.baseURI).href;
     const v2Path = `${v2Base}${v2Base.includes("?") ? "&" : "?"}cache=${Date.now()}`;
     const mod = await import(v2Path);
     if (state.sampleActive) {
@@ -557,6 +569,24 @@ function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
 }
 
+const GITHUB_BASE = "https://github.com/clocksmith/party/tree/main/standard_takehome";
+
+function showBundleLinks(sample) {
+  if (!els.bundleLinks) return;
+  if (!sample) { els.bundleLinks.hidden = true; return; }
+  const base = `${GITHUB_BASE}/_samples/${encodeURIComponent(sample.id)}/solution`;
+  const links = [
+    ["phase1/routines.json", "Phase 1 routines"],
+    ["phase1/README.md", "Phase 1 README"],
+    ["phase2/index.js", "Phase 2 module"],
+    ["phase2/README.md", "Phase 2 README"]
+  ];
+  els.bundleLinks.innerHTML = links
+    .map(([path, label]) => `<a href="${base}/${path}" target="_blank" rel="noopener">${esc(label)}</a>`)
+    .join("");
+  els.bundleLinks.hidden = false;
+}
+
 function runActive(options) {
   const generatePhase2 = options?.generatePhase2 ?? true;
   if (generatePhase2 && state.phase2Active && state.phase2Active.id === state.activeSceneId) {
@@ -618,6 +648,7 @@ async function runSelectedSample() {
       sample_id: sample.id
     });
     els.bundleStatus.textContent = `sample:${sample.id}`;
+    showBundleLinks(sample);
     els.sampleStatus.textContent = `${sample.label ?? sample.id} loaded. Phase 2 v2 now resolves to this sample's module.`;
     const scenes = await Promise.all(state.scenes.map(s => loadScene(s.id)));
     const summary = runBundle(scenes, bundle).summary;

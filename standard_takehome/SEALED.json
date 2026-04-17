@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "sealed_at": "2026-04-17T01:45:47.499Z",
+  "sealed_at": "2026-04-17T01:57:31.602Z",
   "files": {
-    "index.html": "576f855dc78f7606182b1092aabc88c7148898f4078a5cc5e024380c17232dca",
+    "index.html": "c242ba4638d5bcaacb3f9689b6439f2cdd34ac2c22dc3804d087a021414c2e6c",
     "phase2_examples/capacity_example.json": "51c24e578c5821d1cc6d00479cde33e7bbd4907c97bfd3e3ab2cbd40306ea426",
     "phase2_examples/index.json": "bdff5b065902a2761e68d2cdfff6e57e540498bc9bad5528870cf5b52ac5a8da",
     "phase2_examples/obstacle_routing_example.json": "c7301cf92bf1181c48d76e5e384fde974685dd2bb823b2b4c16f94fd47384041",
@@ -18,8 +18,7 @@
     "scenarios/09_precedence_wall.json": "3631e1384b94b2308fd7950b514b3bee1499147010077d5ef182de87c8d0c3ca",
     "scenarios/10_capacity_trap.json": "6756d908664fce60b6dcdff74ae3e00e35be59de26e5fe60b2584409d1402461",
     "scenarios/index.json": "55bdbe12c1bcd93e7ffbc4847650a35a202973a6cc4a283122e1dbf59b5f92e6",
-    "src/analytics.js": "1a0741c4e93048b5efc2d082a230b1ff78381cd87668cd1d251587db704eb18d",
-    "src/app.js": "c8f4b16b53f86449a75d2733524fa23333a618aafb3f151a98129da272381446",
+    "src/app.js": "a934389075fb218bbfcecee939d6f2d093d7fb683d559ad30c6b9207c3e4a042",
     "src/arm.js": "8fb92f07563ca9a6e3c75874fda7b5e442df79adf28404e7ddef620246d305ee",
     "src/harness.js": "2a684566061e90aa2843359460a7c084bf3b1f58c07bdea041b9077d051eef79",
     "src/md.js": "7514f362f1427e995a62703d052f6466cd2dbd768a8b8f091c9021302c953e0a",
@@ -28,6 +27,6 @@
     "src/schema.json": "cdf8b498d8ea754b0a2279c24d972985d4a28da69648fc47079209878c939a96",
     "src/sim.js": "a22274a82f78105a903517c60948f3f19b0c70851ec4f568996fad9fa836cb38",
     "src/sparklines.js": "1d181b23c1b5daa623c2b3c0bd04694cf633d019e34aaf702443af1a7d70f570",
-    "src/style.css": "7ac47969e63d3262ec2cb22c56e3a6f9117318fe72cd6827e7fb383360d8c4b3"
+    "src/style.css": "4f4ea0701140cb1e6bae612704610a7bdf10b1e61976c02861bc2c3939bd7562"
   }
 }

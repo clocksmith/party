@@ -133,6 +133,19 @@ header.bar select {
 .challenge-note i { color: var(--accent); font-style: normal; }
 .challenge-section { border-left: 2px solid var(--accent); padding-left: 8px; }
 
+.bundle-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 6px;
+  font-size: 10px;
+}
+.bundle-links a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.bundle-links a:hover { text-decoration: underline; }
+
 .sample-note code {
   font-family: var(--mono);
   background: rgba(0, 0, 0, 0.08);

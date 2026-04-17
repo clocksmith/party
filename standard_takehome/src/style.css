@@ -387,6 +387,16 @@ button.primary:hover { background: #e85a10; }
 
 .routine-step .idx { color: #5a5a60; text-align: right; }
 .routine-step .type { color: #f0f0f2; }
+.routine-step.active {
+  color: #fff3df;
+  background: rgba(255, 106, 31, 0.20);
+  border-left: 2px solid var(--accent);
+  padding-left: 6px;
+}
+.routine-step.active .idx,
+.routine-step.active .type {
+  color: #fff3df;
+}
 .routine-step.violation {
   color: #ffb09c;
   background: rgba(255, 106, 31, 0.12);

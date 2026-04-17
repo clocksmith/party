@@ -206,11 +206,12 @@ function emptyState(scene) {
   };
 }
 
-function snapshot(state, scene) {
+function snapshot(state, scene, stepIndex = -1) {
   const arm = scene.arm;
   const lengths = arm.links.map(l => l.length);
   const base = { x: arm.base[0], y: arm.base[1] };
   return {
+    step_index: stepIndex,
     angles: state.angles.slice(),
     points: fk(state.angles, lengths, base),
     gripper: state.gripper,
@@ -228,6 +229,7 @@ function moveTowardAngles(state, scene, target, opts) {
   const microStep = DEFAULTS.micro_step;
   const recordTrace = opts.recordTrace;
   const trace = opts.trace;
+  const stepIndex = opts.stepIndex ?? -1;
   const maxSteps = DEFAULTS.max_micro_steps;
 
   while (true) {
@@ -258,7 +260,7 @@ function moveTowardAngles(state, scene, target, opts) {
     state.elapsed_micro_steps += 1;
 
     if (recordTrace && (state.elapsed_micro_steps % 2 === 0)) {
-      trace.push(snapshot(state, scene));
+      trace.push(snapshot(state, scene, stepIndex));
     }
 
     if (state.elapsed_micro_steps > maxSteps) {
@@ -270,7 +272,7 @@ function moveTowardAngles(state, scene, target, opts) {
 export function runRoutine(scene, routine, opts = {}) {
   const recordTrace = opts.recordTrace ?? true;
   const state = emptyState(scene);
-  const trace = recordTrace ? [snapshot(state, scene)] : null;
+  const trace = recordTrace ? [snapshot(state, scene, -1)] : null;
   const violations = [];
   let termination = "completed";
   const lengths = scene.arm.links.map(l => l.length);
@@ -293,7 +295,7 @@ export function runRoutine(scene, routine, opts = {}) {
         termination = "invalid_step";
         break;
       }
-      const v = moveTowardAngles(state, scene, step.angles, { recordTrace, trace });
+      const v = moveTowardAngles(state, scene, step.angles, { recordTrace, trace, stepIndex: si });
       if (v) {
         violations.push({ ...v, step_index: si });
         termination = v.kind === "step_limit" ? "step_limit" : "violation";
@@ -306,7 +308,7 @@ export function runRoutine(scene, routine, opts = {}) {
         termination = "ik_failure";
         break;
       }
-      const v = moveTowardAngles(state, scene, sol.angles, { recordTrace, trace });
+      const v = moveTowardAngles(state, scene, sol.angles, { recordTrace, trace, stepIndex: si });
       if (v) {
         violations.push({ ...v, step_index: si });
         termination = v.kind === "step_limit" ? "step_limit" : "violation";
@@ -327,7 +329,7 @@ export function runRoutine(scene, routine, opts = {}) {
         break;
       }
       state.gripper = "closed";
-      if (recordTrace) trace.push(snapshot(state, scene));
+      if (recordTrace) trace.push(snapshot(state, scene, si));
     } else if (step.type === "grip_open") {
       if (state.heldPart) {
         const r = tryPlaceHeldPart(state, scene);
@@ -344,11 +346,11 @@ export function runRoutine(scene, routine, opts = {}) {
         }
       }
       state.gripper = "open";
-      if (recordTrace) trace.push(snapshot(state, scene));
+      if (recordTrace) trace.push(snapshot(state, scene, si));
     } else if (step.type === "wait") {
       const n = Math.max(1, Math.round((step.duration ?? 0) / 0.05));
       state.elapsed_micro_steps += n;
-      if (recordTrace) trace.push(snapshot(state, scene));
+      if (recordTrace) trace.push(snapshot(state, scene, si));
     } else {
       violations.push({ kind: "invalid_target", step_index: si, detail: `unknown step type ${step.type}` });
       termination = "invalid_step";

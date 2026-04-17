@@ -55,7 +55,8 @@ const state = {
   sampleMode: false,
   requestedSampleId: null,
   samples: [],
-  sampleActive: null
+  sampleActive: null,
+  activeRoutineStep: null
 };
 
 function log(msg, cls = "") {
@@ -83,7 +84,12 @@ async function init() {
   els.sceneSelect.addEventListener("change", () => selectScene(els.sceneSelect.value));
   els.runBtn.addEventListener("click", runActive);
   els.pauseBtn.addEventListener("click", () => { state.playing = !state.playing; els.pauseBtn.textContent = state.playing ? "■ pause" : "▶ resume"; });
-  els.resetBtn.addEventListener("click", () => { state.frame = 0; state.playing = false; draw(); });
+  els.resetBtn.addEventListener("click", () => {
+    state.frame = 0;
+    state.playing = false;
+    updateRoutineHighlight({ force: true, scroll: false });
+    draw();
+  });
   els.baselineBtn.addEventListener("click", runBaseline);
   configureSampleMode();
   els.bundleInput.addEventListener("change", onBundleUpload);
@@ -322,6 +328,7 @@ function setTab(tab) {
   const bodyId = tab === "log" ? "log" : tab === "routine" ? "routine-view" : "notes-view";
   for (const btn of els.tabBtns) btn.classList.toggle("active", btn.dataset.tab === tab);
   for (const body of els.tabBodies) body.classList.toggle("active", body.id === bodyId);
+  if (tab === "routine") updateRoutineHighlight({ force: true, scroll: true });
 }
 
 async function loadSampleNotes(sample) {
@@ -365,12 +372,14 @@ function runActive() {
   state.result = result;
   state.trace = trace;
   state.frame = 0;
+  state.activeRoutineStep = null;
   state.playing = true;
   els.pauseBtn.textContent = "■ pause";
   log(`ran ${state.activeSceneId}: ${result.success ? "PASS" : "FAIL"} (${result.parts_placed}/${result.parts_total}, ${result.violations.length} violations, ${result.elapsed_micro_steps} steps)`, result.success ? "ok" : "err");
   for (const v of result.violations) log(`  violation @ step ${v.step_index}: ${v.kind} — ${v.detail}`, "err");
   renderResult();
   renderRoutine();
+  updateRoutineHighlight({ force: true, scroll: state.activeTab === "routine" });
 }
 
 async function runSelectedSample() {
@@ -514,13 +523,37 @@ function renderRoutine() {
 
   const rows = steps.map((step, i) => {
     const cls = i === firstViolation ? "routine-step violation" : "routine-step";
-    return `<div class="${cls}">
+    return `<div class="${cls}" data-step-index="${i}">
       <span class="idx">${i}</span>
       <span class="type">${escapeHtml(step.type)}</span>
       <span>${escapeHtml(stepArgs(step))}</span>
     </div>`;
   }).join("");
   els.routineView.innerHTML = `<div class="routine-summary">${summary}</div>${rows}`;
+  state.activeRoutineStep = null;
+  updateRoutineHighlight({ force: true, scroll: false });
+}
+
+function activeTraceStepIndex() {
+  const idx = currentSnapshot()?.step_index;
+  return Number.isInteger(idx) && idx >= 0 ? idx : null;
+}
+
+function updateRoutineHighlight({ force = false, scroll = false } = {}) {
+  const activeStep = activeTraceStepIndex();
+  if (!force && activeStep === state.activeRoutineStep) return;
+  state.activeRoutineStep = activeStep;
+
+  const rows = els.routineView.querySelectorAll(".routine-step");
+  let activeRow = null;
+  for (const row of rows) {
+    const on = activeStep != null && Number(row.dataset.stepIndex) === activeStep;
+    row.classList.toggle("active", on);
+    if (on) activeRow = row;
+  }
+  if (scroll && activeRow && state.activeTab === "routine") {
+    activeRow.scrollIntoView({ block: "nearest" });
+  }
 }
 
 function currentSnapshot() {
@@ -559,6 +592,7 @@ function loop(ts) {
     if (dt >= 1000 / state.fps) {
       state.frame += Math.max(1, Math.floor(state.fps / 30));
       state.lastTs = ts;
+      updateRoutineHighlight({ scroll: true });
       if (state.frame >= state.trace.length - 1) {
         state.frame = state.trace.length - 1;
         state.playing = false;

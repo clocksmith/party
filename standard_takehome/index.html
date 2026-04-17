@@ -12,15 +12,23 @@
       <span class="title">ROUTINE PLANNER</span>
       <span style="color:#888;font-size:11px;">simulator</span>
       <span id="mode-pill" class="mode-pill" hidden>sample mode</span>
-      <div class="scene-select">
-        <label for="scene-select" style="color:#aaa;">scene</label>
-        <select id="scene-select"></select>
+      <div class="scene-nav">
+        <button type="button" id="scene-prev" class="scene-nav-btn" aria-label="previous scene">‹</button>
+        <div class="scene-label">
+          <span class="scene-idx" id="scene-idx">01</span>
+          <span class="scene-name" id="scene-name">warmup</span>
+        </div>
+        <button type="button" id="scene-next" class="scene-nav-btn" aria-label="next scene">›</button>
       </div>
     </header>
 
     <div class="stage">
       <canvas id="stage"></canvas>
-      <pre id="overlay" class="overlay"></pre>
+      <div class="overlay" id="overlay">
+        <pre id="overlay-scene" class="overlay-scene"></pre>
+        <div id="overlay-metrics" class="overlay-metrics"></div>
+      </div>
+      <button type="button" id="run-next-overlay" class="canvas-overlay-btn" hidden>▶ run next scene</button>
     </div>
 
     <aside class="panel">

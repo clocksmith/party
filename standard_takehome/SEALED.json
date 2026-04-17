@@ -1,8 +1,8 @@
 {
   "version": 1,
-  "sealed_at": "2026-04-17T00:46:29.760Z",
+  "sealed_at": "2026-04-17T00:53:12.208Z",
   "files": {
-    "index.html": "ed8151c34c4c9914e048708d6ed3495d5322b347cb5b16c61f3bce51b4310af6",
+    "index.html": "886dcb5168724f447a0b5325280fc77ab906e1d531ea34fc55b2325a263f4427",
     "phase2_examples/capacity_example.json": "51c24e578c5821d1cc6d00479cde33e7bbd4907c97bfd3e3ab2cbd40306ea426",
     "phase2_examples/index.json": "bdff5b065902a2761e68d2cdfff6e57e540498bc9bad5528870cf5b52ac5a8da",
     "phase2_examples/obstacle_routing_example.json": "c7301cf92bf1181c48d76e5e384fde974685dd2bb823b2b4c16f94fd47384041",
@@ -18,14 +18,15 @@
     "scenarios/09_precedence_wall.json": "3631e1384b94b2308fd7950b514b3bee1499147010077d5ef182de87c8d0c3ca",
     "scenarios/10_capacity_trap.json": "6756d908664fce60b6dcdff74ae3e00e35be59de26e5fe60b2584409d1402461",
     "scenarios/index.json": "55bdbe12c1bcd93e7ffbc4847650a35a202973a6cc4a283122e1dbf59b5f92e6",
-    "src/app.js": "f6c2b07c203caa438392c34c49b04d0de07c9022e9769009d4fd0908ccb9321d",
+    "src/app.js": "8f80a5ae656201e8d8e72f17b96408a0b43e94f5d85123e413fdb95fa1e4dda8",
     "src/arm.js": "8fb92f07563ca9a6e3c75874fda7b5e442df79adf28404e7ddef620246d305ee",
     "src/harness.js": "2a684566061e90aa2843359460a7c084bf3b1f58c07bdea041b9077d051eef79",
     "src/md.js": "7514f362f1427e995a62703d052f6466cd2dbd768a8b8f091c9021302c953e0a",
-    "src/renderer.js": "5560ea89e87f4b58067509ac3a2d12e5e4e8d30b2afe7834e3e9e856fdab9c6f",
+    "src/renderer.js": "4160d5d0d5a523f274875b61c9de5caac37f0b315fc72e607f8097475d1eaf9a",
     "src/scene.js": "28341bba3eaa9ad146a8a37d434366b4e43109dde82fcbf85dbf9e4a02ae1369",
     "src/schema.json": "cdf8b498d8ea754b0a2279c24d972985d4a28da69648fc47079209878c939a96",
     "src/sim.js": "a22274a82f78105a903517c60948f3f19b0c70851ec4f568996fad9fa836cb38",
-    "src/style.css": "2a84567ab18914a45b449d8a22a840160bc97a03e2ed7224f5548a131ab80b12"
+    "src/sparklines.js": "1d181b23c1b5daa623c2b3c0bd04694cf633d019e34aaf702443af1a7d70f570",
+    "src/style.css": "d155e92323dfa52d6a8af8240c133e475d1a9535f9ca763af575d6161485b70f"
   }
 }

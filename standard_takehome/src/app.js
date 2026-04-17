@@ -4,10 +4,17 @@ import { validateRoutineBundle, runBundle } from "./harness.js";
 import { naiveSolve } from "./planning_api.js";
 import { makeView, render } from "./renderer.js";
 import { renderMarkdown } from "./md.js";
+import { createRingBuffer, pushRing, drawSpark } from "./sparklines.js";
 
 const els = {
   canvas: document.getElementById("stage"),
-  sceneSelect: document.getElementById("scene-select"),
+  scenePrev: document.getElementById("scene-prev"),
+  sceneNext: document.getElementById("scene-next"),
+  sceneIdx: document.getElementById("scene-idx"),
+  sceneName: document.getElementById("scene-name"),
+  overlayScene: document.getElementById("overlay-scene"),
+  overlayMetrics: document.getElementById("overlay-metrics"),
+  runNextOverlay: document.getElementById("run-next-overlay"),
   runBtn: document.getElementById("run"),
   pauseBtn: document.getElementById("pause"),
   resetBtn: document.getElementById("reset"),
@@ -75,13 +82,9 @@ function escapeHtml(s) {
 async function init() {
   const idx = await loadSceneIndex();
   state.scenes = idx.scenes;
-  for (const s of state.scenes) {
-    const opt = document.createElement("option");
-    opt.value = s.id;
-    opt.textContent = s.id;
-    els.sceneSelect.appendChild(opt);
-  }
-  els.sceneSelect.addEventListener("change", () => selectScene(els.sceneSelect.value));
+  els.scenePrev.addEventListener("click", () => selectSceneByIndex(state.sceneIndex - 1));
+  els.sceneNext.addEventListener("click", () => selectSceneByIndex(state.sceneIndex + 1));
+  els.runNextOverlay.addEventListener("click", runNextFromOverlay);
   els.runBtn.addEventListener("click", runActive);
   els.pauseBtn.addEventListener("click", () => { state.playing = !state.playing; els.pauseBtn.textContent = state.playing ? "■ pause" : "▶ resume"; });
   els.resetBtn.addEventListener("click", () => {
@@ -167,7 +170,17 @@ async function initSamples() {
   }
 }
 
+async function selectSceneByIndex(i) {
+  const n = state.scenes.length;
+  if (!n) return;
+  const idx = ((i % n) + n) % n;
+  state.sceneIndex = idx;
+  await selectScene(state.scenes[idx].id);
+}
+
 async function selectScene(id) {
+  const i = state.scenes.findIndex(s => s.id === id);
+  if (i >= 0) state.sceneIndex = i;
   state.activeSceneId = id;
   state.scene = await loadScene(id);
   state.phase2Active = null;
@@ -176,10 +189,116 @@ async function selectScene(id) {
   state.result = null;
   state.frame = 0;
   state.playing = false;
-  els.overlay.textContent = `${state.scene.id}\n${state.scene.parts.length} parts | ${state.scene.bins.length} bins | ${state.scene.obstacles?.length ?? 0} obstacles`;
+  state.lastPlaybackEnded = false;
+  updateSceneNav();
+  if (els.runNextOverlay) els.runNextOverlay.hidden = true;
+  updateOverlayScene();
+  buildSparklinePanel(state.scene);
   renderResult();
   renderRoutine();
   draw();
+}
+
+function updateSceneNav() {
+  const s = state.scenes[state.sceneIndex];
+  if (!s) return;
+  const parts = s.id.split("_");
+  if (els.sceneIdx) els.sceneIdx.textContent = parts[0];
+  if (els.sceneName) els.sceneName.textContent = parts.slice(1).join(" ") || s.id;
+}
+
+function updateOverlayScene() {
+  if (!els.overlayScene) return;
+  const sc = state.scene;
+  els.overlayScene.textContent = `${sc.id}\n${sc.parts.length} parts | ${sc.bins.length} bins | ${sc.obstacles?.length ?? 0} obstacles`;
+}
+
+function buildSparklinePanel(scene) {
+  if (!els.overlayMetrics) return;
+  els.overlayMetrics.innerHTML = "";
+  state.sparks = [];
+  const links = scene.arm?.links ?? [];
+  for (let i = 0; i < links.length; i++) {
+    const lim = links[i].limit ?? [-Math.PI, Math.PI];
+    state.sparks.push({
+      key: `theta${i}`, label: `θ${i}`,
+      min: lim[0], max: lim[1],
+      buf: createRingBuffer(1024),
+      stroke: "#1a1a1c",
+      read: snap => snap.angles[i]
+    });
+  }
+  const w = scene.world ?? { x_min: -1.0, x_max: 1.0, y_min: -0.05, y_max: 0.9 };
+  state.sparks.push({
+    key: "ee_x", label: "EE.x",
+    min: w.x_min, max: w.x_max,
+    buf: createRingBuffer(1024),
+    stroke: "#ff6a1f",
+    read: snap => snap.points[snap.points.length - 1].x
+  });
+  state.sparks.push({
+    key: "ee_y", label: "EE.y",
+    min: w.y_min, max: w.y_max,
+    buf: createRingBuffer(1024),
+    stroke: "#ff6a1f",
+    read: snap => snap.points[snap.points.length - 1].y
+  });
+  for (const spark of state.sparks) {
+    const row = document.createElement("div");
+    row.className = "spark-row";
+    row.innerHTML = `
+      <span class="spark-label">${spark.label}</span>
+      <span class="spark-value">—</span>
+      <canvas class="spark-canvas" width="120" height="14"></canvas>
+      <span class="spark-range">${spark.min.toFixed(2)}..${spark.max.toFixed(2)}</span>
+    `;
+    els.overlayMetrics.appendChild(row);
+    spark.valueEl = row.querySelector(".spark-value");
+    spark.canvas = row.querySelector("canvas");
+    const dpr = window.devicePixelRatio || 1;
+    spark.canvas.width = 120 * dpr;
+    spark.canvas.height = 14 * dpr;
+    spark.canvas.style.width = "120px";
+    spark.canvas.style.height = "14px";
+    spark.ctx = spark.canvas.getContext("2d");
+    spark.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+}
+
+function updateSparklines(snap) {
+  if (!state.sparks.length || !snap) return;
+  for (const spark of state.sparks) {
+    let v;
+    try { v = spark.read(snap); } catch { continue; }
+    if (!Number.isFinite(v)) continue;
+    pushRing(spark.buf, v);
+    spark.valueEl.textContent = (v >= 0 ? "+" : "") + v.toFixed(3);
+    drawSpark(spark.ctx, spark.buf, {
+      width: 120, height: 14,
+      min: spark.min, max: spark.max,
+      stroke: spark.stroke
+    });
+  }
+}
+
+async function runNextFromOverlay() {
+  els.runNextOverlay.hidden = true;
+  const nextIdx = state.sceneIndex + 1;
+  if (nextIdx < state.scenes.length) {
+    await selectSceneByIndex(nextIdx);
+    runActive();
+    return;
+  }
+  const firstPublic = state.phase2Catalog.find(v => v.source === "public");
+  if (!firstPublic) {
+    log("no Phase 2 public example available", "warn");
+    return;
+  }
+  els.phase2Family.value = firstPublic.family;
+  refreshPhase2SceneOptions();
+  els.phase2Scene.value = firstPublic.id;
+  await loadSelectedPhase2Scene();
+  log(`end of benchmark — loaded Phase 2 ${firstPublic.family} example. click 'run v2 in sim' to continue.`, "ok");
 }
 
 async function initPhase2() {
@@ -587,21 +706,30 @@ function draw() {
 }
 
 function loop(ts) {
+  let advanced = false;
   if (state.playing && state.trace) {
     const dt = ts - state.lastTs;
     if (dt >= 1000 / state.fps) {
       state.frame += Math.max(1, Math.floor(state.fps / 30));
       state.lastTs = ts;
+      advanced = true;
       updateRoutineHighlight({ scroll: true });
       if (state.frame >= state.trace.length - 1) {
         state.frame = state.trace.length - 1;
         state.playing = false;
         els.pauseBtn.textContent = "▶ resume";
+        onPlaybackEnded();
       }
     }
   }
+  if (advanced) updateSparklines(currentSnapshot());
   draw();
   requestAnimationFrame(loop);
+}
+
+function onPlaybackEnded() {
+  state.lastPlaybackEnded = true;
+  if (state.bundle && els.runNextOverlay) els.runNextOverlay.hidden = false;
 }
 
 window.addEventListener("resize", () => {

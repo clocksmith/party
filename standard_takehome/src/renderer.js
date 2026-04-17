@@ -5,7 +5,7 @@
 const COLORS = {
   bg: "#e8e8ea",
   grid: "#dcdce0",
-  floor: "#1a1a1c",
+  floor: "#2a2a2c",
   warningBand: "#f4c430",
   warningBandDark: "#1a1a1c",
   obstacle: "#2a2a2c",

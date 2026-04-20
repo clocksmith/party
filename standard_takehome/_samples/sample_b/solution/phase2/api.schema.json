@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "_samples/sample_b/solution/phase2/api.schema.json",
+  "title": "Proposed Planning API v2 — refusal as first-class return",
+  "description": "v2 redesign: scene-in / routine-or-refusal out. Replaces v1's imperative step-emitting surface. Wire steps unchanged; what changes is that infeasibility becomes a structured return value instead of a late safety violation.",
+
+  "$defs": {
+    "planInput": {
+      "type": "object",
+      "required": ["scene"],
+      "properties": {
+        "scene": { "$ref": "../../../../src/schema.json#/$defs/scene" },
+        "context": {
+          "type": "object",
+          "properties": {
+            "family":    { "enum": ["capacity", "precedence", "obstacle_routing"] },
+            "variantId": { "type": "string" },
+            "budgetMs":  { "type": "integer", "minimum": 50 }
+          }
+        }
+      }
+    },
+
+    "planOutput": {
+      "description": "Either a routine (with steps) or a structured refusal. Exactly one shape.",
+      "oneOf": [
+        { "$ref": "#/$defs/routine" },
+        { "$ref": "#/$defs/refusal" }
+      ]
+    },
+
+    "routine": {
+      "type": "object",
+      "required": ["steps"],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "../../../../src/schema.json#/$defs/step" }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "refusal": {
+      "type": "object",
+      "required": ["steps", "refusal"],
+      "properties": {
+        "steps":  { "type": "array", "maxItems": 0 },
+        "refusal": {
+          "type": "object",
+          "required": ["reason", "scope"],
+          "properties": {
+            "reason": {
+              "enum": [
+                "unreachable",
+                "no_compatible_bin",
+                "capacity_full",
+                "precedence_cycle",
+                "ik_diverged",
+                "budget_exceeded",
+                "no_safe_route"
+              ]
+            },
+            "scope":  { "enum": ["scene", "part", "bin"] },
+            "partId": { "type": "string" },
+            "binId":  { "type": "string" },
+            "detail": { "type": "string" }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+
+  "type": "object",
+  "required": ["operations"],
+  "properties": {
+    "operations": {
+      "type": "object",
+      "properties": {
+        "plan": {
+          "description": "plan(input) → output. Routine or refusal, synchronous.",
+          "input":  { "$ref": "#/$defs/planInput" },
+          "output": { "$ref": "#/$defs/planOutput" }
+        }
+      }
+    }
+  }
+}

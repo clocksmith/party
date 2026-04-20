@@ -83,12 +83,10 @@ if (!bundle || typeof bundle.scenarios !== "object") {
 }
 
 const requiredIds = new Set(idx.required ?? []);
-const stretchIds = new Set(idx.stretch ?? []);
-const bonusIds = new Set(idx.bonus ?? []);
+const hardIds = new Set(idx.hard ?? []);
 
 function bandOf(sceneMeta) {
-  if (sceneMeta.bonus || bonusIds.has(sceneMeta.id)) return "bonus";
-  if (sceneMeta.stretch || stretchIds.has(sceneMeta.id)) return "stretch";
+  if (sceneMeta.hard || hardIds.has(sceneMeta.id)) return "hard";
   if (requiredIds.has(sceneMeta.id)) return "required";
   return "required";
 }
@@ -97,7 +95,7 @@ function emptyBand() {
   return { scenes_passed: 0, scenes_total: 0, parts_placed: 0, parts_total: 0, total_violations: 0 };
 }
 
-const out = { suite, scenarios: {}, summary: {}, bands: { required: emptyBand(), stretch: emptyBand(), bonus: emptyBand() } };
+const out = { suite, scenarios: {}, summary: {}, bands: { required: emptyBand(), hard: emptyBand() } };
 let passed = 0, violations = 0, placed = 0, total = 0;
 for (const sceneMeta of idx.scenes) {
   const { id } = sceneMeta;
@@ -107,14 +105,14 @@ for (const sceneMeta of idx.scenes) {
   if (!entry) {
     out.scenarios[id] = { success: false, termination_reason: "no_routine",
       parts_placed: 0, parts_total: scene.parts.length, violations: [],
-      elapsed_micro_steps: 0, path_length: 0, stretch: band === "stretch", bonus: band === "bonus", band };
+      elapsed_micro_steps: 0, path_length: 0, band };
     total += scene.parts.length;
     out.bands[band].scenes_total += 1;
     out.bands[band].parts_total += scene.parts.length;
     continue;
   }
   const { result } = runRoutine(scene, entry, { recordTrace: false });
-  out.scenarios[id] = { ...result, stretch: band === "stretch", bonus: band === "bonus", band };
+  out.scenarios[id] = { ...result, band };
   if (result.success) passed += 1;
   violations += result.violations.length;
   placed += result.parts_placed;
@@ -143,18 +141,13 @@ function printBand(label, band, quiet = false) {
 }
 
 printBand("required", "required");
-printBand("stretch", "stretch");
-printBand("bonus (discussion only; not counted toward scene-completion scoring)", "bonus", true);
+printBand("hard", "hard");
 
 const req = out.bands.required;
-const str = out.bands.stretch;
-const bon = out.bands.bonus;
+const hard = out.bands.hard;
 console.log(`\n${suite}: required ${req.scenes_passed}/${req.scenes_total} scenes, ${req.parts_placed}/${req.parts_total} parts, ${req.total_violations} violations`);
-console.log(`stretch: ${str.scenes_passed}/${str.scenes_total} scenes, ${str.parts_placed}/${str.parts_total} parts, ${str.total_violations} violations`);
-if (bon.scenes_total) {
-  console.log(`bonus: ${bon.parts_placed}/${bon.parts_total} parts placed, ${bon.total_violations} violations (discussion only)`);
-}
+console.log(`hard: ${hard.scenes_passed}/${hard.scenes_total} scenes, ${hard.parts_placed}/${hard.parts_total} parts, ${hard.total_violations} violations`);
 console.log(`\nrubric: RUBRIC.md — safe (gate), coverage (scalar), tradeoff clarity (tiebreaker).`);
-console.log(`phase 2 scoring: node tests/eval_phase2.mjs --module solution/phase2/index.js`);
+console.log(`phase 2 is a design doc (solution/phase2/api.schema.json + fixtures/ + prose) — no runner.`);
 console.log(`\nwrote ${path.relative(root, outPath)}`);
 process.exit(0);

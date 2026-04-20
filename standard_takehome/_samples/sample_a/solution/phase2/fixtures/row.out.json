@@ -1,0 +1,23 @@
+{
+  "steps": [
+    { "type": "move_pose", "x": 0.42, "y": 0.10 },
+    { "type": "grip_close" },
+    { "type": "move_pose", "x": -0.70, "y": 0.08 },
+    { "type": "grip_open" },
+    { "type": "move_pose", "x": 0.58, "y": 0.10 },
+    { "type": "grip_close" },
+    { "type": "move_pose", "x": -0.70, "y": 0.08 },
+    { "type": "grip_open" },
+    { "type": "move_pose", "x": 0.74, "y": 0.10 },
+    { "type": "grip_close" },
+    { "type": "move_pose", "x": -0.40, "y": 0.08 },
+    { "type": "grip_open" }
+  ],
+  "assignments": [
+    { "partId": "p_a1", "binId": "bin_a" },
+    { "partId": "p_a2", "binId": "bin_a" },
+    { "partId": "p_b1", "binId": "bin_ab" }
+  ],
+  "dropped": [],
+  "notes": "Claimed v2 output. The caller handed the whole scene in one call; v2 decided kind-specific bin_a gets both 'a' parts (preferred over the more-accepting bin_ab), and 'b' goes to bin_ab. The caller did not write a loop, did not track capacity, did not decide ordering."
+}

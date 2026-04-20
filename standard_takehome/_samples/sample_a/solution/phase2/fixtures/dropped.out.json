@@ -1,0 +1,15 @@
+{
+  "steps": [
+    { "type": "move_pose", "x": 0.48, "y": 0.12 },
+    { "type": "grip_close" },
+    { "type": "move_pose", "x": -0.70, "y": 0.08 },
+    { "type": "grip_open" }
+  ],
+  "assignments": [
+    { "partId": "reach", "binId": "bin_a" }
+  ],
+  "dropped": [
+    { "partId": "rare", "reason": "no_compatible_bin", "detail": "No bin accepts kind 'rare'; only bin_a (kind 'a') is present." }
+  ],
+  "notes": "Partial-safe output. v2 completes what it can and reports dropped parts with structured reasons. v1 either emitted a violation (dropping 'rare' outside a bin) or required the caller to pre-filter incompatible parts. v2 handles it in one call."
+}

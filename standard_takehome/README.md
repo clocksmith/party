@@ -1,32 +1,36 @@
 # Take-home Exercise: Robot Routine Planner
 
-Build a motion planner for a simulated 2D multi-axis robot arm. Phase 1 plans safe static routines for fixed benchmark scenes. Phase 2 ships a runnable API that regenerates a safe routine when the scene changes. Review focuses on tradeoffs, not optimality — several private variants are adversarial by design.
+Build a motion planner for a simulated 2D multi-axis robot arm. **Phase 1** ships a planner program (any language) plus the routines it produced for the public scenes. **Phase 2** is a design doc — an API schema plus fixtures plus prose — describing how you would redesign the v1 planning surface.
 
-Read `RUBRIC.md` before you start. It is the single source of truth for how submissions are scored.
+Reviewer has the same visibility as you. Nothing is held out. No private scenes. Read `RUBRIC.md` before you start; it is the single source of truth for how submissions are scored.
 
 ## Deliverables
 
-Exactly three files under `solution/`:
-
 ```text
 solution/
-  phase1/routines.json   # static wire-format bundle for benchmark scenes
-  phase2/index.js        # browser ES module: export function plan(scene, context)
-  README.md              # your writeup (the four questions below)
+  phase1/
+    planner/            # your planner program — required, any language
+    routines.json       # the bundle your planner produced for the public scenes
+  phase2/
+    api.schema.json     # your proposed v2 API surface, as JSON Schema
+    fixtures/
+      *.in.json         # scene inputs that exercise the proposed API
+      *.out.json        # the routine (or refusal) the API would return
+  README.md             # four questions, one unified writeup
 ```
 
-The simulator consumes only `phase1/routines.json` (static) and `phase2/index.js` (generative). Everything else — planner code, regeneration scripts, notes — is optional and lives wherever you like under `solution/`. The reviewer reads one README, not two.
+Five artifact shapes, one README. No separate phase READMEs. No runnable Phase 2 module.
+
+`solution/README.md` must include a **"How to regenerate `routines.json`"** section with the exact command you use (e.g. `python planner/main.py`, `node planner/index.js`, `cargo run --release`). The reviewer does not need to re-run anything to score you — the shipped `routines.json` is the evidence — but if they choose to verify, they follow your stated command.
 
 ## What to put in `solution/README.md`
 
 Four questions, short answers. One or two paragraphs each.
 
-1. **How do you plan one scene?** Cover both phases in the same answer — if Phase 2 reuses Phase 1's core, say so.
-2. **What did you optimize, and what did you knowingly give up?** Safety, coverage, compute budget, simplicity, generalization — pick your axis and name the tradeoff.
+1. **How do you plan one scene?** Describe the algorithm your Phase 1 planner uses.
+2. **What did you optimize, what did you knowingly give up, and what assumption — if wrong — breaks your submission?** Safety, coverage, compute budget, simplicity, generalization — pick your axis and name the tradeoff. Then name one load-bearing assumption (about the simulator, the scene distribution, or the arm) and say what happens if it turns out to be false.
 3. **Where does your approach break as scene size or drift grows?** Name the smallest case you would fail on and why.
-4. **What's the smallest v1 API change** (see `src/planning_api.js`) that would have made your planner easier to write? This is your Phase 2 thesis.
-
-No separate phase READMEs. No required section order. Short is fine; handwaves are not.
+4. **What is your Phase 2 thesis — the smallest v1 API change that would have made your Phase 1 planner easier to write?** Walk through `api.schema.json`, point at one fixture, and name what v2 makes worse.
 
 ## Simulator Contract
 
@@ -48,11 +52,11 @@ The sim does **not** model dynamics, inertia, gravity, sensing, force, weight, r
 
 See `src/schema.json` for the full scene and result formats.
 
-**Frozen surface (do not modify):** `index.html`, `src/*`, `scenarios/*.json`, `phase2_examples/*.json`. Contents are checksummed in `SEALED.json`; tampering is detected. Put your work under `solution/`.
+**Frozen surface (do not modify):** `index.html`, `src/*`, `scenarios/*.json`. Contents are checksummed in `SEALED.json`; tampering is detected. Put your work under `solution/`.
 
-## Phase 1 — Static Routines
+## Phase 1 — Program + Bundle
 
-Produce `solution/phase1/routines.json` covering the 10 visible scenes. How you generate it is your business — JS planner, Python solver, hand-authored, AI-assisted — the simulator only consumes the wire format.
+Ship `solution/phase1/planner/` (your code, any language) and `solution/phase1/routines.json` (the bundle that code produced for the 10 public scenes). Document in `solution/README.md` how to run the planner and regenerate the bundle.
 
 ```bash
 node tests/reval.mjs --bundle solution/phase1/routines.json --suite benchmark
@@ -73,46 +77,27 @@ node tests/reval.mjs --bundle solution/phase1/routines.json --suite benchmark
 
 Safety first. A careful planner that safely skips a scene beats a confident one that crashes the arm.
 
-## Phase 2 — Runnable API v2
+## Phase 2 — Design Doc
 
-Pick **one** family. Ship a browser-native ES module:
+There is no runnable Phase 2 module. Phase 2 is a design proposal for a redesigned planning API — the rough edge in v1 you would fix, the shape of your replacement, and example inputs/outputs that demonstrate it.
 
-```js
-// solution/phase2/index.js
-export const family = "capacity"; // or "precedence" / "obstacle_routing"
+Ship:
 
-export function plan(scene, context) {
-  return { steps: [/* Robot API wire steps */] };
-}
-```
+- **`solution/phase2/api.schema.json`** — JSON Schema of your proposed v2 API. Include the input shape, the output shape, and any structured return values (refusal, partial, success) the API exposes.
+- **`solution/phase2/fixtures/*.in.json` + `*.out.json`** — at least one pair showing what the API returns for a real scene, and one pair showing what it returns on infeasibility. Scenes can be drawn from `scenarios/` or authored fresh.
+- **Prose in `solution/README.md` (question 4)** — walk through the schema, reference one fixture, name what v2 makes worse.
 
-| Family | What varies | Public example |
-| --- | --- | --- |
-| `capacity` | part counts, bin capacities, accepted kinds | `phase2_examples/capacity_example.json` |
-| `precedence` | dependency edges, order constraints | `phase2_examples/precedence_example.json` |
-| `obstacle_routing` | obstacle placement, pick/drop geometry | `phase2_examples/obstacle_routing_example.json` |
-
-The simulator imports your module, calls `plan(scene, context)`, and plays the returned routine. Context is `{family, variantId, source: "public" | "private"}`.
-
-**The reviewer runs Phase 2 against a private variant set you have not seen.** The private set intentionally drifts wider than the public example and includes:
-
-- **Wide-drift variants** — part count, bin geometry, obstacle placement, and arm link lengths all move independently. Hardcoded seed tables and tuned thresholds will break.
-- **One stress scene per family** — bigger and intentionally close to intractable; we do not expect optimal. We score the tradeoff you named.
-- **At least one unsolvable variant per family** — part outside reach, no compatible bin, etc. Correct behavior is `{steps: [], notes: "..."}`. Crashing, throwing, or attempting an unsafe sequence is counted as a violation.
-
-Each variant has a **2-second wall-clock budget**. Variants that exceed it count as no-op (zero parts placed, zero refusal credit).
-
-Your v2 should clearly refuse unsupported families. Hardcoding a public-example routine is visibly weak and is scored as such.
+Reviewer reads; nothing executes. The fixtures are claims about your proposed API, not routines to be played in the sim.
 
 ## Scoring
 
 See `RUBRIC.md`. Three axes:
 
-- **Safe** — zero violations across everything you submit. Pass/fail gate.
-- **Coverage** — parts placed across Phase 1 benchmark + Phase 2 public + private variants. Unsolvable variants correctly refused also count.
-- **Tradeoff clarity** — your four README answers, graded against your code. Did you name the tradeoff, and does the code match?
+- **Safe** — zero violations on `routines.json` when replayed through `tests/reval.mjs`. Pass/fail gate.
+- **Coverage** — parts placed across the 10 public scenes. Scalar.
+- **Tradeoff clarity** — your README answers graded against your code and your Phase 2 design doc. Tiebreaker.
 
-No path-length tiebreakers. No elapsed-step tiebreakers. Safety gates, coverage scales, tradeoff-clarity breaks ties.
+No path-length tiebreakers. No elapsed-step tiebreakers. No private holdout. Everything the reviewer sees, you see.
 
 ## Getting Started
 
@@ -125,23 +110,25 @@ node tests/smoke.mjs                  # baseline runs on every scene
 node tests/reval.mjs --bundle solution/phase1/routines.json --suite benchmark
 ```
 
-Then read: `RUBRIC.md`, `src/schema.json`, `src/planning_api.js`, `examples/example_planner.js`, `scenarios/`, and `phase2_examples/`.
+Then read: `RUBRIC.md`, `src/schema.json`, `src/planning_api.js` (v1 for reference), and the scene files under `scenarios/`.
 
 ## FAQ
 
-**Why only one `routines.json`?** Phase 1 is static, Phase 2 is generative. Phase 1 submits a bundle; Phase 2 submits a module that returns a routine per variant at runtime.
+**Does language matter for Phase 1?** No. The simulator only consumes `routines.json`. Your planner can be in Python, Go, Rust, JavaScript, whatever — ship it under `solution/phase1/planner/` with a runnable entry point and a note in the README.
 
-**Does language matter for Phase 1?** No. Any language. The simulator only consumes `routines.json`. Phase 2's module must be browser-runnable JavaScript (no build, no network, no Node-only APIs).
+**Is Phase 2 executable?** No. It is a design document — schema, fixtures, prose. The fixtures describe what your proposed API would return; no runtime validates them.
 
 **Can I use AI tooling?** Yes. Say which decisions were yours and which were AI-assisted in `solution/README.md`. We probe this in the Q&A.
 
-**How long do candidates spend?** Most successful submissions land in 4–8 hours. We do not score hours; make the submission clear to a human reviewer.
+**What if a scene looks unsolvable?** Document the geometric argument and emit an empty routine for that scene. Your Phase 2 schema should also show how the proposed v2 API would surface infeasibility.
 
-**What if a scene looks unsolvable?** Document the geometric argument and emit an empty routine. This is the correct answer for the unsolvable variants in the private Phase 2 set as well.
+**How long do candidates spend?** Most successful submissions land in 4–8 hours. We do not score hours; make the submission clear to a human reviewer.
 
 ## Submit Checklist
 
-- [ ] `solution/phase1/routines.json` covers at least the 6 required scenes.
-- [ ] `solution/phase2/index.js` exports `family` and `plan(scene, context)`, runs in the browser, refuses unsupported families cleanly.
-- [ ] `solution/README.md` answers all four questions above.
+- [ ] `solution/phase1/planner/` contains your planner code.
+- [ ] `solution/phase1/routines.json` is the bundle your planner produces, covering at least the 6 required scenes.
+- [ ] `solution/phase2/api.schema.json` describes your proposed v2 API shape.
+- [ ] `solution/phase2/fixtures/` contains at least one in/out pair for a real scene and one for an infeasibility case.
+- [ ] `solution/README.md` answers all four questions and names the exact regenerate command.
 - [ ] `node tests/reval.mjs --bundle solution/phase1/routines.json --suite benchmark` runs without `TAMPER`.

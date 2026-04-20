@@ -1,8 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
   "required": ["01_warmup", "02_row", "03_kinds", "04_wall", "05_maze", "06_combined"],
-  "stretch": ["07_precedence", "08_dense"],
-  "bonus": ["09_precedence_wall", "10_capacity_trap"],
+  "hard":     ["07_dense_precedence", "08_carry_maze", "09_obstacle_capacity", "10_infeasible"],
   "scenes": [
     { "id": "01_warmup" },
     { "id": "02_row" },
@@ -10,9 +9,9 @@
     { "id": "04_wall" },
     { "id": "05_maze" },
     { "id": "06_combined" },
-    { "id": "07_precedence",                            "stretch": true },
-    { "id": "08_dense", "stretch": true },
-    { "id": "09_precedence_wall", "bonus": true },
-    { "id": "10_capacity_trap", "bonus": true }
+    { "id": "07_dense_precedence",  "hard": true },
+    { "id": "08_carry_maze",        "hard": true },
+    { "id": "09_obstacle_capacity", "hard": true },
+    { "id": "10_infeasible",        "hard": true, "infeasibility_present": true }
   ]
 }

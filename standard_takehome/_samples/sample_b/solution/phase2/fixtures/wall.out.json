@@ -1,0 +1,20 @@
+{
+  "steps": [
+    { "type": "move_pose", "x": 0.48, "y": 0.18 },
+    { "type": "move_pose", "x": 0.48, "y": 0.10 },
+    { "type": "grip_close" },
+    { "type": "move_pose", "x": 0.48, "y": 0.65 },
+    { "type": "move_pose", "x": -0.525, "y": 0.65 },
+    { "type": "move_pose", "x": -0.525, "y": 0.08 },
+    { "type": "grip_open" },
+    { "type": "move_pose", "x": -0.525, "y": 0.65 },
+    { "type": "move_pose", "x": 0.62, "y": 0.65 },
+    { "type": "move_pose", "x": 0.62, "y": 0.10 },
+    { "type": "grip_close" },
+    { "type": "move_pose", "x": 0.62, "y": 0.65 },
+    { "type": "move_pose", "x": -0.525, "y": 0.65 },
+    { "type": "move_pose", "x": -0.525, "y": 0.08 },
+    { "type": "grip_open" }
+  ],
+  "notes": "Claimed v2 output. Both parts are routed over the top of the y=0.45 obstacle via a transit y ≈ 0.65. v2 derives the transit from the scene's obstacles field; v1 forced the caller to script each transit."
+}

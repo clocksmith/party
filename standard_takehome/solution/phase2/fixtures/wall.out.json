@@ -1,0 +1,20 @@
+{
+  "steps": [
+    { "type": "move_pose", "x": 0.48, "y": 0.18 },
+    { "type": "move_pose", "x": 0.48, "y": 0.10 },
+    { "type": "grip_close" },
+    { "type": "move_pose", "x": 0.48, "y": 0.65 },
+    { "type": "move_pose", "x": -0.525, "y": 0.65 },
+    { "type": "move_pose", "x": -0.525, "y": 0.08 },
+    { "type": "grip_open" },
+    { "type": "move_pose", "x": -0.525, "y": 0.65 },
+    { "type": "move_pose", "x": 0.62, "y": 0.65 },
+    { "type": "move_pose", "x": 0.62, "y": 0.10 },
+    { "type": "grip_close" },
+    { "type": "move_pose", "x": 0.62, "y": 0.65 },
+    { "type": "move_pose", "x": -0.525, "y": 0.65 },
+    { "type": "move_pose", "x": -0.525, "y": 0.08 },
+    { "type": "grip_open" }
+  ],
+  "notes": "Claimed v2 output for fixture_wall. The two parts are picked individually and routed over the top of the y=0.45 obstacle via a high-transit y ≈ 0.65. v2 derives the transit height from the scene's obstacles field; in v1 the caller had to script each transit manually using movePose. The wire steps are the same five types — what changed is which layer owns the routing decision."
+}

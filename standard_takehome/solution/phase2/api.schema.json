@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "solution/phase2/api.schema.json",
+  "title": "Proposed Planning API v2",
+  "description": "v2 redesign: scene-in / routine-out, with refusal as a first-class return shape. Replaces v1's imperative step-emitting surface (movePose/gripClose/…). The wire format (five step types) is unchanged; v2 changes what the caller writes, not what the simulator executes.",
+
+  "$defs": {
+    "planInput": {
+      "type": "object",
+      "required": ["scene"],
+      "properties": {
+        "scene": {
+          "$ref": "../../src/schema.json#/$defs/scene",
+          "description": "Full scene as defined by the simulator's scene schema."
+        },
+        "context": {
+          "type": "object",
+          "description": "Optional caller hints. A v2 impl may ignore any of these.",
+          "properties": {
+            "family": {
+              "enum": ["capacity", "precedence", "obstacle_routing"],
+              "description": "Carried over from v1's family concept. v2 allows the caller to label the scene shape, but v2 does not dispatch on it internally."
+            },
+            "variantId": { "type": "string" },
+            "budgetMs": {
+              "type": "integer",
+              "minimum": 50,
+              "description": "Soft wall-clock hint. v2 must still return within the budget, refusing early rather than running over."
+            }
+          }
+        }
+      }
+    },
+
+    "planOutput": {
+      "description": "Either a routine (with steps) or a structured refusal. Exactly one shape.",
+      "oneOf": [
+        { "$ref": "#/$defs/routine" },
+        { "$ref": "#/$defs/refusal" }
+      ]
+    },
+
+    "routine": {
+      "type": "object",
+      "required": ["steps"],
+      "properties": {
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "../../src/schema.json#/$defs/step" },
+          "description": "Wire steps in the existing five-type vocabulary. Unchanged from v1."
+        },
+        "notes": { "type": "string" }
+      }
+    },
+
+    "refusal": {
+      "type": "object",
+      "required": ["steps", "refusal"],
+      "description": "The key v2 addition. v1 leaked infeasibility through late ik_no_converge / collision_* violations at replay. v2 detects infeasibility in plan() and returns a structured refusal instead of emitting an unsafe routine.",
+      "properties": {
+        "steps": {
+          "type": "array",
+          "maxItems": 0,
+          "description": "Must be empty on refusal. No partial routine is emitted — the caller sees either a safe routine or a refusal, never a best-effort violation."
+        },
+        "refusal": {
+          "type": "object",
+          "required": ["reason", "scope"],
+          "properties": {
+            "reason": {
+              "enum": [
+                "unreachable",
+                "no_compatible_bin",
+                "capacity_full",
+                "precedence_cycle",
+                "ik_diverged",
+                "budget_exceeded",
+                "no_safe_route"
+              ]
+            },
+            "scope": {
+              "enum": ["scene", "part", "bin"],
+              "description": "What the refusal applies to. A scene-scoped refusal means the whole scene is rejected; part/bin scope narrows the cause."
+            },
+            "partId": { "type": "string" },
+            "binId":  { "type": "string" },
+            "detail": { "type": "string" }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+
+  "type": "object",
+  "required": ["operations"],
+  "properties": {
+    "operations": {
+      "type": "object",
+      "properties": {
+        "plan": {
+          "type": "object",
+          "description": "plan(input) → output. Replaces v1's Routine builder + manual pose/grip sequencing.",
+          "properties": {
+            "input":  { "$ref": "#/$defs/planInput" },
+            "output": { "$ref": "#/$defs/planOutput" }
+          }
+        }
+      }
+    }
+  }
+}

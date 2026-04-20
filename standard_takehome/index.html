@@ -37,12 +37,10 @@
         <h3>challenge</h3>
         <div class="challenge-note">
           The candidate builds a planner for a 2D robot arm that emits JSON routines the simulator can execute.
-          <b>Phase 1:</b> hand-author routines for 6 fixed scenes.
-          <b>Phase 2:</b> ship a JavaScript module that generates routines for scene variants in one family
-          (<i>capacity</i>, <i>precedence</i>, or <i>obstacle routing</i>).
-          Evaluation: safety, scene coverage, tradeoffs, and clarity of explanation.
-          All candidates are expected to complete Phase 1;
-          senior vs. staff is signaled by Phase 2 &mdash; API design, scope selection, and generalization to unseen scenes.
+          <b>Phase 1:</b> ship a planner program (any language) plus the routines it produced for the public scenes.
+          <b>Phase 2:</b> design-doc only &mdash; an API schema, example fixtures, and prose describing the proposed v2.
+          Evaluation: safety, scene coverage, and clarity of the design writeup.
+          Reviewer has the same visibility as the candidate; nothing is held out.
         </div>
       </section>
 
@@ -89,25 +87,6 @@
       <section>
         <h3>result</h3>
         <div class="result" id="result"></div>
-      </section>
-
-      <section>
-        <h3>phase 2 v2</h3>
-        <div class="phase2-controls">
-          <label>
-            family
-            <select id="phase2-family"></select>
-          </label>
-          <label>
-            variant
-            <select id="phase2-scene"></select>
-          </label>
-          <div class="controls">
-            <button id="phase2-load">load variant</button>
-            <button id="phase2-run" class="primary">▶ run v2 in sim</button>
-          </div>
-          <div class="phase2-note" id="phase2-status">loading variants...</div>
-        </div>
       </section>
 
       <section>

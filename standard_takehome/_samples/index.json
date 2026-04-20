@@ -1,20 +1,16 @@
 {
   "samples": [
     {
-      "id": "codex_roboticist",
-      "label": "codex_roboticist",
-      "routines": "./_samples/codex_roboticist/solution/phase1/routines.json",
-      "phase2": "./_samples/codex_roboticist/solution/phase2/index.js",
-      "phase1_readme": "./_samples/codex_roboticist/solution/phase1/README.md",
-      "phase2_readme": "./_samples/codex_roboticist/solution/phase2/README.md"
+      "id": "sample_a",
+      "label": "sample_a",
+      "routines": "./_samples/sample_a/solution/phase1/routines.json",
+      "readme": "./_samples/sample_a/solution/README.md"
     },
     {
-      "id": "claude_roboticist",
-      "label": "claude_roboticist",
-      "routines": "./_samples/claude_roboticist/solution/phase1/routines.json",
-      "phase2": "./_samples/claude_roboticist/solution/phase2/index.js",
-      "phase1_readme": "./_samples/claude_roboticist/solution/phase1/README.md",
-      "phase2_readme": "./_samples/claude_roboticist/solution/phase2/README.md"
+      "id": "sample_b",
+      "label": "sample_b",
+      "routines": "./_samples/sample_b/solution/phase1/routines.json",
+      "readme": "./_samples/sample_b/solution/README.md"
     }
   ]
 }

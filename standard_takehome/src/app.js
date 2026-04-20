@@ -9,9 +9,6 @@ import { initAnalytics } from "./analytics.js";
 
 const DEFAULT_WORLD = { x_min: -1.0, x_max: 1.0, y_min: -0.05, y_max: 0.9 };
 
-// Add ~12cm of below-floor padding in the viewport so the warning band is not
-// flush against the bottom edge. Coordinate system is unchanged — world x/y
-// still mean the same meters; we just extend the visible y_min downward.
 function viewBounds(scene) {
   const w = scene?.world ?? DEFAULT_WORLD;
   return { ...w, y_min: w.y_min - 0.12 };
@@ -44,11 +41,6 @@ const els = {
   speed: document.getElementById("speed"),
   speedVal: document.getElementById("speed-val"),
   result: document.getElementById("result"),
-  phase2Family: document.getElementById("phase2-family"),
-  phase2Scene: document.getElementById("phase2-scene"),
-  phase2LoadBtn: document.getElementById("phase2-load"),
-  phase2RunBtn: document.getElementById("phase2-run"),
-  phase2Status: document.getElementById("phase2-status"),
   log: document.getElementById("log"),
   routineView: document.getElementById("routine-view"),
   overlay: document.getElementById("overlay"),
@@ -70,8 +62,6 @@ const state = {
   lastTs: 0,
   fps: 60,
   activeTab: "log",
-  phase2Catalog: [],
-  phase2Active: null,
   sampleMode: false,
   requestedSampleId: null,
   samples: [],
@@ -118,9 +108,6 @@ async function init() {
   els.bundleInput.addEventListener("change", onBundleUpload);
   els.exportBtn.addEventListener("click", exportResults);
   els.sampleRunBtn.addEventListener("click", runSelectedSample);
-  els.phase2Family.addEventListener("change", refreshPhase2SceneOptions);
-  els.phase2LoadBtn.addEventListener("click", loadSelectedPhase2Scene);
-  els.phase2RunBtn.addEventListener("click", runPhase2V2);
   for (const btn of els.tabBtns) {
     btn.addEventListener("click", () => setTab(btn.dataset.tab));
   }
@@ -131,7 +118,6 @@ async function init() {
   els.speed.addEventListener("input", () => { state.fps = parseInt(els.speed.value, 10); els.speedVal.textContent = `${state.fps}x`; updateSpeedFill(); });
   updateSpeedFill();
   if (state.sampleMode) await initSamples();
-  await initPhase2();
 
   await selectScene(state.scenes[0].id);
   if (state.sampleMode && state.requestedSampleId) await runSelectedSample();
@@ -174,26 +160,23 @@ function configureSampleMode() {
   const sampleParam = params.get("sample");
   const normalized = String(sampleParam ?? "").toLowerCase();
 
-  // Explicit opt-out: ?sample=off (also accepts 0/false/no/candidate)
   if (["0", "false", "off", "no", "candidate"].includes(normalized)) {
     state.sampleMode = false;
     log("candidate view. Add ?sample=1 to the URL for reviewer/demo mode.", "warn");
     return;
   }
 
-  // Default: sample mode ON. ?sample=<id> picks a specific sample; bare URL
-  // lands on codex_roboticist.
   state.sampleMode = true;
   if (normalized && !["1", "true", "on", "samples"].includes(normalized)) {
     state.requestedSampleId = sampleParam;
   } else {
-    state.requestedSampleId = "codex_roboticist";
+    state.requestedSampleId = "sample_a";
   }
 
   els.modePill.hidden = false;
   els.samplePanel.hidden = false;
   els.notesTabBtn.hidden = false;
-  els.notesView.innerHTML = `<p class="notes-empty">Select and run a sample to view its phase READMEs.</p>`;
+  els.notesView.innerHTML = `<p class="notes-empty">Select and run a sample to view its README.</p>`;
 }
 
 async function initSamples() {
@@ -242,7 +225,6 @@ async function selectScene(id) {
   if (i >= 0) state.sceneIndex = i;
   state.activeSceneId = id;
   state.scene = await loadScene(id);
-  state.phase2Active = null;
   state.view = makeView(els.canvas, viewBounds(state.scene));
   state.trace = null;
   state.result = null;
@@ -346,192 +328,12 @@ function updateSparklines(snap) {
 
 async function runNextFromOverlay() {
   els.runNextOverlay.hidden = true;
-  trackAnalytics("run_next_overlay", {
-    scene_index: state.sceneIndex,
-    phase2_active: !!state.phase2Active
-  });
+  trackAnalytics("run_next_overlay", { scene_index: state.sceneIndex });
   const nextIdx = state.sceneIndex + 1;
   if (nextIdx < state.scenes.length) {
     await selectSceneByIndex(nextIdx);
     runActive();
-    return;
   }
-  let pick = null;
-  if (state.sampleActive) {
-    try {
-      const v2Url = new URL(state.sampleActive.phase2, document.baseURI).href;
-      const mod = await import(`${v2Url}?probe=${Date.now()}`);
-      if (mod.family) {
-        pick = state.phase2Catalog.find(v => v.source === "public" && v.family === mod.family);
-      }
-    } catch { /* fall through */ }
-  }
-  if (!pick) pick = state.phase2Catalog.find(v => v.source === "public");
-  if (!pick) {
-    log("no Phase 2 public example available", "warn");
-    return;
-  }
-  els.phase2Family.value = pick.family;
-  refreshPhase2SceneOptions();
-  els.phase2Scene.value = pick.id;
-  await loadSelectedPhase2Scene();
-  log(`end of benchmark — loaded Phase 2 ${pick.family} example, running v2 now.`, "ok");
-  await runPhase2V2();
-}
-
-async function initPhase2() {
-  const publicVariants = await loadPhase2Catalog("./phase2_examples/", "public");
-  const privateVariants = await loadPhase2Catalog("./_private/phase2_variants/", "private");
-  state.phase2Catalog = [...publicVariants, ...privateVariants];
-
-  const families = ["capacity", "precedence", "obstacle_routing"]
-    .filter(f => state.phase2Catalog.some(v => v.family === f));
-  els.phase2Family.innerHTML = "";
-  for (const family of families) {
-    const opt = document.createElement("option");
-    opt.value = family;
-    opt.textContent = family;
-    els.phase2Family.appendChild(opt);
-  }
-  if (!families.length) {
-    els.phase2Status.textContent = "No Phase 2 variants found.";
-    els.phase2LoadBtn.disabled = true;
-    els.phase2RunBtn.disabled = true;
-    return;
-  }
-  refreshPhase2SceneOptions();
-  const privateCount = privateVariants.length;
-  els.phase2Status.textContent = `${publicVariants.length} public variants${privateCount ? `, ${privateCount} private probes` : ""}.`;
-}
-
-async function loadPhase2Catalog(base, source) {
-  try {
-    const res = await fetch(`${base}index.json`);
-    if (!res.ok) return [];
-    const idx = await res.json();
-    const out = [];
-    for (const [family, entries] of Object.entries(idx.families ?? {})) {
-      for (const entry of entries) {
-        out.push({
-          family,
-          id: entry.id,
-          source,
-          path: `${base}${entry.path}`
-        });
-      }
-    }
-    return out;
-  } catch {
-    return [];
-  }
-}
-
-function refreshPhase2SceneOptions() {
-  const family = els.phase2Family.value;
-  const entries = state.phase2Catalog.filter(v => v.family === family);
-  els.phase2Scene.innerHTML = "";
-  for (const entry of entries) {
-    const opt = document.createElement("option");
-    opt.value = entry.id;
-    opt.textContent = `${entry.id}${entry.source === "private" ? " (private)" : ""}`;
-    els.phase2Scene.appendChild(opt);
-  }
-}
-
-function selectedPhase2Meta() {
-  const family = els.phase2Family.value;
-  const id = els.phase2Scene.value;
-  return state.phase2Catalog.find(v => v.family === family && v.id === id) ?? null;
-}
-
-async function loadSelectedPhase2Scene() {
-  const meta = selectedPhase2Meta();
-  if (!meta) {
-    log("no Phase 2 variant selected", "warn");
-    return;
-  }
-  const res = await fetch(meta.path);
-  if (!res.ok) {
-    log(`failed to load Phase 2 variant ${meta.id}: ${res.status}`, "err");
-    return;
-  }
-  state.scene = await res.json();
-  state.activeSceneId = state.scene.id;
-  state.phase2Active = meta;
-  state.view = makeView(els.canvas, viewBounds(state.scene));
-  state.trace = null;
-  state.result = null;
-  state.frame = 0;
-  state.playing = false;
-  els.overlay.textContent = `${state.scene.id}\nPhase 2 ${meta.family} | ${meta.source}\n${state.scene.parts.length} parts | ${state.scene.bins.length} bins | ${state.scene.obstacles?.length ?? 0} obstacles`;
-  log(`loaded Phase 2 ${meta.source} variant ${state.scene.id} (${meta.family})`, "ok");
-  trackAnalytics("load_phase2_variant", {
-    family: meta.family,
-    variant_id: meta.id,
-    source: meta.source
-  });
-  renderResult();
-  renderRoutine();
-  draw();
-}
-
-async function runPhase2V2() {
-  const meta = selectedPhase2Meta();
-  if (!meta) {
-    log("no Phase 2 variant selected", "warn");
-    return;
-  }
-  trackAnalytics("run_phase2", { family: meta.family, variant: meta.id, via: analyticsContext().via });
-  if (!state.phase2Active || state.phase2Active.id !== meta.id) {
-    await loadSelectedPhase2Scene();
-  }
-  try {
-    const v2Rel = state.sampleActive?.phase2
-      ?? "../solution/phase2/index.js";
-    const v2Base = new URL(v2Rel, document.baseURI).href;
-    const v2Path = `${v2Base}${v2Base.includes("?") ? "&" : "?"}cache=${Date.now()}`;
-    const mod = await import(v2Path);
-    if (state.sampleActive) {
-      log(`v2 resolved to sample:${state.sampleActive.id} → ${v2Base}`, "warn");
-    }
-    const planner = mod.plan ?? mod.default;
-    if (typeof planner !== "function") {
-      throw new Error("solution/phase2/index.js must export plan(scene, context) or a default function");
-    }
-    if (mod.family && mod.family !== meta.family) {
-      log(`v2 module declares family=${mod.family}; running selected family=${meta.family}`, "warn");
-    }
-    const produced = await planner(state.scene, {
-      family: meta.family,
-      variantId: state.scene.id,
-      source: meta.source
-    });
-    const entry = normalizePhase2Routine(produced, state.scene.id);
-    state.bundle = {
-      generator: "solution/phase2/index.js",
-      scenarios: { [state.scene.id]: entry }
-    };
-    els.bundleStatus.textContent = `phase2:${state.scene.id}`;
-    log(`v2 generated ${entry.steps.length} steps for ${state.scene.id}`, "ok");
-    trackAnalytics("generate_phase2_routine", {
-      family: meta.family,
-      variant_id: state.scene.id,
-      source: meta.source,
-      steps: entry.steps.length,
-      sample_mode: state.sampleMode ? "on" : "off"
-    });
-    runActive({ generatePhase2: false });
-  } catch (e) {
-    log(`Phase 2 v2 failed: ${e.message}`, "err");
-  }
-}
-
-function normalizePhase2Routine(value, sceneId) {
-  if (Array.isArray(value)) return { steps: value };
-  if (value?.steps && Array.isArray(value.steps)) return value;
-  const bundled = value?.scenarios?.[sceneId];
-  if (bundled?.steps && Array.isArray(bundled.steps)) return bundled;
-  throw new Error("v2 planner must return {steps:[...]}, a steps array, or a bundle entry for this scene");
 }
 
 function setTab(tab) {
@@ -543,23 +345,16 @@ function setTab(tab) {
 }
 
 async function loadSampleNotes(sample) {
-  const docs = [
-    ["Phase 1", sample?.phase1_readme],
-    ["Phase 2", sample?.phase2_readme]
-  ].filter(([, href]) => href);
-  if (!docs.length) {
-    els.notesView.innerHTML = `<p class="notes-empty">Sample ${esc(sample?.id ?? "?")} has no README paths in _samples/index.json.</p>`;
+  const href = sample?.readme;
+  if (!href) {
+    els.notesView.innerHTML = `<p class="notes-empty">Sample ${esc(sample?.id ?? "?")} has no README path in _samples/index.json.</p>`;
     return;
   }
   try {
-    const rendered = [];
-    for (const [label, href] of docs) {
-      const res = await fetch(href);
-      if (!res.ok) throw new Error(`${href} fetch failed: ${res.status}`);
-      const md = await res.text();
-      rendered.push(`<div class="notes-header">${esc(sample.label ?? sample.id)} — ${esc(label)} — ${esc(href)}</div>${renderMarkdown(md)}`);
-    }
-    els.notesView.innerHTML = rendered.join("<hr />");
+    const res = await fetch(href);
+    if (!res.ok) throw new Error(`${href} fetch failed: ${res.status}`);
+    const md = await res.text();
+    els.notesView.innerHTML = `<div class="notes-header">${esc(sample.label ?? sample.id)} — ${esc(href)}</div>${renderMarkdown(md)}`;
   } catch (e) {
     els.notesView.innerHTML = `<p class="notes-empty">Notes for ${esc(sample.id)} unavailable (${esc(e.message)}).</p>`;
   }
@@ -577,9 +372,7 @@ function showBundleLinks(sample) {
   const base = `${GITHUB_BASE}/_samples/${encodeURIComponent(sample.id)}/solution`;
   const links = [
     ["phase1/routines.json", "Phase 1 routines"],
-    ["phase1/README.md", "Phase 1 README"],
-    ["phase2/index.js", "Phase 2 module"],
-    ["phase2/README.md", "Phase 2 README"]
+    ["README.md", "Solution README"]
   ];
   els.bundleLinks.innerHTML = links
     .map(([path, label]) => `<a href="${base}/${path}" target="_blank" rel="noopener">${esc(label)}</a>`)
@@ -587,12 +380,7 @@ function showBundleLinks(sample) {
   els.bundleLinks.hidden = false;
 }
 
-function runActive(options) {
-  const generatePhase2 = options?.generatePhase2 ?? true;
-  if (generatePhase2 && state.phase2Active && state.phase2Active.id === state.activeSceneId) {
-    runPhase2V2();
-    return;
-  }
+function runActive() {
   if (!state.bundle) {
     log("no bundle loaded — drop a routines.json or click 'baseline'", "warn");
     return;
@@ -614,7 +402,6 @@ function runActive(options) {
     scene_id: state.activeSceneId,
     sample_mode: state.sampleMode ? "on" : "off",
     sample_id: state.sampleActive?.id || "none",
-    phase2_active: !!state.phase2Active,
     success: result.success,
     parts_placed: result.parts_placed,
     parts_total: result.parts_total,
@@ -644,19 +431,14 @@ async function runSelectedSample() {
     }
     state.bundle = bundle;
     state.sampleActive = sample;
-    trackAnalytics("load_sample", {
-      sample_id: sample.id
-    });
+    trackAnalytics("load_sample", { sample_id: sample.id });
     els.bundleStatus.textContent = `sample:${sample.id}`;
     showBundleLinks(sample);
-    els.sampleStatus.textContent = `${sample.label ?? sample.id} loaded. Phase 2 v2 now resolves to this sample's module.`;
+    els.sampleStatus.textContent = `${sample.label ?? sample.id} loaded.`;
     const scenes = await Promise.all(state.scenes.map(s => loadScene(s.id)));
     const summary = runBundle(scenes, bundle).summary;
     log(`loaded sample ${sample.id}: ${summary.scenes_passed}/${summary.scenes_total} scenes, ${summary.parts_placed}/${summary.parts_total} parts, ${summary.total_violations} violations`, summary.total_violations ? "warn" : "ok");
     loadSampleNotes(sample);
-    if (state.phase2Active && state.phase2Active.id === state.activeSceneId) {
-      await selectSceneByIndex(0);
-    }
     runActive();
   } catch (e) {
     els.sampleStatus.textContent = `${sample.label ?? sample.id} unavailable (${e.message}).`;
@@ -879,4 +661,4 @@ window.addEventListener("resize", () => {
   if (state.scene) state.view = makeView(els.canvas, viewBounds(state.scene));
 });
 
-init().catch(e => log(`init failed: ${e.message}`, "err"));
+init();

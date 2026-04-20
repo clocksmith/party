@@ -1,0 +1,9 @@
+{
+  "steps": [],
+  "refusal": {
+    "reason": "dynamic_scene_unsupported",
+    "scope": "scene",
+    "detail": "v2 refuses dynamic inputs (velocities or motion). This planner is a static batch surface; a dynamic extension would require sensing + replanning state the current API does not model."
+  },
+  "notes": "The v2 contribution continues: first-class refusal also covers dynamic inputs that the proposed static API cannot soundly plan."
+}

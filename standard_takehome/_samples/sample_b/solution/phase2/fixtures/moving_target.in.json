@@ -1,0 +1,25 @@
+{
+  "scene": {
+    "id": "fixture_moving_target",
+    "world": { "x_min": -1, "x_max": 1, "y_min": -0.05, "y_max": 0.9 },
+    "arm": {
+      "base": [0, 0],
+      "thickness": 0.018,
+      "gripper_radius": 0.04,
+      "initial_angles": [0.9, 0.8, 0.3],
+      "links": [
+        { "length": 0.4, "limit": [-0.3, 3.14] },
+        { "length": 0.3, "limit": [-2.6, 2.6] },
+        { "length": 0.2, "limit": [-2.6, 2.6] }
+      ]
+    },
+    "obstacles": [],
+    "parts": [
+      { "id": "p1", "x": 0.50, "y": 0.10, "r": 0.026, "kind": "a", "vx": -0.02, "vy": 0 }
+    ],
+    "bins": [
+      { "id": "b1", "x": -0.70, "y": 0.02, "w": 0.22, "h": 0.12, "accepts": "any", "capacity": 1 }
+    ]
+  },
+  "time": 0
+}

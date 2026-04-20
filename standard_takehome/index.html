@@ -38,7 +38,7 @@
         <div class="challenge-note">
           The candidate builds a planner for a 2D robot arm that emits JSON routines the simulator can execute.
           <b>Phase 1:</b> ship a planner program (any language) plus the routines it produced for the public scenes.
-          <b>Phase 2:</b> design-doc only &mdash; an API schema, example fixtures, and prose describing the proposed v2.
+          <b>Phase 2:</b> ship a playable API slice &mdash; schema, fixtures, and a tiny planner module whose outputs replay here.
           Evaluation: safety, scene coverage, and clarity of the design writeup.
           Reviewer has the same visibility as the candidate; nothing is held out.
         </div>
@@ -64,6 +64,24 @@
           <button id="sample-run" class="primary">★ run sample</button>
         </div>
         <div class="phase2-note" id="sample-status">loading samples...</div>
+      </section>
+
+      <section>
+        <h3>phase 2 playable</h3>
+        <div class="phase2-controls">
+          <label>
+            solution path
+            <input id="phase2-path" type="text" value="solution/phase2" spellcheck="false" />
+          </label>
+          <label>
+            fixture
+            <select id="phase2-fixture"></select>
+          </label>
+          <div class="controls">
+            <button id="phase2-run" class="primary">▶ run phase 2</button>
+          </div>
+          <div class="phase2-note" id="phase2-status">Loads planner.mjs and fixtures/&lt;name&gt;.in.json.</div>
+        </div>
       </section>
 
       <section>
@@ -95,10 +113,12 @@
       <div class="bottom-tabs">
         <button type="button" class="tab-btn active" data-tab="log">Log</button>
         <button type="button" class="tab-btn" data-tab="routine">Routine</button>
+        <button type="button" class="tab-btn" data-tab="phase2">Phase 2</button>
         <button type="button" class="tab-btn" data-tab="notes" id="notes-tab-btn" hidden>Notes</button>
       </div>
       <div class="tab-body log active" id="log"></div>
       <div class="tab-body routine-view" id="routine-view"></div>
+      <div class="tab-body phase2-view" id="phase2-view"></div>
       <div class="tab-body notes-view" id="notes-view"></div>
     </div>
   </div>

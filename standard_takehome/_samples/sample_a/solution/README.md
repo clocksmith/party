@@ -6,7 +6,11 @@ Regenerate Phase 1:
 node _samples/sample_a/solution/phase1/planner/planner.js
 ```
 
-Phase 2 is a design doc under `phase2/` — schema plus fixtures, no runtime.
+Regenerate/check Phase 2:
+
+```bash
+node tests/phase2_play.mjs --solution _samples/sample_a/solution/phase2
+```
 
 ## 1. How do I plan one scene?
 
@@ -34,7 +38,7 @@ Second failure mode: **non-rectangular obstacles**. The grid rasterizer assumes 
 
 v1 is per-part imperative: `routine.movePose(...).gripClose().movePose(...).gripOpen()` for every part, and the caller owns the assignment loop. For a scene with N parts and M bins, that is N × (pick, transit, drop, transit-back) calls wired up by hand, and the assignment is baked into the caller's control flow.
 
-My proposed v2 is a **batch planner**: `plan({scene})` returns a complete routine for the whole scene with assignment decided internally. See `phase2/api.schema.json`. The schema says `output.routine.assignments` is a materialized view — the caller can see which part went to which bin — but the *decision* no longer leaks through the API surface. `phase2/fixtures/row.in.json` + `.out.json` shows a 3-part scene where the assignment is determined by kind and bin capacity; the caller never wrote a loop.
+My proposed v2 is a **batch planner**: `plan({scene})` returns a complete routine for the whole scene with assignment decided internally. See `phase2/api.schema.json` and `phase2/planner.mjs`. The schema says `output.assignments` is a materialized view — the caller can see which part went to which bin — but the *decision* no longer leaks through the API surface. `phase2/fixtures/row.*.json` shows a 3-part scene where the assignment is determined by kind and bin capacity; `phase2/fixtures/shifted_scene.*.json` shows the same family with moved coordinates; `phase2/fixtures/dropped.*.json` shows the partial output when one part has no compatible bin.
 
 What v2 makes worse: **atomicity**. v1 let the caller skip a single part mid-scene and continue with the rest. v2 commits to the whole scene as one returned routine — if one part is infeasible, the whole `plan()` returns a partial routine with that part dropped, which is less ergonomic for callers who want fine-grained control over which parts ship and which don't. I accept that cost because the common case is "do the scene, tell me what you placed," not "place exactly these three parts in exactly this order."
 

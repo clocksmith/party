@@ -6,7 +6,11 @@ Regenerate Phase 1:
 node _samples/sample_b/solution/phase1/planner/planner.js
 ```
 
-Phase 2 is a design doc under `phase2/` — schema plus fixtures, no runtime.
+Regenerate/check Phase 2:
+
+```bash
+node tests/phase2_play.mjs --solution _samples/sample_b/solution/phase2
+```
 
 ## 1. How do I plan one scene?
 
@@ -32,11 +36,13 @@ Second failure mode: **scenes with 12+ parts and non-metric routing costs**. `pl
 
 v1 forces every callsite to own the same fragile sequence: pick IK targets, try a path, grip, carry, drop, discover violations later at replay. For anything beyond one fixed scene that hides the intent — "place these parts safely despite drift."
 
-My proposed v2 is captured in `phase2/api.schema.json`. The key shape change: `plan(input) → output` where `output` is **either** a routine **or** a structured refusal. That split does two things v1 couldn't:
+My proposed v2 is captured in `phase2/api.schema.json` and `phase2/planner.mjs`. The key shape change: `plan(input) → output` where `output` is **either** a routine **or** a structured refusal. That split does two things v1 couldn't:
 
 1. **Refusal is a first-class return**, not a late violation. `fixtures/unsolvable.in.json` + `.out.json` — the part at `(0.94, 0.82)` is beyond arm reach; v2 returns `{steps: [], refusal: {reason: "unreachable", scope: "part", partId: "far"}}` synchronously. v1 would have emitted a `move_pose` to the target, hit `ik_no_converge` at replay, and counted it as a violation.
 
-2. **Routing becomes the planner's job, not the caller's.** `fixtures/wall.in.json` + `.out.json` — the v2 output derives a high-transit path over the obstacle from the scene's `obstacles` field. In v1 the caller had to script each transit manually.
+2. **Routing becomes the planner's job, not the caller's.** `fixtures/wall.in.json` + `.out.json` — the v2 output delegates obstacle routing to the planner and returns already-validated joint-space steps. In v1 the caller had to script each transit manually and discover unsafe IK branches at replay.
+
+The extra `fixtures/moving_target.*.json` pair is deliberately refused: this v2 is a static batch planner, so a scene with part velocity needs a different sensing/replanning surface rather than pretending a static routine is sound.
 
 What v2 makes worse: **failure diagnostics are one level deeper**. v1 callers saw exactly which `movePose` caused a violation at replay. v2 callers get `refusal.reason === "no_safe_route"` with no breadcrumb trail through the routing search. The schema exposes `refusal.detail` for free-form explanation but not structured tracing. I would add a diagnostics return shape in v3 if this mattered in practice.
 

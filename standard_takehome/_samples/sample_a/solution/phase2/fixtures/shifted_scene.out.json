@@ -1,0 +1,23 @@
+{
+  "steps": [
+    { "type": "move_pose", "x": 0.47, "y": 0.08 },
+    { "type": "grip_close" },
+    { "type": "move_pose", "x": -0.65, "y": 0.09 },
+    { "type": "grip_open" },
+    { "type": "move_pose", "x": 0.63, "y": 0.09 },
+    { "type": "grip_close" },
+    { "type": "move_pose", "x": -0.65, "y": 0.09 },
+    { "type": "grip_open" },
+    { "type": "move_pose", "x": 0.79, "y": 0.11 },
+    { "type": "grip_close" },
+    { "type": "move_pose", "x": -0.35, "y": 0.09 },
+    { "type": "grip_open" }
+  ],
+  "assignments": [
+    { "partId": "p_a1", "binId": "bin_a" },
+    { "partId": "p_a2", "binId": "bin_a" },
+    { "partId": "p_b1", "binId": "bin_ab" }
+  ],
+  "dropped": [],
+  "notes": "Playable v2 batch output: one plan call handled assignment, capacity, and ordering."
+}

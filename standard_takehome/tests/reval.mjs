@@ -131,7 +131,7 @@ const hard = out.bands.hard;
 console.log(`\n${suite}: required ${req.scenes_passed}/${req.scenes_total} scenes, ${req.coverage_parts_placed}/${req.coverage_parts_total} coverage (${req.parts_placed}/${req.parts_total} raw parts), ${req.total_violations} violations`);
 console.log(`hard: ${hard.scenes_passed}/${hard.scenes_total} scenes, ${hard.coverage_parts_placed}/${hard.coverage_parts_total} coverage (${hard.parts_placed}/${hard.parts_total} raw parts), ${hard.total_violations} violations`);
 console.log(`\nrubric: RUBRIC.md — safe (gate), coverage (scalar), tradeoff clarity (tiebreaker).`);
-console.log(`phase 2 is a design doc (solution/phase2/api.schema.json + fixtures/ + prose) — no runner.`);
+console.log(`phase 2 is checked separately with tests/phase2_play.mjs (solution/phase2/planner.mjs + fixtures + prose).`);
 console.log(`\nwrote ${path.relative(root, outPath)}`);
 if (violations > 0) {
   console.log(`safety gate: FAIL (${violations} violations across ${out.bands.required.scenes_total + out.bands.hard.scenes_total} scenes)`);

@@ -6,6 +6,7 @@
   "description": "Browser-based 2D robot arm simulator and take-home harness.",
   "scripts": {
     "serve": "python3 -m http.server 8000",
-    "smoke": "node tests/smoke.mjs"
+    "smoke": "node tests/smoke.mjs",
+    "phase2": "node tests/phase2_play.mjs --solution solution/phase2"
   }
 }

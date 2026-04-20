@@ -9,7 +9,7 @@
     { "partId": "reach", "binId": "bin_a" }
   ],
   "dropped": [
-    { "partId": "rare", "reason": "no_compatible_bin", "detail": "No bin accepts kind 'rare'; only bin_a (kind 'a') is present." }
+    { "partId": "rare", "reason": "no_compatible_bin", "detail": "No compatible bin accepts kind 'rare'." }
   ],
-  "notes": "Partial-safe output. v2 completes what it can and reports dropped parts with structured reasons. v1 either emitted a violation (dropping 'rare' outside a bin) or required the caller to pre-filter incompatible parts. v2 handles it in one call."
+  "notes": "Playable v2 batch output: safe partial completion with structured dropped parts."
 }

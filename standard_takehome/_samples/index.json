@@ -4,13 +4,17 @@
       "id": "sample_a",
       "label": "sample_a",
       "routines": "./_samples/sample_a/solution/phase1/routines.json",
-      "readme": "./_samples/sample_a/solution/README.md"
+      "readme": "./_samples/sample_a/solution/README.md",
+      "phase2": "./_samples/sample_a/solution/phase2",
+      "phase2Fixtures": ["row", "shifted_scene", "dropped"]
     },
     {
       "id": "sample_b",
       "label": "sample_b",
       "routines": "./_samples/sample_b/solution/phase1/routines.json",
-      "readme": "./_samples/sample_b/solution/README.md"
+      "readme": "./_samples/sample_b/solution/README.md",
+      "phase2": "./_samples/sample_b/solution/phase2",
+      "phase2Fixtures": ["wall", "unsolvable", "moving_target"]
     }
   ]
 }

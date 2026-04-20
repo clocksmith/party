@@ -590,6 +590,6 @@ function main() {
   console.log(`wrote ${path.relative(ROOT, OUT)}`);
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (typeof process !== "undefined" && process.argv?.[1] === fileURLToPath(import.meta.url)) {
   main();
 }

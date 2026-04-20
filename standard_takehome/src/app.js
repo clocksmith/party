@@ -1,6 +1,6 @@
 import { loadSceneIndex, loadScene } from "./scene.js";
 import { runRoutine } from "./sim.js";
-import { classifyResult, validateRoutineBundle, runBundle } from "./harness.js";
+import { classifyResult, evaluatePhase2Output, normalizePhase2Input, validateRoutineBundle, runBundle } from "./harness.js";
 import { naiveSolve } from "./planning_api.js";
 import { makeView, render } from "./renderer.js";
 import { renderMarkdown } from "./md.js";
@@ -33,6 +33,11 @@ const els = {
   sampleSelect: document.getElementById("sample-select"),
   sampleRunBtn: document.getElementById("sample-run"),
   sampleStatus: document.getElementById("sample-status"),
+  phase2Path: document.getElementById("phase2-path"),
+  phase2Fixture: document.getElementById("phase2-fixture"),
+  phase2RunBtn: document.getElementById("phase2-run"),
+  phase2Status: document.getElementById("phase2-status"),
+  phase2View: document.getElementById("phase2-view"),
   notesTabBtn: document.getElementById("notes-tab-btn"),
   notesView: document.getElementById("notes-view"),
   bundleInput: document.getElementById("bundle-input"),
@@ -66,6 +71,7 @@ const state = {
   requestedSampleId: null,
   samples: [],
   sampleActive: null,
+  phase2Output: null,
   activeRoutineStep: null,
   viaSharedLink: location.hash.length > 0,
   analytics: null,
@@ -145,6 +151,8 @@ async function init() {
   els.bundleInput.addEventListener("change", onBundleUpload);
   els.exportBtn.addEventListener("click", exportResults);
   els.sampleRunBtn.addEventListener("click", runSelectedSample);
+  els.sampleSelect.addEventListener("change", onSampleSelectChange);
+  els.phase2RunBtn.addEventListener("click", runPhase2Fixture);
   for (const btn of els.tabBtns) {
     btn.addEventListener("click", () => setTab(btn.dataset.tab));
   }
@@ -240,6 +248,8 @@ async function initSamples() {
     }
     els.sampleRunBtn.disabled = false;
     els.sampleStatus.textContent = `${state.samples.length} known sample solution${state.samples.length === 1 ? "" : "s"} available.`;
+    const activeSample = state.samples.find(s => s.id === els.sampleSelect.value) ?? state.samples[0];
+    if (activeSample) applyPhase2SampleDefaults(activeSample);
     log(`sample mode enabled: loaded ${state.samples.length} sample solution${state.samples.length === 1 ? "" : "s"} from _samples`, "warn");
   } catch (e) {
     state.samples = [];
@@ -375,7 +385,10 @@ async function runNextFromOverlay() {
 
 function setTab(tab) {
   state.activeTab = tab;
-  const bodyId = tab === "log" ? "log" : tab === "routine" ? "routine-view" : "notes-view";
+  const bodyId = tab === "log" ? "log"
+    : tab === "routine" ? "routine-view"
+    : tab === "phase2" ? "phase2-view"
+    : "notes-view";
   for (const btn of els.tabBtns) btn.classList.toggle("active", btn.dataset.tab === tab);
   for (const body of els.tabBodies) body.classList.toggle("active", body.id === bodyId);
   if (tab === "routine") updateRoutineHighlight({ force: true, scroll: true });
@@ -409,6 +422,7 @@ function showBundleLinks(sample) {
   const base = `${GITHUB_BASE}/_samples/${encodeURIComponent(sample.id)}/solution`;
   const links = [
     ["phase1/routines.json", "Phase 1 routines"],
+    ["phase2/planner.mjs", "Phase 2 planner"],
     ["README.md", "Solution README"]
   ];
   els.bundleLinks.innerHTML = links
@@ -473,6 +487,7 @@ async function runSelectedSample() {
     trackAnalytics("load_sample", { sample_id: sample.id });
     els.bundleStatus.textContent = `sample:${sample.id}`;
     showBundleLinks(sample);
+    applyPhase2SampleDefaults(sample);
     els.sampleStatus.textContent = `${sample.label ?? sample.id} loaded.`;
     const scenes = await loadScenesForBundle();
     const summary = runBundle(scenes, bundle).summary;
@@ -483,6 +498,140 @@ async function runSelectedSample() {
     els.sampleStatus.textContent = `${sample.label ?? sample.id} unavailable (${e.message}).`;
     log(`sample ${sample.id} unavailable: ${e.message}`, "err");
   }
+}
+
+function canonicalJson(value) {
+  if (Array.isArray(value)) return value.map(canonicalJson);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(Object.keys(value).sort().map(k => [k, canonicalJson(value[k])]));
+}
+
+function sameJson(a, b) {
+  return JSON.stringify(canonicalJson(a)) === JSON.stringify(canonicalJson(b));
+}
+
+async function fetchJsonOptional(url) {
+  const res = await fetch(url);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`${url} fetch failed: ${res.status}`);
+  return res.json();
+}
+
+function renderPhase2Output({ path, fixture, output, expected, matches, evalOut, errors = [] }) {
+  const summary = [
+    `solution: ${path}`,
+    `fixture: ${fixture}`,
+    expected ? `expected: ${matches ? "MATCH" : "DIFF"}` : "expected: none",
+    evalOut?.result ? `replay: ${evalOut.result.parts_placed}/${evalOut.result.parts_total} parts, ${evalOut.result.violations.length} violations` : null,
+    errors.length ? `errors: ${errors.length}` : null
+  ].filter(Boolean).join("\n");
+  const payload = output ? JSON.stringify(output, null, 2) : "";
+  const expectedPayload = expected ? JSON.stringify(expected, null, 2) : "";
+  const errorText = errors.length ? `\n\n${errors.map(e => `ERROR: ${e}`).join("\n")}` : "";
+  const chunks = [
+    summary,
+    errorText.trim(),
+    payload ? `actual:\n${payload}` : "",
+    expectedPayload ? `expected:\n${expectedPayload}` : ""
+  ].filter(Boolean);
+  els.phase2View.innerHTML = `<pre class="phase2-output">${escapeHtml(chunks.join("\n\n"))}</pre>`;
+}
+
+function applyPhase2SampleDefaults(sample) {
+  if (!sample || !els.phase2Fixture) return;
+  if (sample.phase2 && els.phase2Path) {
+    els.phase2Path.value = sample.phase2.replace(/^\.\//, "");
+  }
+  const fixtures = Array.isArray(sample.phase2Fixtures) && sample.phase2Fixtures.length
+    ? sample.phase2Fixtures
+    : sample.phase2Fixture ? [sample.phase2Fixture] : [];
+  els.phase2Fixture.innerHTML = "";
+  for (const name of fixtures) {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    els.phase2Fixture.appendChild(opt);
+  }
+  if (fixtures.length) els.phase2Fixture.value = fixtures[0];
+}
+
+function onSampleSelectChange() {
+  const sample = state.samples.find(s => s.id === els.sampleSelect.value);
+  if (sample) applyPhase2SampleDefaults(sample);
+}
+
+async function runPhase2Fixture() {
+  const solutionPath = (els.phase2Path.value || "solution/phase2").replace(/^\.\//, "").replace(/\/+$/, "");
+  const fixture = (els.phase2Fixture.value || "").trim();
+  if (!fixture) {
+    log("phase2 fixture name is required", "warn");
+    return;
+  }
+
+  const base = `./${solutionPath}`;
+  const inputUrl = `${base}/fixtures/${encodeURIComponent(fixture)}.in.json`;
+  const expectedUrl = `${base}/fixtures/${encodeURIComponent(fixture)}.out.json`;
+  const plannerUrl = new URL(`../${solutionPath}/planner.mjs?cache=${Date.now()}`, import.meta.url).href;
+  const errors = [];
+  let rawInput = null;
+  let expected = null;
+  let output = null;
+  let evalOut = null;
+  let matches = false;
+
+  els.phase2Status.textContent = `running ${solutionPath}/${fixture}...`;
+  log(`running phase2 fixture ${solutionPath}/${fixture}`);
+  trackAnalytics("run_phase2_fixture", { path: solutionPath, fixture });
+
+  try {
+    rawInput = await fetchJsonOptional(inputUrl);
+    if (!rawInput) throw new Error(`${inputUrl} not found`);
+    expected = await fetchJsonOptional(expectedUrl);
+    const mod = await import(plannerUrl);
+    if (typeof mod.plan !== "function") throw new Error("planner.mjs must export function plan(input)");
+    output = await mod.plan(normalizePhase2Input(rawInput));
+    evalOut = evaluatePhase2Output(rawInput, output, { recordTrace: true });
+    errors.push(...evalOut.issues);
+    if (expected) matches = sameJson(output, expected);
+    if (expected && !matches) errors.push(`${fixture}.out.json differs from plan(input) output`);
+    if (evalOut.result?.violations?.length) {
+      for (const v of evalOut.result.violations) errors.push(`${v.kind} @ step ${v.step_index}: ${v.detail ?? ""}`);
+    }
+  } catch (e) {
+    errors.push(e.message);
+  }
+
+  renderPhase2Output({ path: solutionPath, fixture, output, expected, matches, evalOut, errors });
+
+  if (evalOut?.scene && evalOut?.routine && evalOut?.result && evalOut?.trace) {
+    state.scene = evalOut.scene;
+    state.activeSceneId = evalOut.scene.id;
+    state.view = makeView(els.canvas, viewBounds(state.scene));
+    state.bundle = { generator: `phase2:${solutionPath}`, scenarios: { [state.activeSceneId]: evalOut.routine } };
+    state.result = evalOut.result;
+    state.trace = evalOut.trace;
+    state.frame = 0;
+    state.playing = evalOut.trace.length > 1;
+    state.activeRoutineStep = null;
+    if (els.sceneIdx) els.sceneIdx.textContent = "P2";
+    if (els.sceneName) els.sceneName.textContent = state.scene.id;
+    updateOverlayScene();
+    buildSparklinePanel(state.scene);
+    renderResult();
+    renderRoutine();
+    updateRoutineHighlight({ force: true, scroll: false });
+    draw();
+  }
+
+  if (errors.length) {
+    els.phase2Status.textContent = `${fixture}: failed (${errors.length} issue${errors.length === 1 ? "" : "s"})`;
+    log(`phase2 ${fixture}: FAIL (${errors.length} issues)`, "err");
+  } else {
+    const result = evalOut?.result;
+    els.phase2Status.textContent = `${fixture}: playable, ${result?.parts_placed ?? 0}/${result?.parts_total ?? 0} parts, ${result?.violations?.length ?? 0} violations`;
+    log(`phase2 ${fixture}: PASS`, "ok");
+  }
+  setTab("phase2");
 }
 
 function runBaseline() {

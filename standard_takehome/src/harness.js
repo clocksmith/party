@@ -96,3 +96,123 @@ export function runBundle(scenes, bundle, opts = {}) {
   };
   return out;
 }
+
+export function isScene(value) {
+  return !!value
+    && typeof value === "object"
+    && value.arm
+    && Array.isArray(value.parts)
+    && Array.isArray(value.bins);
+}
+
+export function normalizePhase2Input(rawInput) {
+  if (rawInput && typeof rawInput === "object" && isScene(rawInput.scene)) {
+    return rawInput;
+  }
+  if (isScene(rawInput)) return { scene: rawInput };
+  return rawInput;
+}
+
+export function phase2Routine(output) {
+  if (!output || typeof output !== "object") return null;
+  if (Array.isArray(output.steps)) {
+    return { steps: output.steps, notes: output.notes ?? "" };
+  }
+  if (output.routine && Array.isArray(output.routine.steps)) {
+    return { steps: output.routine.steps, notes: output.routine.notes ?? output.notes ?? "" };
+  }
+  return null;
+}
+
+function validateStep(step, path) {
+  const issues = [];
+  if (!step || typeof step !== "object") {
+    issues.push(`${path} must be an object`);
+    return issues;
+  }
+  if (step.type === "move_joint") {
+    if (!Array.isArray(step.angles) || step.angles.some(v => !Number.isFinite(v))) {
+      issues.push(`${path}.angles must be an array of finite numbers`);
+    }
+  } else if (step.type === "move_pose") {
+    if (!Number.isFinite(step.x) || !Number.isFinite(step.y)) {
+      issues.push(`${path}.x and ${path}.y must be finite numbers`);
+    }
+  } else if (step.type === "wait") {
+    if (!Number.isFinite(step.duration) || step.duration < 0) {
+      issues.push(`${path}.duration must be a non-negative number`);
+    }
+  } else if (step.type !== "grip_open" && step.type !== "grip_close") {
+    issues.push(`${path}.type is not a supported robot step`);
+  }
+  return issues;
+}
+
+export function validatePhase2Output(output) {
+  const issues = [];
+  if (!output || typeof output !== "object" || Array.isArray(output)) {
+    return ["phase2 output must be an object"];
+  }
+
+  const routine = phase2Routine(output);
+  if (!routine) {
+    issues.push("phase2 output must expose a routine as steps[] or routine.steps[]");
+  } else {
+    for (let i = 0; i < routine.steps.length; i++) {
+      issues.push(...validateStep(routine.steps[i], `steps[${i}]`));
+    }
+  }
+
+  if (output.refusal != null) {
+    if (!output.refusal || typeof output.refusal !== "object" || Array.isArray(output.refusal)) {
+      issues.push("refusal must be an object");
+    } else {
+      if (typeof output.refusal.reason !== "string" || !output.refusal.reason) {
+        issues.push("refusal.reason must be a non-empty string");
+      }
+      if (output.refusal.scope != null && typeof output.refusal.scope !== "string") {
+        issues.push("refusal.scope must be a string when present");
+      }
+    }
+    if (routine && routine.steps.length > 0) {
+      issues.push("refusal outputs must not also return executable steps");
+    }
+  }
+
+  if (output.dropped != null) {
+    if (!Array.isArray(output.dropped)) {
+      issues.push("dropped must be an array when present");
+    } else {
+      for (let i = 0; i < output.dropped.length; i++) {
+        const d = output.dropped[i];
+        if (!d || typeof d !== "object" || Array.isArray(d)) {
+          issues.push(`dropped[${i}] must be an object`);
+          continue;
+        }
+        if (typeof d.partId !== "string" || !d.partId) issues.push(`dropped[${i}].partId must be a non-empty string`);
+        if (typeof d.reason !== "string" || !d.reason) issues.push(`dropped[${i}].reason must be a non-empty string`);
+      }
+    }
+  }
+
+  if (output.assignments != null && !Array.isArray(output.assignments)) {
+    issues.push("assignments must be an array when present");
+  }
+
+  return issues;
+}
+
+export function evaluatePhase2Output(rawInput, output, opts = {}) {
+  const input = normalizePhase2Input(rawInput);
+  const issues = validatePhase2Output(output);
+  const routine = phase2Routine(output);
+  const scene = input?.scene;
+  if (!isScene(scene)) {
+    return { input, scene: null, routine, result: null, trace: null, issues: issues.concat("phase2 input must contain a scene") };
+  }
+  if (!routine || issues.length) {
+    return { input, scene, routine, result: null, trace: null, issues };
+  }
+  const { result, trace } = runRoutine(scene, routine, { recordTrace: !!opts.recordTrace });
+  return { input, scene, routine, result, trace, issues };
+}

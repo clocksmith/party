@@ -1,12 +1,12 @@
 # Take-home Exercise: Robot Routine Planner
 
-Build a motion planner for a simulated 2D multi-axis robot arm. **Phase 1** ships a planner program (any language) plus the routines it produced for the public scenes. **Phase 2** is a design doc — an API schema plus fixtures plus prose — describing how you would redesign the v1 planning surface.
+Build a motion planner for a simulated 2D multi-axis robot arm. **Phase 1** ships a planner program (any language) plus the routines it produced for the public scenes. **Phase 2** ships a playable API-design slice — an API schema, fixtures, prose, and a small JavaScript planner module whose returned routines can be replayed in the simulator.
 
-This is deliberately a take-home about take-homes. The robot benchmark is the concrete substrate; the senior signal is whether you can make the work legible, bounded, and fair to evaluate. Phase 1 asks you to live inside the current surface. Phase 2 asks you to design the next surface so a future candidate could express infeasibility and tradeoffs cleanly instead of relying on hidden side channels.
+This is deliberately a take-home about take-homes. The robot benchmark is the concrete substrate; the senior signal is whether you can make the work legible, bounded, and fair to evaluate. Phase 1 asks you to live inside the current surface. Phase 2 asks you to design the next surface so a future candidate could express infeasibility and tradeoffs cleanly instead of relying on hidden side channels. It is intentionally narrow: make one redesign thesis executable on fixtures, not a second full benchmark.
 
 Reviewer has the same visibility as you. Nothing is held out. No private scenes. Read `RUBRIC.md` before you start; it is the single source of truth for how submissions are scored.
 
-**There is no trick.** The task is: write a planner, ship the `routines.json` it produced for the 10 public scenes, and design the smallest API change that would make scene 10 (the deliberate mixed-feasibility case) straightforward. Safety gate is pass/fail. Coverage is a single integer. Tradeoff clarity is graded against named criteria in `RUBRIC.md`. Extra polish, micro-optimization, or beating the samples on step count is not rewarded; being honest about what you chose, what you skipped, and what you cannot cleanly express *is*.
+**There is no trick.** The task is: write a planner, ship the `routines.json` it produced for the 10 public scenes, and make the smallest API change that would make scene 10 (the deliberate mixed-feasibility case) straightforward. Safety gate is pass/fail. Coverage is a single integer. Tradeoff clarity is graded against named criteria in `RUBRIC.md`. Extra polish, micro-optimization, or beating the samples on step count is not rewarded; being honest about what you chose, what you skipped, and what you cannot cleanly express *is*.
 
 ## Deliverables
 
@@ -17,13 +17,14 @@ solution/
     routines.json       # the bundle your planner produced for the public scenes
   phase2/
     api.schema.json     # your proposed v2 API surface, as JSON Schema
+    planner.mjs         # exports plan(input), executable on your fixtures
     fixtures/
-      *.in.json         # scene inputs that exercise the proposed API
-      *.out.json        # the routine (or refusal) the API would return
+      *.in.json         # plan(input), either {scene,...} or a raw scene
+      *.out.json        # exact plan(input) output for that fixture
   README.md             # four questions, one unified writeup
 ```
 
-Five artifact shapes, one README. No separate phase READMEs. No runnable Phase 2 module.
+Six artifact shapes, one README. No separate phase READMEs. Phase 2 is executable, but intentionally small: `planner.mjs` only needs to support the fixture family you choose, and it should clearly refuse unsupported cases.
 
 `solution/README.md` must include a **"How to regenerate `routines.json`"** section with the exact command you use (e.g. `python planner/main.py`, `node planner/index.js`, `cargo run --release`). The reviewer does not need to re-run anything to score you — the shipped `routines.json` is the evidence — but if they choose to verify, they follow your stated command.
 
@@ -34,7 +35,7 @@ Four questions, short answers. One or two paragraphs each.
 1. **How do you plan one scene?** Describe the algorithm your Phase 1 planner uses.
 2. **What did you optimize, what did you knowingly give up, and what assumption — if wrong — breaks your submission?** Safety, coverage, compute budget, simplicity, generalization — pick your axis and name the tradeoff. Then name one load-bearing assumption (about the simulator, the scene distribution, or the arm) and say what happens if it turns out to be false.
 3. **Where does your approach break as scene size or drift grows?** Name the smallest case you would fail on and why.
-4. **Scene 10 is Phase 2.** Scene 10 contains parts your planner cannot place (one outside arm reach, one with no compatible bin). v1 gives you no clean way to report this — infeasibility leaks out through late safety violations or ad-hoc side-channel code in your planner. Treat this as a miniature take-home-design problem: show the minimum API change that would have made scene 10 straightforward and reviewable. Your `api.schema.json` must expose a new return shape that addresses infeasibility; at least one fixture pair must demonstrate that shape on a scene-10-style input. Name what your v2 makes worse.
+4. **Scene 10 is Phase 2.** Scene 10 contains parts your planner cannot place (one outside arm reach, one with no compatible bin). v1 gives you no clean way to report this — infeasibility leaks out through late safety violations or ad-hoc side-channel code in your planner. Treat this as a miniature take-home-design problem: show the minimum API change that would have made scene 10 straightforward and reviewable. Your `api.schema.json` must expose a new return shape that addresses infeasibility; at least one fixture pair must demonstrate that shape on a scene-10-style input; `planner.mjs` must return the fixture outputs when run by `tests/phase2_play.mjs`. Name what your v2 makes worse.
 
 ## Simulator Contract
 
@@ -83,21 +84,27 @@ node tests/reval.mjs --bundle solution/phase1/routines.json
 
 Safety first. A careful planner that safely skips a scene beats a confident one that crashes the arm. Scene 10 deliberately contains parts that cannot be placed; correct behavior is to safely complete what you can and skip what you can't.
 
-## Phase 2 — Design Doc (welded to scene 10)
+## Phase 2 — Playable API Slice
 
-There is no runnable Phase 2 module. Phase 2 is a narrow, specific design proposal: **how would you redesign v1's API so scene 10 becomes straightforward and fair to review?**
+Phase 2 is a runnable design proposal: **pick one weakness in v1 and ship a tiny executable planner that demonstrates your fix on at least one fixture.**
 
-Scene 10 is the sharpest v1 pain point in the benchmark. It contains parts your planner physically cannot place. Under v1, the only ways to handle this are (a) attempt them and violate, failing the safety gate, or (b) implement side-channel feasibility detection inside your planner, which is clunky and leaks into every callsite. Neither is clean. Your Phase 2 is the case for a better API.
-
-The meta task is to design the evaluation surface you wish you had been given: explicit inputs, structured outputs, fixtures that make edge cases reviewable, and prose that names the cost of the new design. A good Phase 2 should feel like the spec for a smaller, fairer version of this take-home.
+Pick the weakness you care about (infeasibility reporting, batch assignment, refusal of dynamic inputs, whatever you can defend). Ship a small `planner.mjs` that implements your proposed v2 surface. Ship fixtures that exercise it. Both the CLI and the browser load your module, run `plan(input)`, compare against your declared output, and play the returned routine through the simulator. You do not need to solve every hard scene — you need to make *one* redesign thesis executable and legible.
 
 Ship:
 
-- **`solution/phase2/api.schema.json`** — JSON Schema of your proposed v2 API. It must expose a new return shape (e.g. `refusal`, `dropped`, `partial`) that addresses infeasibility as a first-class concept, not a late violation.
-- **`solution/phase2/fixtures/*.in.json` + `*.out.json`** — at least one pair demonstrating that return shape on a scene-10-style input, and at least one pair demonstrating a successful plan on a normal scene. Scenes can be drawn from `scenarios/` or authored fresh.
-- **Prose in `solution/README.md` (question 4)** — walk through the schema, point at the infeasibility fixture, and name what your v2 makes worse.
+- **`solution/phase2/planner.mjs`** — portable ES module exporting `plan(input) → output`. The module must load in both Node and the browser with zero dependencies outside your repo, no network, and no Node-only or browser-only globals. Output shape is your proposed v2 API: routine, refusal, partial, assignments — whatever your thesis claims.
+- **`solution/phase2/api.schema.json`** — JSON Schema of the `plan(input) → output` contract.
+- **`solution/phase2/fixtures/*.in.json` + `*.out.json`** — at least two pairs. One must demonstrate your proposed return shape on a case v1 handles badly (infeasible scene, dynamic input, tight capacity, whatever you scope to). `.out.json` must match what `plan()` returns on the corresponding `.in.json`; the CLI and browser compare them exactly.
+- **Prose in `solution/README.md` (question 4)** — name the v1 weakness you fixed, point at the fixture pair that demonstrates it, and name what your v2 makes worse. It is fine to support only one variant family if you refuse unsupported cases clearly.
 
-Reviewer reads; nothing executes. The fixtures are claims about your proposed API, not routines to be played in the sim.
+Verify locally:
+
+```bash
+node tests/phase2_play.mjs --solution solution/phase2
+node tests/phase2_play.mjs --solution solution/phase2 --fixture <name>
+```
+
+In the browser, open the **Phase 2 Playable** panel, set the solution path and fixture name, and click run. The UI will load your module, run `plan()`, display the output alongside your declared `.out.json`, and animate the returned routine in the sim.
 
 ## Scoring
 
@@ -105,7 +112,7 @@ See `RUBRIC.md`. Three axes:
 
 - **Safe** — zero violations on `routines.json` when replayed through `tests/reval.mjs`. Pass/fail gate.
 - **Coverage** — parts placed across the 10 public scenes. Scalar.
-- **Tradeoff clarity** — your README answers graded against your code and your Phase 2 design doc. Tiebreaker.
+- **Tradeoff clarity** — your README answers graded against your code and your playable Phase 2 slice. Tiebreaker.
 
 No path-length tiebreakers. No elapsed-step tiebreakers. No private holdout. Everything the reviewer sees, you see.
 
@@ -119,13 +126,13 @@ python3 -m http.server 8000          # simulator UI at http://localhost:8000
 node tests/smoke.mjs                  # baseline runs on every scene
 ```
 
-Then read: `RUBRIC.md`, `src/schema.json`, `src/planning_api.js` (v1 for reference), and the scene files under `scenarios/`. Once your planner has generated `solution/phase1/routines.json`, run `node tests/reval.mjs --bundle solution/phase1/routines.json`.
+Then read: `RUBRIC.md`, `src/schema.json`, `src/planning_api.js` (v1 for reference), and the scene files under `scenarios/`. Once your Phase 1 planner has generated `solution/phase1/routines.json`, run `node tests/reval.mjs --bundle solution/phase1/routines.json`. Once your Phase 2 slice is in place, run `node tests/phase2_play.mjs --solution solution/phase2`.
 
 ## FAQ
 
 **Does language matter for Phase 1?** No. The simulator only consumes `routines.json`. Your planner can be in Python, Go, Rust, JavaScript, whatever — ship it under `solution/phase1/planner/` with a runnable entry point and a note in the README.
 
-**Is Phase 2 executable?** No. It is a design document — schema, fixtures, prose. The fixtures describe what your proposed API would return; no runtime validates them.
+**Is Phase 2 executable?** Yes, narrowly. `planner.mjs` must export `plan(input)` and must run on your fixtures. This is not a second benchmark; it is a playable proof that your API shape can express a success and an infeasibility/refusal case cleanly.
 
 **Can I use AI tooling?** Yes. Say which decisions were yours and which were AI-assisted in `solution/README.md`. We probe this in the Q&A.
 
@@ -138,6 +145,8 @@ Then read: `RUBRIC.md`, `src/schema.json`, `src/planning_api.js` (v1 for referen
 - [ ] `solution/phase1/planner/` contains your planner code.
 - [ ] `solution/phase1/routines.json` is the bundle your planner produces, covering at least the 6 required scenes.
 - [ ] `solution/phase2/api.schema.json` describes your proposed v2 API shape.
+- [ ] `solution/phase2/planner.mjs` exports `plan(input)`.
 - [ ] `solution/phase2/fixtures/` contains at least one in/out pair for a real scene and one for an infeasibility case.
 - [ ] `solution/README.md` answers all four questions and names the exact regenerate command.
 - [ ] `node tests/reval.mjs --bundle solution/phase1/routines.json` exits 0 (safety gate passed).
+- [ ] `node tests/phase2_play.mjs --solution solution/phase2` exits 0 (Phase 2 fixtures are playable).

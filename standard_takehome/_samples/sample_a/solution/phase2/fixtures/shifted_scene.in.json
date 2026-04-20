@@ -1,0 +1,25 @@
+{
+  "id": "fixture_shifted_scene",
+  "world": { "x_min": -1, "x_max": 1, "y_min": -0.05, "y_max": 0.9 },
+  "arm": {
+    "base": [0, 0],
+    "thickness": 0.018,
+    "gripper_radius": 0.04,
+    "initial_angles": [0.9, 0.8, 0.3],
+    "links": [
+      { "length": 0.4, "limit": [-0.3, 3.14] },
+      { "length": 0.3, "limit": [-2.6, 2.6] },
+      { "length": 0.2, "limit": [-2.6, 2.6] }
+    ]
+  },
+  "obstacles": [],
+  "parts": [
+    { "id": "p_a1", "x": 0.47, "y": 0.08, "r": 0.026, "kind": "a" },
+    { "id": "p_a2", "x": 0.63, "y": 0.09, "r": 0.026, "kind": "a" },
+    { "id": "p_b1", "x": 0.79, "y": 0.11, "r": 0.020, "kind": "b" }
+  ],
+  "bins": [
+    { "id": "bin_a",  "x": -0.75, "y": 0.03, "w": 0.20, "h": 0.12, "accepts": ["a"], "capacity": 2 },
+    { "id": "bin_ab", "x": -0.45, "y": 0.03, "w": 0.20, "h": 0.12, "accepts": ["a", "b"], "capacity": 2 }
+  ]
+}

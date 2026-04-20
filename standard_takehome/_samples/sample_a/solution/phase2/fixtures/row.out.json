@@ -19,5 +19,5 @@
     { "partId": "p_b1", "binId": "bin_ab" }
   ],
   "dropped": [],
-  "notes": "Claimed v2 output. The caller handed the whole scene in one call; v2 decided kind-specific bin_a gets both 'a' parts (preferred over the more-accepting bin_ab), and 'b' goes to bin_ab. The caller did not write a loop, did not track capacity, did not decide ordering."
+  "notes": "Playable v2 batch output: one plan call handled assignment, capacity, and ordering."
 }

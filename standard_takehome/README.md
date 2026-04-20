@@ -122,7 +122,7 @@ Then read: `RUBRIC.md`, `src/schema.json`, `src/planning_api.js` (v1 for referen
 
 **What if a scene looks unsolvable?** Document the geometric argument and emit an empty routine for that scene. Your Phase 2 schema should also show how the proposed v2 API would surface infeasibility.
 
-**How long do candidates spend?** Most successful submissions land in 4–8 hours. We do not score hours; make the submission clear to a human reviewer.
+**How long do candidates spend?** Most candidates should be able to complete Phase 1 in about 4-6 focused hours, then spend another 1-2 hours on Phase 2 and the unified README. The submission window is one calendar week so you can schedule around work, setup, and normal life, not because we expect a week of labor. We do not score hours or polish beyond the artifacts in `RUBRIC.md`; after the routine bundle is safe and the tradeoffs are clear, extra tuning usually has diminishing returns.
 
 ## Submit Checklist
 

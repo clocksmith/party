@@ -1,6 +1,6 @@
 {
   "candidate": "baseline",
-  "generator": "src/planning_api.js naiveSolve()",
+  "generator": "_private/gen_baseline_bundle.mjs (naiveSolve)",
   "scenarios": {
     "01_warmup": {
       "steps": [
@@ -304,112 +304,11 @@
       ],
       "notes": ""
     },
-    "07_precedence": {
+    "07_dense_precedence": {
       "steps": [
         {
           "type": "move_pose",
           "x": 0.72,
-          "y": 0.1
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.76,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.52,
-          "y": 0.1
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.76,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.32,
-          "y": 0.1
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.4600000000000001,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.72,
-          "y": 0.26
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.76,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.52,
-          "y": 0.26
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.4600000000000001,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.32,
-          "y": 0.26
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.2,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        }
-      ],
-      "notes": ""
-    },
-    "08_dense": {
-      "steps": [
-        {
-          "type": "move_pose",
-          "x": 0.3,
           "y": 0.1
         },
         {
@@ -425,7 +324,7 @@
         },
         {
           "type": "move_pose",
-          "x": 0.45,
+          "x": 0.56,
           "y": 0.1
         },
         {
@@ -433,7 +332,71 @@
         },
         {
           "type": "move_pose",
-          "x": -0.5700000000000001,
+          "x": -0.8300000000000001,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.4,
+          "y": 0.14
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.61,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.66,
+          "y": 0.22
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.61,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.5,
+          "y": 0.22
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.61,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.36,
+          "y": 0.3
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.39,
           "y": 0.08
         },
         {
@@ -442,196 +405,15 @@
         {
           "type": "move_pose",
           "x": 0.6,
-          "y": 0.1
+          "y": 0.32
         },
         {
           "type": "grip_close"
         },
         {
           "type": "move_pose",
-          "x": -0.8300000000000001,
+          "x": -0.39,
           "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.75,
-          "y": 0.1
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.31000000000000005,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.35,
-          "y": 0.22
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.5700000000000001,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.5,
-          "y": 0.22
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.31000000000000005,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.65,
-          "y": 0.22
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.8300000000000001,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.4,
-          "y": 0.34
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.8300000000000001,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.55,
-          "y": 0.34
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.5700000000000001,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.7,
-          "y": 0.34
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.31000000000000005,
-          "y": 0.08
-        },
-        {
-          "type": "grip_open"
-        }
-      ],
-      "notes": ""
-    },
-    "09_precedence_wall": {
-      "steps": [
-        {
-          "type": "move_pose",
-          "x": 0.5,
-          "y": 0.1
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.64,
-          "y": 0.09000000000000001
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.65,
-          "y": 0.1
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.64,
-          "y": 0.09000000000000001
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.4,
-          "y": 0.24
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.64,
-          "y": 0.09000000000000001
-        },
-        {
-          "type": "grip_open"
-        },
-        {
-          "type": "move_pose",
-          "x": 0.55,
-          "y": 0.28
-        },
-        {
-          "type": "grip_close"
-        },
-        {
-          "type": "move_pose",
-          "x": -0.64,
-          "y": 0.09000000000000001
         },
         {
           "type": "grip_open"
@@ -639,15 +421,47 @@
         {
           "type": "move_pose",
           "x": 0.48,
-          "y": 0.4
+          "y": 0.34
         },
         {
           "type": "grip_close"
         },
         {
           "type": "move_pose",
-          "x": -0.64,
-          "y": 0.09000000000000001
+          "x": -0.39,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.48,
+          "y": 0.46
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.17,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.62,
+          "y": 0.46
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.17,
+          "y": 0.08
         },
         {
           "type": "grip_open"
@@ -655,59 +469,96 @@
       ],
       "notes": ""
     },
-    "10_capacity_trap": {
+    "08_carry_maze": {
       "steps": [
         {
           "type": "move_pose",
-          "x": 0.35,
-          "y": 0.1
+          "x": 0.52,
+          "y": 0.08
         },
         {
           "type": "grip_close"
         },
         {
           "type": "move_pose",
-          "x": -0.36,
-          "y": 0.075
+          "x": -0.7,
+          "y": 0.08
         },
         {
           "type": "grip_open"
         },
         {
           "type": "move_pose",
-          "x": 0.5,
-          "y": 0.1
+          "x": 0.62,
+          "y": 0.12
         },
         {
           "type": "grip_close"
         },
         {
           "type": "move_pose",
-          "x": -0.36,
-          "y": 0.075
+          "x": -0.7,
+          "y": 0.08
         },
         {
           "type": "grip_open"
         },
         {
           "type": "move_pose",
-          "x": 0.65,
-          "y": 0.1
+          "x": 0.58,
+          "y": 0.24
         },
         {
           "type": "grip_close"
         },
         {
           "type": "move_pose",
-          "x": -0.66,
-          "y": 0.075
+          "x": -0.7,
+          "y": 0.08
         },
         {
           "type": "grip_open"
         },
         {
           "type": "move_pose",
-          "x": 0.78,
+          "x": 0.72,
+          "y": 0.2
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.7,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.48,
+          "y": 0.32
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.7,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        }
+      ],
+      "notes": ""
+    },
+    "09_obstacle_capacity": {
+      "steps": [
+        {
+          "type": "move_pose",
+          "x": 0.56,
           "y": 0.1
         },
         {
@@ -715,8 +566,125 @@
         },
         {
           "type": "move_pose",
-          "x": -0.66,
-          "y": 0.075
+          "x": -0.28,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.46,
+          "y": 0.12
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.28,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.66,
+          "y": 0.14
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.28,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.44,
+          "y": 0.24
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.54,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.58,
+          "y": 0.26
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.54,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.72,
+          "y": 0.18
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.54,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        }
+      ],
+      "notes": ""
+    },
+    "10_infeasible": {
+      "steps": [
+        {
+          "type": "move_pose",
+          "x": 0.52,
+          "y": 0.12
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.61,
+          "y": 0.08
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_pose",
+          "x": 0.62,
+          "y": 0.16
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_pose",
+          "x": -0.61,
+          "y": 0.08
         },
         {
           "type": "grip_open"

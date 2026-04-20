@@ -1972,8 +1972,399 @@
       "notes": "wavefront + shape heuristics + safety pre-check"
     },
     "08_carry_maze": {
-      "steps": [],
-      "notes": "wavefront + shape heuristics + safety pre-check"
+      "steps": [
+        {
+          "type": "move_joint",
+          "angles": [
+            0.198805,
+            1.698928,
+            1.439733
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            -0.3,
+            0.539445,
+            2.207958
+          ]
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.332275,
+            1.729537,
+            1.808405
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.108394,
+            1.982479,
+            1.806495
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.724832,
+            1.583774,
+            1.663195
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            2.484666,
+            0.598966,
+            1.198216
+          ]
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.636198,
+            1.683723,
+            0.676072
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.967534,
+            1.998902,
+            0.821695
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.281377,
+            1.629582,
+            1.991789
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.143902,
+            1.481692,
+            1.970102
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.194772,
+            0.31134,
+            2.128386
+          ]
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.102002,
+            1.067978,
+            2.094593
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.198946,
+            1.568143,
+            1.812743
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.019009,
+            2.013849,
+            1.282253
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.828162,
+            1.526501,
+            0.68806
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            2.539166,
+            0.470106,
+            1.329601
+          ]
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.706545,
+            1.737827,
+            0.611688
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.113381,
+            1.969186,
+            1.041282
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.001047,
+            1.957244,
+            1.08176
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.177289,
+            1.575262,
+            1.800692
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            -0.092689,
+            -0.002604,
+            2.060784
+          ]
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.076004,
+            0.637831,
+            2.334239
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.220488,
+            1.629943,
+            1.734183
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.044953,
+            2.037717,
+            1.451542
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.693163,
+            1.602041,
+            1.507652
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            2.511528,
+            0.535066,
+            1.264695
+          ]
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.29895,
+            2.171765,
+            1.380052
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.144965,
+            1.503941,
+            2.056205
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.127234,
+            -0.040673,
+            2.10163
+          ]
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.149079,
+            0.842682,
+            2.059402
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.186338,
+            1.541842,
+            1.969848
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.043308,
+            1.995726,
+            1.907963
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.939744,
+            1.469532,
+            1.579998
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            2.541722,
+            0.464135,
+            1.336071
+          ]
+        },
+        {
+          "type": "grip_open"
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.483595,
+            1.929525,
+            0.853535
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.864227,
+            1.980484,
+            1.024014
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.068021,
+            1.54388,
+            1.802335
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.30471,
+            -0.683393,
+            1.646575
+          ]
+        },
+        {
+          "type": "grip_close"
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.066195,
+            0.610447,
+            2.026809
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.215838,
+            0.993765,
+            2.124816
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.147833,
+            1.510574,
+            1.719409
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            0.691604,
+            1.877208,
+            1.212931
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.138604,
+            1.991504,
+            0.379981
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            1.845293,
+            1.529515,
+            0.157181
+          ]
+        },
+        {
+          "type": "move_joint",
+          "angles": [
+            2.641644,
+            0.232895,
+            1.535348
+          ]
+        },
+        {
+          "type": "grip_open"
+        }
+      ],
+      "notes": "joint-space fallback for hard obstacle carry; completed 08_carry_maze with joint-space safety checks"
     },
     "09_obstacle_capacity": {
       "steps": [],

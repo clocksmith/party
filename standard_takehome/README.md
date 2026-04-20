@@ -2,7 +2,11 @@
 
 Build a motion planner for a simulated 2D multi-axis robot arm. **Phase 1** ships a planner program (any language) plus the routines it produced for the public scenes. **Phase 2** is a design doc — an API schema plus fixtures plus prose — describing how you would redesign the v1 planning surface.
 
+This is deliberately a take-home about take-homes. The robot benchmark is the concrete substrate; the senior signal is whether you can make the work legible, bounded, and fair to evaluate. Phase 1 asks you to live inside the current surface. Phase 2 asks you to design the next surface so a future candidate could express infeasibility and tradeoffs cleanly instead of relying on hidden side channels.
+
 Reviewer has the same visibility as you. Nothing is held out. No private scenes. Read `RUBRIC.md` before you start; it is the single source of truth for how submissions are scored.
+
+**There is no trick.** The task is: write a planner, ship the `routines.json` it produced for the 10 public scenes, and design the smallest API change that would make scene 10 (the deliberate mixed-feasibility case) straightforward. Safety gate is pass/fail. Coverage is a single integer. Tradeoff clarity is graded against named criteria in `RUBRIC.md`. Extra polish, micro-optimization, or beating the samples on step count is not rewarded; being honest about what you chose, what you skipped, and what you cannot cleanly express *is*.
 
 ## Deliverables
 
@@ -30,7 +34,7 @@ Four questions, short answers. One or two paragraphs each.
 1. **How do you plan one scene?** Describe the algorithm your Phase 1 planner uses.
 2. **What did you optimize, what did you knowingly give up, and what assumption — if wrong — breaks your submission?** Safety, coverage, compute budget, simplicity, generalization — pick your axis and name the tradeoff. Then name one load-bearing assumption (about the simulator, the scene distribution, or the arm) and say what happens if it turns out to be false.
 3. **Where does your approach break as scene size or drift grows?** Name the smallest case you would fail on and why.
-4. **What is your Phase 2 thesis — the smallest v1 API change that would have made your Phase 1 planner easier to write?** Walk through `api.schema.json`, point at one fixture, and name what v2 makes worse.
+4. **Scene 10 is Phase 2.** Scene 10 contains parts your planner cannot place (one outside arm reach, one with no compatible bin). v1 gives you no clean way to report this — infeasibility leaks out through late safety violations or ad-hoc side-channel code in your planner. Treat this as a miniature take-home-design problem: show the minimum API change that would have made scene 10 straightforward and reviewable. Your `api.schema.json` must expose a new return shape that addresses infeasibility; at least one fixture pair must demonstrate that shape on a scene-10-style input. Name what your v2 makes worse.
 
 ## Simulator Contract
 
@@ -52,14 +56,16 @@ The sim does **not** model dynamics, inertia, gravity, sensing, force, weight, r
 
 See `src/schema.json` for the full scene and result formats.
 
-**Frozen surface (do not modify):** `index.html`, `src/*`, `scenarios/*.json`. Contents are checksummed in `SEALED.json`; tampering is detected. Put your work under `solution/`.
+**Reference surface:** `index.html`, `src/*`, `tests/*`, and `scenarios/*.json` define the exercise. Put your submitted work under `solution/`. Reviewers can inspect the repository diff if any non-solution files change.
 
 ## Phase 1 — Program + Bundle
 
 Ship `solution/phase1/planner/` (your code, any language) and `solution/phase1/routines.json` (the bundle that code produced for the 10 public scenes). Document in `solution/README.md` how to run the planner and regenerate the bundle.
 
+After your planner has generated `solution/phase1/routines.json`, validate the bundle with:
+
 ```bash
-node tests/reval.mjs --bundle solution/phase1/routines.json --suite benchmark
+node tests/reval.mjs --bundle solution/phase1/routines.json
 ```
 
 | Scene | Band | Tests |
@@ -70,22 +76,26 @@ node tests/reval.mjs --bundle solution/phase1/routines.json --suite benchmark
 | `04_wall` | required | obstacle routing |
 | `05_maze` | required | tight clearance with held part |
 | `06_combined` | required | routing + assignment + capacity |
-| `07_precedence` | stretch | DAG ordering + bins |
-| `08_dense` | stretch | scale + packed geometry |
-| `09_precedence_wall` | bonus | precedence × obstacle routing |
-| `10_capacity_trap` | bonus | global assignment vs greedy |
+| `07_dense_precedence` | hard | deep DAG + kind-tight capacity at scale |
+| `08_carry_maze` | hard | narrow corridor with held-part collision |
+| `09_obstacle_capacity` | hard | assignment under obstacle routing |
+| `10_infeasible` | hard | **mixed feasible/infeasible parts — welds to Phase 2** |
 
-Safety first. A careful planner that safely skips a scene beats a confident one that crashes the arm.
+Safety first. A careful planner that safely skips a scene beats a confident one that crashes the arm. Scene 10 deliberately contains parts that cannot be placed; correct behavior is to safely complete what you can and skip what you can't.
 
-## Phase 2 — Design Doc
+## Phase 2 — Design Doc (welded to scene 10)
 
-There is no runnable Phase 2 module. Phase 2 is a design proposal for a redesigned planning API — the rough edge in v1 you would fix, the shape of your replacement, and example inputs/outputs that demonstrate it.
+There is no runnable Phase 2 module. Phase 2 is a narrow, specific design proposal: **how would you redesign v1's API so scene 10 becomes straightforward and fair to review?**
+
+Scene 10 is the sharpest v1 pain point in the benchmark. It contains parts your planner physically cannot place. Under v1, the only ways to handle this are (a) attempt them and violate, failing the safety gate, or (b) implement side-channel feasibility detection inside your planner, which is clunky and leaks into every callsite. Neither is clean. Your Phase 2 is the case for a better API.
+
+The meta task is to design the evaluation surface you wish you had been given: explicit inputs, structured outputs, fixtures that make edge cases reviewable, and prose that names the cost of the new design. A good Phase 2 should feel like the spec for a smaller, fairer version of this take-home.
 
 Ship:
 
-- **`solution/phase2/api.schema.json`** — JSON Schema of your proposed v2 API. Include the input shape, the output shape, and any structured return values (refusal, partial, success) the API exposes.
-- **`solution/phase2/fixtures/*.in.json` + `*.out.json`** — at least one pair showing what the API returns for a real scene, and one pair showing what it returns on infeasibility. Scenes can be drawn from `scenarios/` or authored fresh.
-- **Prose in `solution/README.md` (question 4)** — walk through the schema, reference one fixture, name what v2 makes worse.
+- **`solution/phase2/api.schema.json`** — JSON Schema of your proposed v2 API. It must expose a new return shape (e.g. `refusal`, `dropped`, `partial`) that addresses infeasibility as a first-class concept, not a late violation.
+- **`solution/phase2/fixtures/*.in.json` + `*.out.json`** — at least one pair demonstrating that return shape on a scene-10-style input, and at least one pair demonstrating a successful plan on a normal scene. Scenes can be drawn from `scenarios/` or authored fresh.
+- **Prose in `solution/README.md` (question 4)** — walk through the schema, point at the infeasibility fixture, and name what your v2 makes worse.
 
 Reviewer reads; nothing executes. The fixtures are claims about your proposed API, not routines to be played in the sim.
 
@@ -107,10 +117,9 @@ cd party/standard_takehome
 
 python3 -m http.server 8000          # simulator UI at http://localhost:8000
 node tests/smoke.mjs                  # baseline runs on every scene
-node tests/reval.mjs --bundle solution/phase1/routines.json --suite benchmark
 ```
 
-Then read: `RUBRIC.md`, `src/schema.json`, `src/planning_api.js` (v1 for reference), and the scene files under `scenarios/`.
+Then read: `RUBRIC.md`, `src/schema.json`, `src/planning_api.js` (v1 for reference), and the scene files under `scenarios/`. Once your planner has generated `solution/phase1/routines.json`, run `node tests/reval.mjs --bundle solution/phase1/routines.json`.
 
 ## FAQ
 
@@ -120,7 +129,7 @@ Then read: `RUBRIC.md`, `src/schema.json`, `src/planning_api.js` (v1 for referen
 
 **Can I use AI tooling?** Yes. Say which decisions were yours and which were AI-assisted in `solution/README.md`. We probe this in the Q&A.
 
-**What if a scene looks unsolvable?** Document the geometric argument and emit an empty routine for that scene. Your Phase 2 schema should also show how the proposed v2 API would surface infeasibility.
+**What if a scene looks unsolvable?** Most of `routines.json` should be full routines. Scene 10 is the deliberate mixed case — emit a routine that places the feasible parts and skips the infeasible ones (safe partial, not empty). For a whole scene that looks unsolvable, emit an empty routine (`{"steps": []}`) for that scene's entry and document the geometric argument in the README.
 
 **How long do candidates spend?** Most candidates should be able to complete Phase 1 in about 4-6 focused hours, then spend another 1-2 hours on Phase 2 and the unified README. The submission window is one calendar week so you can schedule around work, setup, and normal life, not because we expect a week of labor. We do not score hours or polish beyond the artifacts in `RUBRIC.md`; after the routine bundle is safe and the tradeoffs are clear, extra tuning usually has diminishing returns.
 
@@ -131,4 +140,4 @@ Then read: `RUBRIC.md`, `src/schema.json`, `src/planning_api.js` (v1 for referen
 - [ ] `solution/phase2/api.schema.json` describes your proposed v2 API shape.
 - [ ] `solution/phase2/fixtures/` contains at least one in/out pair for a real scene and one for an infeasibility case.
 - [ ] `solution/README.md` answers all four questions and names the exact regenerate command.
-- [ ] `node tests/reval.mjs --bundle solution/phase1/routines.json --suite benchmark` runs without `TAMPER`.
+- [ ] `node tests/reval.mjs --bundle solution/phase1/routines.json` exits 0 (safety gate passed).

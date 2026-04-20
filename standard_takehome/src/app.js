@@ -1,6 +1,6 @@
 import { loadSceneIndex, loadScene } from "./scene.js";
 import { runRoutine } from "./sim.js";
-import { validateRoutineBundle, runBundle } from "./harness.js";
+import { classifyResult, validateRoutineBundle, runBundle } from "./harness.js";
 import { naiveSolve } from "./planning_api.js";
 import { makeView, render } from "./renderer.js";
 import { renderMarkdown } from "./md.js";
@@ -83,6 +83,43 @@ function log(msg, cls = "") {
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+const RESULT_META = {
+  pass: { label: "PASS", display: "PASS", logClass: "ok", statusClass: "status-pass" },
+  partial: { label: "PARTIAL", display: "PARTIAL", logClass: "warn", statusClass: "status-partial" },
+  missing: { label: "MISSING", display: "MISSING", logClass: "warn", statusClass: "status-missing" },
+  violate: { label: "VIOLATE", display: "VIOLATE", logClass: "err", statusClass: "status-fail" }
+};
+
+function resultMeta(result) {
+  return RESULT_META[classifyResult(result)] ?? RESULT_META.violate;
+}
+
+function formatStatusCounts(summary) {
+  const c = summary.status_counts ?? {};
+  return `${c.pass ?? summary.scenes_passed ?? 0} PASS, ${c.partial ?? 0} PARTIAL, ${c.missing ?? 0} MISSING, ${c.violate ?? 0} VIOLATE`;
+}
+
+function summaryLogClass(summary) {
+  const c = summary.status_counts ?? {};
+  if ((c.violate ?? summary.total_violations ?? 0) > 0) return "err";
+  if ((c.partial ?? 0) > 0 || (c.missing ?? 0) > 0) return "warn";
+  return "ok";
+}
+
+function formatCoverage(summary) {
+  if (Number.isFinite(summary.coverage_parts_total)) {
+    return `${summary.coverage_parts_placed}/${summary.coverage_parts_total} coverage (${summary.parts_placed}/${summary.parts_total} raw parts)`;
+  }
+  return `${summary.parts_placed}/${summary.parts_total} raw parts`;
+}
+
+async function loadScenesForBundle() {
+  return Promise.all(state.scenes.map(async meta => {
+    const scene = await loadScene(meta.id);
+    return { ...scene, coverage_parts_total: meta.coverage_parts_total };
+  }));
 }
 
 async function init() {
@@ -397,12 +434,14 @@ function runActive() {
   state.activeRoutineStep = null;
   state.playing = true;
   els.pauseBtn.textContent = "■ pause";
-  log(`ran ${state.activeSceneId}: ${result.success ? "PASS" : "FAIL"} (${result.parts_placed}/${result.parts_total}, ${result.violations.length} violations, ${result.elapsed_micro_steps} steps)`, result.success ? "ok" : "err");
+  const meta = resultMeta(result);
+  log(`ran ${state.activeSceneId}: ${meta.label} (${result.parts_placed}/${result.parts_total}, ${result.violations.length} violations, ${result.elapsed_micro_steps} steps)`, meta.logClass);
   trackAnalytics("run_routine", {
     scene_id: state.activeSceneId,
     sample_mode: state.sampleMode ? "on" : "off",
     sample_id: state.sampleActive?.id || "none",
     success: result.success,
+    status: classifyResult(result),
     parts_placed: result.parts_placed,
     parts_total: result.parts_total,
     violations: result.violations.length
@@ -435,9 +474,9 @@ async function runSelectedSample() {
     els.bundleStatus.textContent = `sample:${sample.id}`;
     showBundleLinks(sample);
     els.sampleStatus.textContent = `${sample.label ?? sample.id} loaded.`;
-    const scenes = await Promise.all(state.scenes.map(s => loadScene(s.id)));
+    const scenes = await loadScenesForBundle();
     const summary = runBundle(scenes, bundle).summary;
-    log(`loaded sample ${sample.id}: ${summary.scenes_passed}/${summary.scenes_total} scenes, ${summary.parts_placed}/${summary.parts_total} parts, ${summary.total_violations} violations`, summary.total_violations ? "warn" : "ok");
+    log(`loaded sample ${sample.id}: ${formatStatusCounts(summary)}, ${formatCoverage(summary)}, ${summary.total_violations} violations`, summaryLogClass(summary));
     loadSampleNotes(sample);
     runActive();
   } catch (e) {
@@ -449,12 +488,12 @@ async function runSelectedSample() {
 function runBaseline() {
   log("running baseline planner across all scenes...");
   const bundle = { generator: "naiveSolve()", scenarios: {} };
-  Promise.all(state.scenes.map(s => loadScene(s.id))).then(scenes => {
+  loadScenesForBundle().then(scenes => {
     for (const sc of scenes) bundle.scenarios[sc.id] = naiveSolve(sc);
     state.bundle = bundle;
     els.bundleStatus.textContent = "baseline";
     const summary = runBundle(scenes, bundle);
-    log(`baseline: ${summary.summary.scenes_passed}/${summary.summary.scenes_total} scenes, ${summary.summary.parts_placed}/${summary.summary.parts_total} parts placed`, summary.summary.scenes_passed === summary.summary.scenes_total ? "ok" : "warn");
+    log(`baseline: ${formatStatusCounts(summary.summary)}, ${formatCoverage(summary.summary)}`, summaryLogClass(summary.summary));
     runActive();
   });
 }
@@ -488,7 +527,7 @@ function onBundleUpload(ev) {
 
 function exportResults() {
   if (!state.bundle) { log("no bundle to evaluate", "warn"); return; }
-  Promise.all(state.scenes.map(s => loadScene(s.id))).then(scenes => {
+  loadScenesForBundle().then(scenes => {
     const out = runBundle(scenes, state.bundle);
     const blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -497,7 +536,7 @@ function exportResults() {
     a.download = "results.json";
     a.click();
     URL.revokeObjectURL(url);
-    log(`exported results.json: ${out.summary.scenes_passed}/${out.summary.scenes_total} scenes passed`, "ok");
+    log(`exported results.json: ${formatStatusCounts(out.summary)}, ${formatCoverage(out.summary)}`, summaryLogClass(out.summary));
     trackAnalytics("export_results", {
       scenes_passed: out.summary.scenes_passed,
       scenes_total: out.summary.scenes_total,
@@ -513,10 +552,9 @@ function renderResult() {
     els.result.innerHTML = `<div class="row"><span class="k">status</span><span class="v status-pending">○ no run</span></div>`;
     return;
   }
-  const statusCls = r.success ? "status-pass" : "status-fail";
-  const statusSym = r.success ? "● PASS" : "☒ FAIL";
+  const meta = resultMeta(r);
   els.result.innerHTML = `
-    <div class="row"><span class="k">status</span><span class="v ${statusCls}">${statusSym}</span></div>
+    <div class="row"><span class="k">status</span><span class="v ${meta.statusClass}">${meta.display}</span></div>
     <div class="row"><span class="k">parts placed</span><span class="v">${r.parts_placed} / ${r.parts_total}</span></div>
     <div class="row"><span class="k">violations</span><span class="v">${r.violations.length}</span></div>
     <div class="row"><span class="k">micro-steps</span><span class="v">${r.elapsed_micro_steps}</span></div>
@@ -553,7 +591,7 @@ function renderRoutine() {
   const firstViolation = r?.violations?.[0]?.step_index;
   const summary = [
     `${steps.length} routine steps`,
-    r ? `${r.success ? "PASS" : "FAIL"}` : "not run",
+    r ? resultMeta(r).label : "not run",
     r ? `${r.parts_placed}/${r.parts_total} parts` : null,
     r ? `${r.violations.length} violations` : null,
     r ? `${r.path_length.toFixed(3)} path` : null,

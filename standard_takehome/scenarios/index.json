@@ -12,6 +12,6 @@
     { "id": "07_dense_precedence",  "hard": true },
     { "id": "08_carry_maze",        "hard": true },
     { "id": "09_obstacle_capacity", "hard": true },
-    { "id": "10_infeasible",        "hard": true, "infeasibility_present": true }
+    { "id": "10_infeasible",        "hard": true, "infeasibility_present": true, "coverage_parts_total": 2 }
   ]
 }

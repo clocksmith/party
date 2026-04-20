@@ -182,7 +182,8 @@ canvas {
   background: var(--panel);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .panel section {
@@ -326,6 +327,8 @@ button.primary:hover { background: #e85a10; }
 .result .row .v { font-weight: 600; }
 .result .status-pass { color: var(--good); }
 .result .status-fail { color: var(--bad); }
+.result .status-partial { color: var(--warn); }
+.result .status-missing { color: var(--ink-dim); }
 .result .status-pending { color: var(--ink-dim); }
 
 .bottom-panel {

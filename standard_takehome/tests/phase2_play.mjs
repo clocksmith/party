@@ -5,9 +5,9 @@
 //
 // A Phase 2 solution exports plan(input) from planner.mjs. Each fixture input
 // is either the plan input itself ({ scene, ... }) or a raw scene object, which
-// this runner wraps as { scene }. If a matching .out.json exists, the planner
-// output must match it exactly after key-order normalization. Returned steps
-// are replayed through the same simulator used by Phase 1.
+// this runner wraps as { scene }. The matching .out.json is required, and the
+// planner output must match it exactly after key-order normalization. Returned
+// steps are replayed through the same simulator used by Phase 1.
 
 import fs from "fs";
 import path from "path";

@@ -154,12 +154,7 @@ console.log(`stretch: ${str.scenes_passed}/${str.scenes_total} scenes, ${str.par
 if (bon.scenes_total) {
   console.log(`bonus: ${bon.parts_placed}/${bon.parts_total} parts placed, ${bon.total_violations} violations (discussion only)`);
 }
-console.log(`\nscoring order (reviewer):`);
-console.log(`  1. tamper-free and schema-valid (gate — checked above)`);
-console.log(`  2. fewer safety violations`);
-console.log(`  3. more parts placed`);
-console.log(`  4. more scenes completed (required first, then stretch; bonus is discussion only)`);
-console.log(`  5. lower path length (tie-breaker)`);
-console.log(`  6. lower elapsed_micro_steps (weak tie-breaker only)`);
+console.log(`\nrubric: RUBRIC.md — safe (gate), coverage (scalar), tradeoff clarity (tiebreaker).`);
+console.log(`phase 2 scoring: node tests/eval_phase2.mjs --module solution/phase2/index.js`);
 console.log(`\nwrote ${path.relative(root, outPath)}`);
 process.exit(0);

@@ -28,6 +28,14 @@ npm test                        # Run tests
 node test/system/test-run.js    # Mock hardware tests
 ```
 
+## Intent-First Operations
+
+- Treat Party intent as hardware-safe laser/DMX control, not visual show copy.
+- If the user asks what a pattern/device/control does, map the device profile, amplitude limits, fixture channels, and test path before recommending changes.
+- Do not infer show direction, intensity, or hardware risk tolerance; the user sets creative intent, implementation enforces safety.
+- Mock hardware tests prove command logic only. Real hardware claims require the real device path and safety constraints.
+- If a fixture behaves incorrectly, inspect the device profile and generated DMX frames before changing UI labels.
+
 ## No time estimates
 
 - never estimate work in hours, days, weeks, or any other time unit, in code, comments, commit messages, status updates, receipts, or chat replies

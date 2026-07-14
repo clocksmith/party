@@ -1,0 +1,4 @@
+interface:
+  display_name: "Party Debug"
+  short_description: "Trace and fix Party project failures"
+  default_prompt: "Use $party-debug to reproduce, trace, and fix this failure in Party."

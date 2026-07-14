@@ -1,0 +1,4 @@
+interface:
+  display_name: "Party Development"
+  short_description: "Build and validate Party project changes"
+  default_prompt: "Use $party-development to implement and validate this change in Party."

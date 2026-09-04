@@ -35,6 +35,9 @@ node test/system/test-run.js    # Mock hardware tests
 - Do not infer show direction, intensity, or hardware risk tolerance; the user sets creative intent, implementation enforces safety.
 - Mock hardware tests prove command logic only. Real hardware claims require the real device path and safety constraints.
 - If a fixture behaves incorrectly, inspect the device profile and generated DMX frames before changing UI labels.
+- Open-ended feature and show design follow these instructions. The repository skill
+  validates a prepared change against mock and explicitly authorized hardware; it does
+  not choose creative intent or implement arbitrary features.
 
 ## No speculative engineering timelines
 

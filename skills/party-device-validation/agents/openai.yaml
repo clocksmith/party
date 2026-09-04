@@ -1,0 +1,4 @@
+interface:
+  display_name: "Party Device Validation"
+  short_description: "Validate bounded laser and DMX output"
+  default_prompt: "Use $party-device-validation to validate this prepared Party change against the named fixture and authorized device boundary."

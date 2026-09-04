@@ -1,12 +1,26 @@
 ---
 name: party-debug
-description: Diagnose Party laser and DMX failures. Use when discovery, fixture selection, pattern output, channel mapping, transports, CLI controls, tests, or real-device behavior is wrong or unsafe.
+description: Diagnose a named Party laser or DMX discovery, fixture, frame, mapping, transport, CLI, test, or device failure; repair it only when requested.
 ---
 
 # Party Debug
 
+Diagnosis is read-only and mock-first. Patching requires an implementation request; hardware output requires separate explicit authorization.
+
 Find the first broken boundary from operator input to emitted DMX frame before
 changing patterns or controls.
+
+## Prerequisites
+
+Supply the failing command or frame, expected output, fixture profile and channel map,
+transport mode, and device identity only when real hardware is explicitly in scope.
+
+## Procedure
+
+1. Reproduce through the mock transport and capture the exact fixture/frame identity.
+2. Trace the input, pattern, mapping, safety, transport, and device boundaries below.
+3. Report the first mismatch; only for a requested repair, patch its owner and rerun
+   focused and system checks. Keep hardware output separately authorized.
 
 ## Trace The Path
 
@@ -33,9 +47,30 @@ Do not infer a transport problem from a visual symptom.
 - Mock passes and hardware fails: preserve the mock result as logic evidence and
   inspect device identity, cabling, mode, transport, and frame timing separately.
 
-## Fix And Prove
+## Authorized Repair And Proof
 
-Add a regression that captures the exact profile, pattern input, and expected frame.
+When repair is requested, add a regression that captures the exact profile, pattern input, and expected frame.
 Run the focused suite, then `npm test` and `node test/system/test-run.js` when the
 change crosses frame generation. Exercise hardware only with explicit authorization
 and confirmed safety controls. Report the first broken boundary and the exact proof.
+
+## Validation
+
+The exact fixture profile and pattern produce the expected bounded frame in the mock
+transport; real-device evidence is separate and must name the exercised hardware.
+
+## Stop Conditions
+
+Immediately stop output on an unsafe amplitude, unknown fixture profile, unexpected
+device identity, or unavailable emergency control. Never infer physical safety from
+mock success.
+
+## Outputs
+
+A fixture-bound diagnosis and mock-frame evidence, plus any authorized repair's test
+results. Real-device evidence, when separately authorized, names the device exercised.
+
+## Side Effects
+
+Diagnosis and validation are mock-first. Authorized repair may edit Party and write
+test artifacts; real DMX or laser output is never implied by invocation.

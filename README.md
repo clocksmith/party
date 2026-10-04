@@ -300,4 +300,4 @@ The Canvas Context preview/deploy commands delegate to that repository. The
 legacy Canvas Context and take-home sources remain here, but their old default-site
 deployment configs are retired so they cannot overwrite Doppler. A future
 publication of those archives needs its own explicitly selected Hosting site.
-Mandate 2038 lives at https://simulatte.world/mandate-2038/.
+Mandate 2038 lives at https://m3t4.ai/mandate-2038/.

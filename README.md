@@ -292,3 +292,12 @@ If you use Project PARTY in your research, please cite:
 ---
 
 **⚠ Safety Warning:** This project involves laser equipment and autonomous systems. Always follow laser safety regulations, wear appropriate protective equipment, and maintain human oversight during experiments.
+
+## Canvas Context hosting
+
+`canvascontext.com` now hosts the Doppler demo, owned by `../doppler/firebase.json`.
+The Canvas Context preview/deploy commands delegate to that repository. The
+legacy Canvas Context and take-home sources remain here, but their old default-site
+deployment configs are retired so they cannot overwrite Doppler. A future
+publication of those archives needs its own explicitly selected Hosting site.
+Mandate 2038 lives at https://simulatte.world/mandate-2038/.

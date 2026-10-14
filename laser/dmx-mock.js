@@ -88,13 +88,18 @@ export class MockSerialPort extends EventEmitter {
     close(callback) {
         setTimeout(() => {
             this.isOpen = false;
-            if (this.simulationInterval) {
-                clearInterval(this.simulationInterval);
-                this.simulationInterval = null;
-            }
+            this.stopSimulation();
             callback(null);
             this.emit('close');
         }, this.responseDelay);
+    }
+
+    /** Clears the simulated-response timer; safe to call when the port was never opened. */
+    stopSimulation() {
+        if (this.simulationInterval) {
+            clearInterval(this.simulationInterval);
+            this.simulationInterval = null;
+        }
     }
     
     write(data, callback) {
@@ -141,7 +146,10 @@ export class MockSerialPort extends EventEmitter {
             for (let i = 1; i < data.length && i <= DMX_CONSTANTS.MAX_CHANNELS; i++) {
                 this.deviceState.channels[i - 1] = data[i];
             }
-            
+
+            // Host -> device channel data (start code stripped)
+            this.emit('dmxFrame', Buffer.from(data).subarray(1));
+
             // Simulate device reactions to specific patterns
             this._checkForPatterns();
         }
@@ -305,9 +313,10 @@ export class DMXTestHarness {
         this.mockPort = new MockSerialPort(options.port || {});
         this.mockDevice = new MockDMXDevice(options.device || {});
         
-        // Connect mock device to mock port
-        this.mockPort.on('data', (data) => {
-            this.mockDevice.updateChannels(data);
+        // Feed DMX frames written to the port into the mock device. 'data' is
+        // device -> host traffic (button/ACK bytes) and must not drive channels.
+        this.mockPort.on('dmxFrame', (channelData) => {
+            this.mockDevice.updateChannels(channelData);
         });
         
         this.log('Test harness initialized');
@@ -315,8 +324,11 @@ export class DMXTestHarness {
     }
     
     async teardown() {
-        if (this.mockPort && this.mockPort.isOpen) {
-            await new Promise(resolve => this.mockPort.close(resolve));
+        if (this.mockPort) {
+            if (this.mockPort.isOpen) {
+                await new Promise(resolve => this.mockPort.close(resolve));
+            }
+            this.mockPort.stopSimulation();
         }
         this.log('Test harness torn down');
     }

@@ -208,15 +208,16 @@ class DMXSerialInterface extends EventEmitter {
     /**
      * Sends a raw DMX frame (Break, MAB, Start Code + Data).
      * @param {Buffer} dmxDataBuffer - Buffer containing ONLY the channel data (1 to 512 bytes).
+     * @returns {Promise<boolean>} true if the frame was written, false if it was skipped or failed.
      */
     async sendRawDmxFrame(dmxDataBuffer) {
         if (!this.isConnected()) {
              this._log('Cannot send frame, port not connected.', 'warn');
-             return;
+             return false;
         }
         if (this._isSending) {
             this._log('Skipping frame send, previous frame busy.', 'warn');
-            return;
+            return false;
         }
         this._isSending = true;
 
@@ -234,6 +235,7 @@ class DMXSerialInterface extends EventEmitter {
             // Stage 3: Data (Start Code + Payload)
             const frameBuffer = Buffer.concat([Buffer.from([DMX_START_CODE]), dmxDataBuffer]);
             await this._writeAndDrain(frameBuffer);
+            return true;
 
         } catch (error) {
             this._log(`Failed sending DMX frame: ${error.message}`, 'error');
@@ -242,6 +244,7 @@ class DMXSerialInterface extends EventEmitter {
                 this._cleanupPort();
             }
             this.emit('error', new Error(`DMX Frame Send Failure: ${error.message}`));
+            return false;
         } finally {
             this._isSending = false;
         }
@@ -261,10 +264,12 @@ class DMXSerialInterface extends EventEmitter {
     /** @private Helper to write data and wait for drain. */
     _writeAndDrain(data) {
         return new Promise((resolve, reject) => {
-             if (!this.port || !this.port.isOpen) return reject(new Error("Port is not open for writing"));
-            this.port.write(data, (wErr) => {
+            // Capture the port: close() can clear this.port before the write callback runs.
+            const port = this.port;
+            if (!port || !port.isOpen) return reject(new Error("Port is not open for writing"));
+            port.write(data, (wErr) => {
                 if (wErr) return reject(new Error(`Write failed: ${wErr.message}`));
-                this.port.drain((dErr) => {
+                port.drain((dErr) => {
                     if (dErr) return reject(new Error(`Drain failed: ${dErr.message}`));
                     resolve();
                 });
@@ -313,6 +318,9 @@ class DMXController extends EventEmitter {
 
         this.dmxState = new Array(this.universeSize + 1).fill(0); // DMX is 1-based index
         this.refreshTimerId = null;
+        this.frameCount = 0; // Frames written by the current/last refresh loop run
+        this._loopStartedAt = null;
+        this._loopStoppedAt = null;
         this.isLoggingData = false;
         this.stringDecoder = new StringDecoder('utf8');
 
@@ -389,11 +397,15 @@ class DMXController extends EventEmitter {
              return;
         }
         this._log(`Starting DMX refresh loop (Interval: ${this.refreshRateMs}ms)`, 'info');
+        this.frameCount = 0;
+        this._loopStartedAt = Date.now();
+        this._loopStoppedAt = null;
         this.refreshTimerId = setInterval(async () => {
             if (this.isConnected()) {
                 const dataToSend = Buffer.from(this.dmxState.slice(1, this.universeSize + 1));
                 try {
-                    await this.serialInterface.sendRawDmxFrame(dataToSend);
+                    const sent = await this.serialInterface.sendRawDmxFrame(dataToSend);
+                    if (sent) this.frameCount++;
                 } catch (sendError){
                     this._log(`Error during scheduled frame send: ${sendError.message}`, 'error');
                 }
@@ -410,7 +422,21 @@ class DMXController extends EventEmitter {
             this._log("Stopping DMX refresh loop.", 'info');
             clearInterval(this.refreshTimerId);
             this.refreshTimerId = null;
+            this._loopStoppedAt = Date.now();
         }
+    }
+
+    /**
+     * Frame statistics for the current (or last) refresh loop run.
+     * @returns {{frameCount: number, fps: number}} Frames written and their average rate.
+     */
+    getStatistics() {
+        const endedAt = this.refreshTimerId ? Date.now() : (this._loopStoppedAt ?? Date.now());
+        const elapsedSec = this._loopStartedAt ? (endedAt - this._loopStartedAt) / 1000 : 0;
+        return {
+            frameCount: this.frameCount,
+            fps: elapsedSec > 0 ? this.frameCount / elapsedSec : 0
+        };
     }
 
     /**
@@ -457,7 +483,15 @@ class DMXController extends EventEmitter {
         }
         if(changed) this._log(`Reset channels 1-${this.universeSize} to 0.`, 'info');
     }
-    
+
+    /**
+     * Zeroes every managed channel; the refresh loop transmits the dark frame.
+     * Called by PatternAnimator.emergencyStop() and ProfileGenerator.
+     */
+    blackout() {
+        this.resetChannels();
+    }
+
     /**
      * Promise-aware wrapper for setChannel (maps to updateChannel)
      * @param {number} channel - DMX channel (1-based)

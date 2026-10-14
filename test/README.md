@@ -67,9 +67,6 @@ node test/system/test-run.js
 # Unit tests
 npm run test:unit
 
-# Integration tests
-npm run test:integration
-
 # Device tests
 npm run test:devices
 ```

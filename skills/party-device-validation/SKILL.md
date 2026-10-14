@@ -20,7 +20,6 @@ description: Validate a prepared Party laser or DMX change against a named fixtu
 
    ```bash
    npm run test:unit
-   npm run test:integration
    node test/system/test-run.js
    ```
 

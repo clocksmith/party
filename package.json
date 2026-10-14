@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node cli/dmx-cli.js control",
     "test": "npm run test:unit && npm run test:devices",
-    "test:unit": "mocha --exit test/*.test.js",
+    "test:unit": "mocha test/*.test.js",
     "test:devices": "npm run test:ehaho",
     "test:ehaho": "node test/devices/ehaho-l2400.test.js",
     "test:ehaho:hardware": "node test/devices/ehaho-l2400.test.js --hardware",

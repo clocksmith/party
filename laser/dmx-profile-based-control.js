@@ -117,17 +117,22 @@ export class ProfileBasedDeviceControl extends EventEmitter {
                 }
                 break;
                 
-            case 'boolean':
-                if (typeof valueOrMode === 'boolean') {
-                    value = valueOrMode ? (channelDef.values?.enabled || 1) : (channelDef.values?.disabled || 0);
+            case 'boolean': {
+                // "enabled" may be a scalar or a { min, max } range of enabling values.
+                const enabled = channelDef.values?.enabled;
+                const range = enabled && typeof enabled === 'object' ? enabled : null;
+                const enabledValue = range ? (range.min ?? 1) : (enabled ?? 1);
+                const disabledValue = channelDef.values?.disabled ?? 0;
+                if (typeof valueOrMode === 'number') {
+                    if (valueOrMode <= 0) value = disabledValue;
+                    else value = range ? this.clamp(valueOrMode, range.min ?? 1, range.max ?? 255) : enabledValue;
                 } else if (typeof valueOrMode === 'string') {
-                    value = valueOrMode.toLowerCase() === 'enabled' ? 
-                        (channelDef.values?.enabled || 1) : 
-                        (channelDef.values?.disabled || 0);
+                    value = valueOrMode.toLowerCase() === 'enabled' ? enabledValue : disabledValue;
                 } else {
-                    value = valueOrMode ? 1 : 0;
+                    value = valueOrMode ? enabledValue : disabledValue;
                 }
                 break;
+            }
                 
             default:
                 value = this.clamp(valueOrMode, 0, 255);
@@ -303,7 +308,7 @@ export class ProfileBasedDeviceControl extends EventEmitter {
         const values = {};
         
         for (const [name, def] of this.channelMap) {
-            const dmxValue = this.dmxController.channels[def.absoluteChannel - 1] || 0;
+            const dmxValue = this.dmxController.dmxState?.[def.absoluteChannel] ?? 0;
             values[name] = {
                 name,
                 channel: def.channel,
